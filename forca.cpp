@@ -19,6 +19,26 @@
     const std::string __FORCA_OS__ = "UNIX";
 #endif
 
+/**
+ * Limpa a tela do terminal de acordo com o sistema operacional.
+ *
+ * Utiliza o comando "cls" para sistemas Windows e "clear" para sistemas Unix-like.
+ * A escolha do comando é feita em tempo de compilação usando diretivas de pré-processador.
+ */
+void clear_screen(){
+    
+    #ifdef _WIN32
+        system("cls");
+    #elif _WIN64
+        system("cls");
+    #elif __CYGWIN__
+        system("cls");
+    #else
+        system("clear");
+    #endif
+    
+}
+
 /* 
 |=========================================
 |   FUNÇÕES DE NORMALIZAÇÃO DE STRING
@@ -323,6 +343,8 @@ bool createFile( std::string filepath, std::string content = "" ){
 
     if( exist && ! canRead(filepath) ){
 
+        clear_screen();
+        
         std::cout<<"O arquivo nao tem permissao de leitura, ou ocorreu um erro ao tentar abrir o arquivo, verifique e tente novamente!"<<std::endl;
 
         return false;
@@ -331,6 +353,8 @@ bool createFile( std::string filepath, std::string content = "" ){
 
     if( ! canWrite(filepath) ){
 
+        clear_screen();
+        
         std::cout<<"O arquivo nao tem permissao de escrita, ou ocorreu um erro ao tentar abrir o arquivo, verifique e tente novamente!"<<std::endl;
 
         return false;
@@ -348,6 +372,8 @@ bool createFile( std::string filepath, std::string content = "" ){
     newFile<<content;
 
     if( newFile.fail() ){
+
+        clear_screen();
 
         std::cout<<"Erro ao gravar o conteudo no arquivo criado, tente novamente!"<<std::endl;
 
@@ -369,12 +395,24 @@ bool createFile( std::string filepath, std::string content = "" ){
 |=================================================
 */
 
+/**
+ * Extrai e retorna o conteúdo de um arquivo no caminho especificado.
+ *
+ * O caminho é normalizado antes da leitura. A função verifica se o arquivo existe e se pode ser lido,
+ * exibindo mensagens de erro e retornando uma string vazia em caso de falha. Se possível, lê todo o conteúdo
+ * do arquivo e retorna como uma string.
+ *
+ * @param   std::string filepath   Caminho do arquivo a ser lido.
+ * @return  std::string            Conteúdo do arquivo como string, ou string vazia em caso de erro.
+ */
 std::string getContent( std::string filepath ){
 
     bool exist = fileExist(filepath);
 
     if( ! exist ){
 
+        clear_screen();
+        
         std::cout<<"O arquivo não existe, ou ocorreu um erro ao tentar abrir o arquivo, verifique e tente novamente!"<<std::endl;
 
         return "";
@@ -383,6 +421,8 @@ std::string getContent( std::string filepath ){
 
     if( ! canRead(filepath) ){
 
+        clear_screen();
+        
         std::cout<<"O arquivo nao tem permissao de leitura, ou ocorreu um erro ao tentar abrir o arquivo, verifique e tente novamente!"<<std::endl;
 
         return "";
@@ -399,8 +439,13 @@ std::string getContent( std::string filepath ){
     file.seekg(0, std::ios::beg); 
 
     if (size == -1) {
+
+        clear_screen();
+
         std::cout<<"Erro ao obter tamanho do arquivo"<<std::endl;
+
         return "";
+
     }
 
     file.seekg(0, std::ios::beg);
@@ -410,6 +455,8 @@ std::string getContent( std::string filepath ){
     file.read(&content[0], size);
 
     if( file.fail() ){
+
+        clear_screen();
 
         std::cout<<"Erro ao extrair conteudo do arquivo!"<<std::endl;
 
@@ -424,6 +471,14 @@ std::string getContent( std::string filepath ){
     return content;
 
 }
+
+/*
+|==================================================
+|   FUNÇÕES DE VERIFICAÇÃO DE ARQUIVO E CONTEUDO
+|==================================================
+*/
+
+
 
 /* 
 |==================
@@ -444,6 +499,8 @@ int main(){
     // std::string normalized = normalizePath(filepath);
 
     // std::cout<<normalized<<std::endl;
+
+    clear_screen();
 
     std::string content = getContent(filepath);
 
