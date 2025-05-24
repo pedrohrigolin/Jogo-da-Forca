@@ -1,6 +1,23 @@
 #include <iostream>
 #include <string>
 #include <cctype>
+#include <fstream>
+#include <vector>
+
+/**
+ * Define uma constante de string indicando o sistema operacional em uso.
+ * 
+ * Se o código estiver sendo compilado em um sistema Windows (_WIN32 ou _WIN64),
+ * define __FORCA_OS__ como "WINDOWS". Caso contrário, define como "UNIX".
+ * 
+ * Isso permite que o restante do código adapte comportamentos específicos
+ * de acordo com o sistema operacional detectado em tempo de compilação.
+ */
+#if defined(_WIN32) || defined(_WIN64)
+    const std::string __FORCA_OS__ = "WINDOWS";
+#else
+    const std::string __FORCA_OS__ = "UNIX";
+#endif
 
 /* 
 |=========================================
@@ -156,6 +173,196 @@ std::string normalizeWord( std::string text ){
 
 }
 
+/*
+|=========================================================
+|   FUNÇÕES UTILITÁRIAS PARA A MANIPULAÇÃO DE ARQUIVOS
+|=========================================================
+*/
+
+/**
+ * Normaliza um caminho de arquivo, removendo espaços, convertendo todas as barras invertidas (\)
+ * para barras normais (/) e eliminando barras duplicadas. 
+ * 
+ * Essa função é útil para padronizar caminhos de arquivos, evitando problemas de compatibilidade
+ * entre sistemas operacionais e inconsistências causadas por múltiplas barras ou espaços.
+ *
+ * @param   std::string path    Caminho do arquivo a ser normalizado.
+ * @return  std::string         Caminho normalizado, sem espaços, com barras '/' e sem duplicidade.
+ */
+std::string normalizePath( std::string path ){
+
+    path = removeSpaces(path);
+
+    std::string::size_type pos = path.find("\\");
+
+    // Remove / invertidas, comium no windows mas que pode gerar problemas no codigo.
+    while( pos != std::string::npos ){
+
+        path.replace(pos, 1, "/");
+
+        pos = path.find("\\", pos);
+
+    }
+
+    pos = path.find("/");
+
+    // Remove / sequenciais
+    while( pos != std::string::npos ){
+
+        if( path[ pos - 1 ] == '/' ) path.erase(pos, 1);
+        else pos++;
+
+        pos = path.find("/", pos);
+
+    }
+
+    return path;
+
+}
+
+/**
+ * Verifica se um arquivo existe no caminho especificado.
+ *
+ * O caminho é normalizado antes da verificação para evitar problemas de formatação.
+ * A função tenta abrir o arquivo em modo de leitura; se conseguir, considera que o arquivo existe.
+ *
+ * @param   std::string filepath   Caminho do arquivo a ser verificado.
+ * @return  bool                   true se o arquivo existe, false caso contrário.
+ */
+bool fileExist( std::string filepath ){
+
+    filepath = normalizePath(filepath);
+
+    std::ifstream file(filepath);
+
+    bool exist = file.is_open();
+
+    file.close();
+
+    return exist;
+
+}
+
+/**
+ * Verifica se um arquivo pode ser lido no caminho especificado.
+ *
+ * O caminho é normalizado antes da verificação. A função tenta abrir o arquivo em modo de leitura
+ * e verifica se o arquivo está acessível e em bom estado para leitura.
+ *
+ * @param   std::string filepath   Caminho do arquivo a ser verificado.
+ * @return  bool                   true se o arquivo pode ser lido, false caso contrário.
+ */
+bool canRead( std::string filepath ){
+
+    filepath = normalizePath(filepath);
+
+    std::ifstream file(filepath);
+
+    if( ! file.is_open() ) return false;
+
+    if( ! file.good() ) return false;
+
+    file.close();
+
+    return true;
+
+}
+
+/**
+ * Verifica se um arquivo pode ser escrito no caminho especificado.
+ *
+ * O caminho é normalizado antes da verificação. A função tenta abrir o arquivo em modo de escrita (append)
+ * e realiza testes para garantir que é possível escrever no arquivo, verificando permissões e possíveis erros.
+ *
+ * @param   std::string filepath   Caminho do arquivo a ser verificado.
+ * @return  bool                   true se o arquivo pode ser escrito, false caso contrário.
+ */
+bool canWrite( std::string filepath ){
+
+    filepath = normalizePath(filepath);
+
+    std::ofstream file(filepath, std::ios::app);
+
+    if( ! file.is_open() ) return false;
+
+    // Primeiro verifica com base na posição do ponteiro de escrita
+    if( file.tellp() == -1 ) return false;
+
+    // Agora tenta escreve um conteudo vazio mesmo
+    file<<"";
+
+    // Verifica se foi possivel escrever
+    if( file.fail() ) return false;
+
+    file.close();
+
+    return true;
+
+}
+
+/*
+|=====================================
+|   FUNÇÕES DE CRIAÇÃO DE ARQUIVOS
+|=====================================
+*/
+
+/**
+ * Cria um arquivo no caminho especificado, com conteúdo opcional.
+ *
+ * O caminho é normalizado antes da criação. Se o arquivo já existir, verifica permissões de leitura e escrita.
+ * Caso não seja possível ler ou escrever, exibe mensagens de erro e retorna false.
+ * Se o arquivo não existir ou for possível sobrescrever, cria o arquivo e grava o conteúdo informado.
+ *
+ * @param   std::string filepath   Caminho do arquivo a ser criado.
+ * @param   std::string content    Conteúdo a ser gravado no arquivo (opcional, padrão é string vazia).
+ * @return  bool                   true se o arquivo foi criado e escrito com sucesso, false caso contrário.
+ */
+bool createFile( std::string filepath, std::string content = "" ){
+
+    filepath = normalizePath(filepath);
+
+    bool exist = fileExist(filepath);
+
+    if( exist && ! canRead(filepath) ){
+
+        std::cout<<"O arquivo nao tem permissao de leitura, ou ocorreu um erro ao tentar abrir o arquivo, verifique e tente novamente!"<<std::endl;
+
+        return false;
+
+    }
+
+    if( ! canWrite(filepath) ){
+
+        std::cout<<"O arquivo nao tem permissao de escrita, ou ocorreu um erro ao tentar abrir o arquivo, verifique e tente novamente!"<<std::endl;
+
+        return false;
+
+    }
+
+    std::ofstream newFile;
+    
+    newFile.open(filepath);
+
+    if( ! newFile.is_open() ) return false;
+
+    newFile<<content;
+
+    if( newFile.fail() ){
+
+        std::cout<<"Erro ao gravar o conteudo no arquivo criado, tente novamente!"<<std::endl;
+
+        newFile.close();
+
+        return false;
+
+    }
+
+    newFile.close();
+    
+    return true;
+
+}
+
 /* 
 |==================
 |   FUNÇÃO MAIN
@@ -164,11 +371,19 @@ std::string normalizeWord( std::string text ){
 
 int main(){
 
-    std::string teste = "   AB  C D EFGH IJ K  \n adsa AQUI áááâ üü  da \t adada  dsada \r dsads adadas \v dadagfa fdafa \f dasdsa dsada  ";
+    // std::string teste = "   AB  C D EFGH IJ K  \n adsa AQUI áááâ üü  da \t adada  dsada \r dsads adadas \v dadagfa fdafa \f dasdsa dsada  ";
 
-    teste = normalizeWord(teste);
+    // teste = normalizeWord(teste);
 
-    std::cout<<teste<<std::endl;
+    // std::cout<<teste<<std::endl;
+
+    std::string filepath = ".\\\\//////WORDS///////CUSTOM\\\\/////// \\\\  //// LEVELS/HARD.t    x t       ";
+
+    // std::string normalized = normalizePath(filepath);
+
+    // std::cout<<normalized<<std::endl;
+
+    createFile(filepath);
 
     return 0;
 }
