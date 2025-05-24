@@ -319,8 +319,6 @@ bool canWrite( std::string filepath ){
  */
 bool createFile( std::string filepath, std::string content = "" ){
 
-    filepath = normalizePath(filepath);
-
     bool exist = fileExist(filepath);
 
     if( exist && ! canRead(filepath) ){
@@ -338,6 +336,8 @@ bool createFile( std::string filepath, std::string content = "" ){
         return false;
 
     }
+
+    filepath = normalizePath(filepath);
 
     std::ofstream newFile;
     
@@ -363,6 +363,68 @@ bool createFile( std::string filepath, std::string content = "" ){
 
 }
 
+/*
+|=================================================
+|   FUNÇÕES DE EXTRAÇÃO DE CONTEÚDO DE ARQUIVO
+|=================================================
+*/
+
+std::string getContent( std::string filepath ){
+
+    bool exist = fileExist(filepath);
+
+    if( ! exist ){
+
+        std::cout<<"O arquivo não existe, ou ocorreu um erro ao tentar abrir o arquivo, verifique e tente novamente!"<<std::endl;
+
+        return "";
+
+    }
+
+    if( ! canRead(filepath) ){
+
+        std::cout<<"O arquivo nao tem permissao de leitura, ou ocorreu um erro ao tentar abrir o arquivo, verifique e tente novamente!"<<std::endl;
+
+        return "";
+
+    }
+
+    filepath = normalizePath(filepath);
+
+    std::ifstream file(filepath, std::ios::binary | std::ios::ate);
+
+    if( ! file.is_open() ) return "";
+
+    std::streamsize size = file.tellg();
+    file.seekg(0, std::ios::beg); 
+
+    if (size == -1) {
+        std::cout<<"Erro ao obter tamanho do arquivo"<<std::endl;
+        return "";
+    }
+
+    file.seekg(0, std::ios::beg);
+    std::string content;
+    content.resize(static_cast<size_t>(size));
+
+    file.read(&content[0], size);
+
+    if( file.fail() ){
+
+        std::cout<<"Erro ao extrair conteudo do arquivo!"<<std::endl;
+
+        file.close();
+
+        return "";
+
+    }
+
+    file.close();
+
+    return content;
+
+}
+
 /* 
 |==================
 |   FUNÇÃO MAIN
@@ -377,13 +439,15 @@ int main(){
 
     // std::cout<<teste<<std::endl;
 
-    std::string filepath = ".\\\\//////WORDS///////CUSTOM\\\\/////// \\\\  //// LEVELS/HARD.t    x t       ";
+    std::string filepath = ".\\\\//////WORDS///////DEFAULT\\\\/////// \\\\  //// LEVELS/HARD.t    x t       ";
 
     // std::string normalized = normalizePath(filepath);
 
     // std::cout<<normalized<<std::endl;
 
-    createFile(filepath);
+    std::string content = getContent(filepath);
+
+    std::cout<<content<<std::endl;
 
     return 0;
 }
