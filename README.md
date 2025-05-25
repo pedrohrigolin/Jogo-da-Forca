@@ -63,7 +63,7 @@
 ### 💡 Dicas *(opcional)*
 - 🔄 Implementar sistema de dicas dependendo da dificuldade
 
-### 🌀 Recursividade *(ideia futura)*
+### 🌀 Recursividade *(pensar em aplicações)*
 - 🔄 Tentar aplicar alguma parte do fluxo com recursividade se possível
 
 ---
