@@ -19,6 +19,12 @@
     const std::string __FORCA_OS__ = "UNIX";
 #endif
 
+/*
+|==========================
+|   FUNÇÕES UTILITÁRIAS
+|==========================
+*/
+
 /**
  * Limpa a tela do terminal de acordo com o sistema operacional.
  *
@@ -473,11 +479,35 @@ std::string getContent( std::string filepath ){
 }
 
 /*
-|==================================================
-|   FUNÇÕES DE VERIFICAÇÃO DE ARQUIVO E CONTEUDO
-|==================================================
+|================================================================
+|   FUNÇÕES DE VERIFICAÇÃO DE ARQUIVO, CONTEUDO E INTEGRIDADE
+|================================================================
 */
 
+/**
+ * Verifica se uma string contém apenas caracteres alfabéticos (A-Z, a-z).
+ *
+ * Percorre cada caractere da string e retorna false caso encontre algum caractere
+ * que não seja uma letra. Caso todos os caracteres sejam letras, retorna true.
+ *
+ * @param   std::string word    String a ser verificada.
+ * @return  bool                true se todos os caracteres são letras, false caso contrário.
+ */
+bool checkAllowedCharacters( std::string word ){
+
+    std::string::size_type length = word.length();
+
+    std::string::size_type i;
+
+    for (i = 0; i<length; i++) {
+
+        if ( ! std::isalpha( static_cast<unsigned char>( word[i] ) ) ) return false;
+
+    }
+
+    return true;
+
+}
 
 
 /* 
@@ -488,23 +518,32 @@ std::string getContent( std::string filepath ){
 
 int main(){
 
-    // std::string teste = "   AB  C D EFGH IJ K  \n adsa AQUI áááâ üü  da \t adada  dsada \r dsads adadas \v dadagfa fdafa \f dasdsa dsada  ";
+    std::string teste = " AB  C D EFGH IJ K  \n adsa AQUI áááâ üü  da \t adada  dsada \r dsads adadas \v dadagfa fdafa \f dasdsa dsada  ";
 
-    // teste = normalizeWord(teste);
+    teste = normalizeWord(teste);
+
+    if( checkAllowedCharacters(teste) ){
+        clear_screen();
+        std::cout<<"Esta correto!"<<std::endl;
+    }
+    else{
+        clear_screen();
+        std::cout<<"Contem caracteres nao permitidos!"<<std::endl;
+    }
 
     // std::cout<<teste<<std::endl;
 
-    std::string filepath = ".\\\\//////WORDS///////DEFAULT\\\\/////// \\\\  //// LEVELS/HARD.t    x t       ";
+    // std::string filepath = ".\\\\//////WORDS///////DEFAULT\\\\/////// \\\\  //// LEVELS/HARD.t    x t       ";
 
     // std::string normalized = normalizePath(filepath);
 
     // std::cout<<normalized<<std::endl;
 
-    clear_screen();
+    // clear_screen();
 
-    std::string content = getContent(filepath);
+    // std::string content = getContent(filepath);
 
-    std::cout<<content<<std::endl;
+    // std::cout<<content<<std::endl;
 
     return 0;
 }
