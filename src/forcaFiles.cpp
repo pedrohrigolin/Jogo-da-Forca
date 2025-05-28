@@ -418,22 +418,13 @@ namespace forcaFiles {
 
                 filename = forcaFiles::utils::normalizePath( forcaFiles::forcaCustomPath + name.second );
 
+                std::string content = "";
+
                 if( ! forcaFiles::utils::fileExist(filename) ){
 
                     // TODO: EVOLUIR ISSO PARA UM BLOCO TRY CATCH FUTURAMENTE
 
-                    std::string content = forcaFiles::read::getContent( forcaFiles::utils::normalizePath( forcaFiles::forcaDefaultPath + name.second ) );
-
-                    forcaFiles::create::createFile(filename, content);
-
-                }
-
-                // Aqui tem repetição de código só para exibir o erro correto. Será usado posteriormente.
-                if( ! forcaFiles::utils::canRead(filename) ){
-
-                    // TODO: EVOLUIR ISSO PARA UM BLOCO TRY CATCH FUTURAMENTE
-
-                    std::string content = forcaFiles::read::getContent( forcaFiles::utils::normalizePath( forcaFiles::forcaDefaultPath + name.second ) );
+                    content = forcaFiles::read::getContent( forcaFiles::utils::normalizePath( forcaFiles::forcaDefaultPath + name.second ) );
 
                     forcaFiles::create::createFile(filename, content);
 
@@ -445,12 +436,26 @@ namespace forcaFiles {
 
                 }
 
-                // Aqui tem repetição de código só para exibir o erro correto. Será usado posteriormente.
+                // Se o arquivo não permite leitura, sobreescreve ele para permitir
+                if( ! forcaFiles::utils::canRead(filename) ){
+
+                    // TODO: EVOLUIR ISSO PARA UM BLOCO TRY CATCH FUTURAMENTE
+
+                    if(content == ""){
+                        content = forcaFiles::read::getContent( forcaFiles::utils::normalizePath( forcaFiles::forcaDefaultPath + name.second ) );
+                    }
+
+                    forcaFiles::create::createFile(filename, content);
+
+                }
+
                 if( forcaFiles::utils::isEmpty(filename) ){
 
                     // TODO: EVOLUIR ISSO PARA UM BLOCO TRY CATCH FUTURAMENTE
 
-                    std::string content = forcaFiles::read::getContent( forcaFiles::utils::normalizePath( forcaFiles::forcaDefaultPath + name.second ) );
+                    if(content == ""){
+                        content = forcaFiles::read::getContent( forcaFiles::utils::normalizePath( forcaFiles::forcaDefaultPath + name.second ) );
+                    }
 
                     forcaFiles::create::createFile(filename, content);
 
