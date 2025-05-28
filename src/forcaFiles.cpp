@@ -3,11 +3,46 @@
 #include <cstring>
 #include <string>
 #include <iostream>
+#include <map>
+#include <stdexcept>
 #include "forcaStrings.h"
 #include "forcaUtils.h"
 #include "forcaFiles.h"
 
 namespace forcaFiles {
+
+    /**
+     * Caminho relativo base para os arquivos padrão do sistema.
+     * 
+     * Esta constante define o diretório que contém os arquivos essenciais e imutáveis
+     * do programa, como recursos base, configurações padrão e arquivos do sistema
+     * que não devem ser modificados durante a execução.
+     */
+    std::string const forcaDefaultPath = "../files/default/";
+
+    /**
+     * Caminho relativo base para os arquivos customizáveis.
+     * 
+     * Define o diretório que armazena arquivos que podem ser modificados pelo usuário,
+     * como configurações personalizadas, dados salvos e recursos adicionais
+     * que podem ser alterados sem afetar o funcionamento base do programa.
+     */
+    std::string const forcaCustomPath = "../files/custom/";
+
+    /**
+     * Mapeamento de identificadores para caminhos de arquivos do sistema.
+     * 
+     * Estrutura que associa identificadores legíveis (keys) aos caminhos relativos
+     * dos arquivos do programa. Facilita o acesso e manutenção dos caminhos,
+     * centralizando as referências e permitindo validações consistentes.
+     */
+    std::map<std::string, std::string> const forcaPaths = {
+
+        {"WORDS_LEVELS_EASY", "words/levels/easy.txt"},
+        {"WORDS_LEVELS_NORMAL", "words/levels/normal.txt"},
+        {"WORDS_LEVELS_HARD", "words/levels/hard.txt"}
+
+    };
 
     namespace utils {
 
@@ -167,19 +202,15 @@ namespace forcaFiles {
 
                 forcaUtils::clear_screen();
                 
-                std::cout<<"O arquivo nao tem permissao de leitura, ou ocorreu um erro ao tentar abrir o arquivo, verifique e tente novamente!"<<std::endl;
-
-                return false;
-
+                throw std::runtime_error("O arquivo " + filepath + " nao tem permissao de leitura, ou ocorreu um erro ao tentar abrir o arquivo, verifique e tente novamente!");
+                
             }
 
             if( ! forcaFiles::utils::canWrite(filepath) ){
 
                 forcaUtils::clear_screen();
                 
-                std::cout<<"O arquivo nao tem permissao de escrita, ou ocorreu um erro ao tentar abrir o arquivo, verifique e tente novamente!"<<std::endl;
-
-                return false;
+                throw std::runtime_error("O arquivo " + filepath + " nao tem permissao de escrita!");
 
             }
 
@@ -189,19 +220,21 @@ namespace forcaFiles {
             
             newFile.open(filepath);
 
-            if( ! newFile.is_open() ) return false;
+            if( ! newFile.is_open() ) {
+
+                throw std::runtime_error("Nao foi possivel abrir o arquivo " + filepath + " para criação!");
+
+            }
 
             newFile<<content;
 
             if( newFile.fail() ){
 
                 forcaUtils::clear_screen();
-
-                std::cout<<"Erro ao gravar o conteudo no arquivo criado, tente novamente!"<<std::endl;
-
+                
                 newFile.close();
-
-                return false;
+                
+                throw std::runtime_error("Erro ao gravar o conteudo no arquivo " + filepath);
 
             }
 
@@ -239,9 +272,7 @@ namespace forcaFiles {
 
                 forcaUtils::clear_screen();
                 
-                std::cout<<"O arquivo não existe, ou ocorreu um erro ao tentar abrir o arquivo, verifique e tente novamente!"<<std::endl;
-
-                return "";
+                throw std::runtime_error("O arquivo " + filepath + " nao existe!");
 
             }
 
@@ -249,9 +280,7 @@ namespace forcaFiles {
 
                 forcaUtils::clear_screen();
                 
-                std::cout<<"O arquivo nao tem permissao de leitura, ou ocorreu um erro ao tentar abrir o arquivo, verifique e tente novamente!"<<std::endl;
-
-                return "";
+                throw std::runtime_error("O arquivo " + filepath + " nao tem permissao de leitura!");
 
             }
 
@@ -259,7 +288,11 @@ namespace forcaFiles {
 
             std::ifstream file(filepath, std::ios::binary | std::ios::ate);
 
-            if( ! file.is_open() ) return "";
+            if( ! file.is_open() ) {
+
+                throw std::runtime_error("Não foi possivel abrir o arquivo " + filepath + "!");
+
+            }
 
             std::streamsize size = file.tellg();
             file.seekg(0, std::ios::beg); 
@@ -268,9 +301,9 @@ namespace forcaFiles {
 
                 forcaUtils::clear_screen();
 
-                std::cout<<"Erro ao obter tamanho do arquivo"<<std::endl;
+                file.close();
 
-                return "";
+                throw std::runtime_error("Erro ao obter tamanho do arquivo " + filepath);
 
             }
 
@@ -283,11 +316,9 @@ namespace forcaFiles {
 
                 forcaUtils::clear_screen();
 
-                std::cout<<"Erro ao extrair conteudo do arquivo!"<<std::endl;
-
                 file.close();
-
-                return "";
+                
+                throw std::runtime_error("Erro ao extrair conteudo do arquivo " + filepath);
 
             }
 
@@ -308,8 +339,13 @@ namespace forcaFiles {
 
         bool isEmpty( std::string filename ) {
 
-            // TODO: MELHORAR A RESPOSTA DESSA FUNÇÃO, USANDO THROW.
-            if( ! forcaFiles::utils::fileExist(filename) && ! forcaFiles::utils::canRead(filename) ) return true;
+            if( ! forcaFiles::utils::fileExist(filename) ){
+                throw std::runtime_error("O arquivo" + forcaFiles::utils::normalizePath(filename) + " nao existe!");
+            }
+
+            if( ! forcaFiles::utils::canRead(filename) ){
+                throw std::runtime_error("O arquivo" + forcaFiles::utils::normalizePath(filename) + " nao permite leitura!");
+            }
 
             std::string content = forcaFiles::read::getContent(filename);
 
@@ -325,6 +361,18 @@ namespace forcaFiles {
             return false;
 
         }
+
+    }
+
+    namespace validate {
+
+        /*
+        |===========================
+        |   FUNÇÕES DE VALIDAÇÃO
+        |===========================
+        */
+
+
 
     }
 
