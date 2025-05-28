@@ -5,6 +5,15 @@
 *.obj
 *.class
 
+# Arquivos gerais
+/ideias_dir.txt
+
 # Diretórios comuns de build
 /output/
 /.vscode/
+/build/
+/bin/*
+
+# Diretórios gerais
+/markdown_andamento/
+/Imagens/
