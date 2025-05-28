@@ -33,6 +33,12 @@ namespace forcaFiles {
 
     }
 
+    namespace validate {
+
+        bool validateFiles();
+
+    }
+
 }
 
 #endif

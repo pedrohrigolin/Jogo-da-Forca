@@ -337,14 +337,26 @@ namespace forcaFiles {
     */
     namespace utils {
 
+        /**
+         * Verifica se um arquivo está vazio, ignorando espaços em branco.
+         * 
+         * Esta função abre o arquivo especificado e analisa seu conteúdo para determinar
+         * se está vazio. Um arquivo é considerado vazio se:
+         * - Não contém nenhum caractere, ou
+         * - Contém apenas caracteres de espaço em branco (espaços, tabs, quebras de linha)
+         * 
+         * @param   std::string filename   Caminho do arquivo a ser verificado
+         * @return  bool                   true se o arquivo está vazio, false caso contrário
+         * @throws  std::runtime_error     Se o arquivo não existe ou não pode ser lido
+         */
         bool isEmpty( std::string filename ) {
 
             if( ! forcaFiles::utils::fileExist(filename) ){
-                throw std::runtime_error("O arquivo" + forcaFiles::utils::normalizePath(filename) + " nao existe!");
+                throw std::runtime_error("O arquivo " + forcaFiles::utils::normalizePath(filename) + " nao existe!");
             }
 
             if( ! forcaFiles::utils::canRead(filename) ){
-                throw std::runtime_error("O arquivo" + forcaFiles::utils::normalizePath(filename) + " nao permite leitura!");
+                throw std::runtime_error("O arquivo " + forcaFiles::utils::normalizePath(filename) + " nao permite leitura!");
             }
 
             std::string content = forcaFiles::read::getContent(filename);
@@ -372,7 +384,83 @@ namespace forcaFiles {
         |===========================
         */
 
+        /**
+         * Valida a existência e integridade de todos os arquivos do sistema.
+         * 
+         * Verifica cada arquivo listado em forcaPaths, garantindo que:
+         * - Existe uma versão padrão (default) do arquivo
+         * - A versão padrão pode ser lida e não está vazia
+         * - Existe uma versão customizável do arquivo (ou cria uma cópia da versão padrão)
+         * - A versão customizável pode ser lida e escrita
+         * - A versão customizável não está vazia (se estiver, restaura conteúdo da versão padrão)
+         * 
+         * @return  bool                   true se todos os arquivos são válidos
+         * @throws  std::runtime_error     Se algum arquivo padrão não existe, não pode ser lido ou está vazio
+         *                                 Se algum arquivo customizável não pode ser escrito
+         */
+        bool validateFiles() {
 
+            for( const auto& name : forcaFiles::forcaPaths ) {
+
+                std::string filename = forcaFiles::utils::normalizePath( forcaFiles::forcaDefaultPath + name.second );
+
+                if( ! forcaFiles::utils::fileExist(filename) ){
+                    throw std::runtime_error("O arquivo " + filename + " nao existe!");
+                }
+
+                if( ! forcaFiles::utils::canRead(filename) ){
+                    throw std::runtime_error("O arquivo " + filename + " nao permite leitura!");
+                }
+
+                if( forcaFiles::utils::isEmpty(filename) ){
+                    throw std::runtime_error("O arquivo " + filename + " nao pode estar vazio!");
+                }
+
+                filename = forcaFiles::utils::normalizePath( forcaFiles::forcaCustomPath + name.second );
+
+                if( ! forcaFiles::utils::fileExist(filename) ){
+
+                    // TODO: EVOLUIR ISSO PARA UM BLOCO TRY CATCH FUTURAMENTE
+
+                    std::string content = forcaFiles::read::getContent( forcaFiles::utils::normalizePath( forcaFiles::forcaDefaultPath + name.second ) );
+
+                    forcaFiles::create::createFile(filename, content);
+
+                }
+
+                // Aqui tem repetição de código só para exibir o erro correto. Será usado posteriormente.
+                if( ! forcaFiles::utils::canRead(filename) ){
+
+                    // TODO: EVOLUIR ISSO PARA UM BLOCO TRY CATCH FUTURAMENTE
+
+                    std::string content = forcaFiles::read::getContent( forcaFiles::utils::normalizePath( forcaFiles::forcaDefaultPath + name.second ) );
+
+                    forcaFiles::create::createFile(filename, content);
+
+                }
+
+                if( ! forcaFiles::utils::canWrite(filename) ){
+
+                    throw std::runtime_error("O arquivo " + filename + " nao pode ser escrito!");
+
+                }
+
+                // Aqui tem repetição de código só para exibir o erro correto. Será usado posteriormente.
+                if( forcaFiles::utils::isEmpty(filename) ){
+
+                    // TODO: EVOLUIR ISSO PARA UM BLOCO TRY CATCH FUTURAMENTE
+
+                    std::string content = forcaFiles::read::getContent( forcaFiles::utils::normalizePath( forcaFiles::forcaDefaultPath + name.second ) );
+
+                    forcaFiles::create::createFile(filename, content);
+
+                }
+
+            }
+
+            return true;
+
+        }
 
     }
 

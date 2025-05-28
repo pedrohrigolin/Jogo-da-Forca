@@ -66,7 +66,9 @@ int main(){
 
     std::string filepath = "../files/words/custom/levels/easy.txt";
 
-    std::cout<<forcaFiles::utils::isEmpty(filepath)<<std::endl;
+    forcaFiles::validate::validateFiles();
+
+    // std::cout<<forcaFiles::utils::isEmpty(filepath)<<std::endl;
 
     // std::string normalized = normalizePath(filepath);
 
