@@ -7,9 +7,9 @@ include_directories(${CMAKE_SOURCE_DIR}/include)
 
 file(GLOB SOURCES "src/*.cpp")
 
-add_executable(jogo-da-forca ${SOURCES})
+add_executable(JogoDaForca ${SOURCES})
 
 # Define saída no diretório bin/
-set_target_properties(jogo-da-forca PROPERTIES
+set_target_properties(JogoDaForca PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/bin"
 )
