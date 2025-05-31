@@ -20,6 +20,7 @@ namespace forcaCore {
     */
     struct words_game {
         forcaCore::words_levels levels;
+        std::string temporary;
     };
 
     extern words_game words;

@@ -23,7 +23,7 @@ namespace forcaInitialize {
      */
     bool createWordsStructLevels(){
 
-        std::string path = forcaFiles::utils::getPath("WORDS_LEVELS_EASY");
+        std::string path = forcaFiles::utils::getPath("WORDS_LEVELS_EASY", "CUSTOM");
 
         std::string content = forcaFiles::read::getContent(path);
 
@@ -41,7 +41,7 @@ namespace forcaInitialize {
 
         explode.clear();
 
-        path = forcaFiles::utils::getPath("WORDS_LEVELS_NORMAL");
+        path = forcaFiles::utils::getPath("WORDS_LEVELS_NORMAL", "CUSTOM");
 
         content = forcaFiles::read::getContent(path);
 
@@ -57,7 +57,7 @@ namespace forcaInitialize {
 
         explode.clear();
 
-        path = forcaFiles::utils::getPath("WORDS_LEVELS_HARD");
+        path = forcaFiles::utils::getPath("WORDS_LEVELS_HARD", "CUSTOM");
 
         content = forcaFiles::read::getContent(path);
 

@@ -448,7 +448,7 @@ namespace forcaFiles {
          *                                 Se algum arquivo customizável não pode ser escrito
          */
         bool validateFiles() {
-            // TODO: ADICIONAR A VALIDAÇÃO PARA ARQUIVOS SOMENTE DEFAULT.
+           
             for( const auto& name : forcaFiles::forcaFileKeys ) {
 
                 std::string filename = forcaFiles::utils::normalizePath( forcaFiles::forcaDefaultPath + name.second );
@@ -508,6 +508,24 @@ namespace forcaFiles {
 
                     forcaFiles::create::createFile(filename, content);
 
+                }
+
+            }
+
+            for( const auto& name : forcaFiles::forcaDefaultFiles ) {
+
+                std::string filename = forcaFiles::utils::normalizePath( forcaFiles::forcaDefaultPath + name.second );
+
+                if( ! forcaFiles::utils::fileExist(filename) ){
+                    throw std::runtime_error("O arquivo " + filename + " nao existe!");
+                }
+
+                if( ! forcaFiles::utils::canRead(filename) ){
+                    throw std::runtime_error("O arquivo " + filename + " nao permite leitura!");
+                }
+
+                if( forcaFiles::utils::isEmpty(filename) ){
+                    throw std::runtime_error("O arquivo " + filename + " nao pode estar vazio!");
                 }
 
             }
