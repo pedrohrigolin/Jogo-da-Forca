@@ -31,6 +31,8 @@
 #include "forcaUtils.h"
 #include "forcaStrings.h"
 #include "forcaFiles.h"
+#include "forcaInitialize.h"
+#include "forcaCore.h"
 
 /*
 |================================================================
@@ -49,24 +51,25 @@
 
 int main(){
 
-    std::string teste = " AB  C D EFGH IJ K  \n adsa AQUI áááâ üü  da \t adada  dsada \r dsads adadas \v dadagfa fdafa \f dasdsa dsada  ";
 
-    teste = forcaStrings::normalizeWord(teste);
+    // std::string teste = " AB  C D EFGH IJ K  \n adsa AQUI áááâ üü  da \t adada  dsada \r dsads adadas \v dadagfa fdafa \f dasdsa dsada  ";
 
-    if( forcaStrings::checkAlphaCharacters(teste) ){
-        forcaUtils::clear_screen();
-        std::cout<<"Esta correto!"<<std::endl;
-    }
-    else{
-        forcaUtils::clear_screen();
-        std::cout<<"Contem caracteres nao permitidos!"<<std::endl;
-    }
+    // teste = forcaStrings::normalizeWord(teste);
 
-    // std::cout<<teste<<std::endl;
+    // if( forcaStrings::checkAlphaCharacters(teste) ){
+    //     forcaUtils::clear_screen();
+    //     std::cout<<"Esta correto!"<<std::endl;
+    // }
+    // else{
+    //     forcaUtils::clear_screen();
+    //     std::cout<<"Contem caracteres nao permitidos!"<<std::endl;
+    // }
 
-    std::string filepath = "../files/words/custom/levels/easy.txt";
+    // // std::cout<<teste<<std::endl;
 
-    forcaFiles::validate::validateFiles();
+    // std::string filepath = "../files/words/custom/levels/easy.txt";
+
+    // forcaFiles::validate::validateFiles();
 
     // std::cout<<forcaFiles::utils::isEmpty(filepath)<<std::endl;
 
