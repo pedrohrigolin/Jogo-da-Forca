@@ -1,6 +1,7 @@
 #include <iostream>
 #include <map>
 #include <stdexcept>
+#include <vector>
 #include "forcaStrings.h"
 #include "forcaUtils.h"
 #include "forcaFiles.h"
@@ -16,7 +17,11 @@ namespace forcaInitialize {
 
         std::string content = forcaFiles::read::getContent(path);
 
-        std::cout<<path<<std::endl;
+        std::vector<std::string> explode;
+
+        forcaUtils::explode(content, "\n", &explode);
+
+        std::cout<<explode[50]<<std::endl;
 
         return true;
 
@@ -34,6 +39,8 @@ namespace forcaInitialize {
         forcaUtils::clear_screen();
 
         std::cout<<std::endl<<std::endl<<"Iniciando o jogo da forca..."<<std::endl;
+
+        std::cout<<std::endl<<std::endl<<"Verificando a integridade dos arquivos..."<<std::endl;
 
         return true;
 

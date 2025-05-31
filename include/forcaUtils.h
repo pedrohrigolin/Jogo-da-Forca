@@ -1,6 +1,9 @@
 #ifndef FORCA_UTILS_H
 #define FORCA_UTILS_H
 
+#include <string>
+#include <vector>
+
 namespace forcaUtils {
 
     /**
@@ -25,6 +28,8 @@ namespace forcaUtils {
     bool filter_validate_bool( bool value, bool strict = false );
 
     bool filter_validate_bool( int value, bool strict = false );
+
+    void explode( std::string string, std::string separator, std::vector<std::string>* reference );
 
 }
 

@@ -123,4 +123,38 @@ namespace forcaUtils {
 
     }
 
+    /**
+     * @brief Divide uma string em substrings com base em um separador e armazena o resultado em um vetor.
+     *
+     * Esta função simula o comportamento da função explode do PHP, separando a string de entrada em partes,
+     * utilizando o separador informado, e armazenando cada parte no vetor passado por ponteiro.
+     *
+     * @param string     String a ser dividida.
+     * @param separator  Separador utilizado para dividir a string.
+     * @param reference  Ponteiro para o vetor onde as substrings resultantes serão armazenadas.
+     *
+     * @note Por preferência pessoal, a implementação ideal seria retornar um std::vector<std::string> e utilizar um loop while,
+     *       mas optei por esta abordagem recursiva com ponteiro para demonstrar conhecimento em manipulação de ponteiros e recursividade.
+     */
+    void explode( std::string string, std::string separator, std::vector<std::string>* reference ) {
+
+        std::string::size_type pos = string.find(separator);
+
+        if( pos != std::string::npos ){
+
+            std::string substr = string.substr(0, pos);
+
+            reference->push_back(substr);
+
+            string = string.erase( 0, pos + separator.length() );
+
+            explode(string, separator, reference);
+
+        }
+        else{
+            reference->push_back(string);
+        }
+
+    }
+
 }
