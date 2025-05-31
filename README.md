@@ -151,6 +151,6 @@ cmake --build .
 Remove-Item -Recurse -Force CMakeCache.txt, CMakeFiles
 ```
 
-> 💡 **Dica:** Sempre limpe o cache se mudar configurações do CMake ou trocar compilador.
+> 💡 **Dica:** Sempre limpe o cache e apague os arquivos da pasta build se mudar configurações do CMake ou trocar compilador.
 
 ---
