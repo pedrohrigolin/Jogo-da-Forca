@@ -19,8 +19,10 @@ namespace forcaCore {
         eu poderia criar categorias, daí eu crio uma struct word_categorias e referencio ela aqui em words_game.
     */
     struct words_game {
-        forcaCore::words_levels levels[1];
+        forcaCore::words_levels levels;
     };
+
+    extern words_game words;
 
     // ? PARA PALAVRAS DIVIDIDAS EM CATEGORIAS, PROVAVELMENTE TERIA QUE USAR ALGUM MAPA
 

@@ -10,6 +10,6 @@
 
 namespace forcaCore {
 
-    words_game words[1];
+    words_game words;
 
 }

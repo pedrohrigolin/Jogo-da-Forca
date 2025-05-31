@@ -10,7 +10,17 @@
 
 namespace forcaInitialize {
 
-    // Adiciona as palavras por nivel a struct words.
+    /**
+     * @brief Lê os arquivos de palavras por nível e preenche a estrutura words do jogo.
+     *
+     * Esta função busca os arquivos de palavras para cada nível de dificuldade (easy, normal, hard),
+     * lê o conteúdo de cada arquivo, separa as palavras por linha e armazena nos respectivos vetores
+     * da estrutura forcaCore::words.levels.
+     *
+     * Utiliza a função explode para dividir o conteúdo dos arquivos em linhas.
+     *
+     * @return true se todas as listas de palavras foram carregadas com sucesso.
+     */
     bool createWordsStructLevels(){
 
         std::string path = forcaFiles::utils::getPath("WORDS_LEVELS_EASY");
@@ -21,7 +31,47 @@ namespace forcaInitialize {
 
         forcaUtils::explode(content, "\n", &explode);
 
-        std::cout<<explode[50]<<std::endl;
+        std::size_t i, size = explode.size();
+
+        for(i=0; i<size; i++){
+
+            forcaCore::words.levels.easy.push_back(explode[i]);
+
+        }
+
+        explode.clear();
+
+        path = forcaFiles::utils::getPath("WORDS_LEVELS_NORMAL");
+
+        content = forcaFiles::read::getContent(path);
+
+        forcaUtils::explode(content, "\n", &explode);
+
+        size = explode.size();
+
+        for(i=0; i<size; i++){
+
+            forcaCore::words.levels.normal.push_back(explode[i]);
+
+        }
+
+        explode.clear();
+
+        path = forcaFiles::utils::getPath("WORDS_LEVELS_HARD");
+
+        content = forcaFiles::read::getContent(path);
+
+        forcaUtils::explode(content, "\n", &explode);
+
+        size = explode.size();
+
+        for(i=0; i<size; i++){
+
+            forcaCore::words.levels.hard.push_back(explode[i]);
+
+        }
+
+        explode.clear();
 
         return true;
 
