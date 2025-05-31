@@ -112,3 +112,45 @@
 | `utils.cpp` / `.h`     | Funções auxiliares gerais                        |
 
 ---
+
+# 🧪 Rodando Código via Terminal (CMake + MinGW)
+
+### 📁 **1. Criar e acessar a pasta `build/`**
+```bash
+mkdir build
+cd build
+```
+
+---
+
+### ⚙️ **2. Gerar arquivos com MinGW**
+```bash
+cmake .. -G "MinGW Makefiles"
+```
+
+---
+
+### 🛠️ **3. Compilar o projeto**
+```bash
+cmake --build .
+```
+
+---
+
+### ▶️ **4. Rodar o executável**
+```bash
+.\..bin\JogoDaForca.exe
+```
+
+---
+
+## 🔄 Caso já tenha gerado arquivos CMake anteriormente...
+
+### ❌ **Limpar cache antigo (Importante!)**
+```powershell
+Remove-Item -Recurse -Force CMakeCache.txt, CMakeFiles
+```
+
+> 💡 **Dica:** Sempre limpe o cache se mudar configurações do CMake ou trocar compilador.
+
+---
