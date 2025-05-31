@@ -51,7 +51,9 @@
 
 int main(){
 
-    std::cout<<forcaUtils::filter_sanitize_boolean(0)<<std::endl;
+    std::cout<<forcaUtils::filter_validate_bool(0)<<std::endl;
+
+    forcaInitialize::createWordsStructLevels();
 
 
     // std::string teste = " AB  C D EFGH IJ K  \n adsa AQUI áááâ üü  da \t adada  dsada \r dsads adadas \v dadagfa fdafa \f dasdsa dsada  ";

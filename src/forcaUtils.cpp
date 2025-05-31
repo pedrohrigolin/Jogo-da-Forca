@@ -46,19 +46,22 @@ namespace forcaUtils {
     /**
      * @brief Valida e converte uma string para booleano.
      * 
-     * Aceita valores como "TRUE", "1", "ON", "YES" para true e "FALSE", "0", "OFF", "NO" para false.
+     * Aceita valores como "TRUE", "1", "ON", "YES", "SIM" para true e "FALSE", "0", "OFF", "NO", "NAO" para false.
      * Se strict for true, lança std::invalid_argument para valores não reconhecidos.
+     * 
+     * OBS: VALORES SÃO CASE INSENSITIVE E PASSAM POR NORMALIZAÇÃO DE STRINGS, ENTÃO É PERMITIDO VALORES COMO
+     * NÃO, sim, yes, NO, NAO, TRUE e etc, SEM PRECISAR SE PREOCUPAR COM NORMALIZAR A STRING ANTES.
      * 
      * @param value Valor a ser validado (std::string).
      * @param strict Se true, apenas valores explicitamente booleanos são aceitos; caso contrário, aceita valores equivalentes. Padrão: false.
      * @return true se o valor for considerado verdadeiro, false caso contrário.
      * @throws std::invalid_argument Se strict for true e o valor não puder ser interpretado como booleano.
      */
-    bool filter_validate_bool( std::string value, bool strict = false ){
+    bool filter_validate_bool( std::string value, bool strict ){
 
-        static const std::vector<std::string> TRUE_VALUES = { "TRUE", "1", "ON", "YES" };
+        static const std::vector<std::string> TRUE_VALUES = { "TRUE", "1", "ON", "YES", "SIM" };
 
-        static const std::vector<std::string> FALSE_VALUES = { "FALSE", "0", "OFF", "NO" };
+        static const std::vector<std::string> FALSE_VALUES = { "FALSE", "0", "OFF", "NO", "NAO" };
 
         value = forcaStrings::normalizeWord(value);
 
@@ -90,7 +93,7 @@ namespace forcaUtils {
      * @param strict Parâmetro ignorado, apenas para manter a interface. Padrão: false.
      * @return O próprio valor booleano.
      */
-    bool filter_validate_bool( bool value, bool strict = false ){ return value; }
+    bool filter_validate_bool( bool value, bool strict ){ return value; }
 
     /**
      * @brief Valida e converte um inteiro para booleano.
@@ -103,7 +106,7 @@ namespace forcaUtils {
      * @return true se o valor for 1, false se for 0 ou outro valor (quando strict for false).
      * @throws std::invalid_argument Se strict for true e o valor não for 1 nem 0.
      */
-    bool filter_validate_bool( int value, bool strict = false ){
+    bool filter_validate_bool( int value, bool strict ){
 
         if(value == 1) return true;
 

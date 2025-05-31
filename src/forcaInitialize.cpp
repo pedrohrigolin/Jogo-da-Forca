@@ -1,5 +1,5 @@
 #include <iostream>
-#include <map> // ? TALVEZ DE PARA REMOVER DEPOIS
+#include <map>
 #include <stdexcept>
 #include "forcaStrings.h"
 #include "forcaUtils.h"
@@ -10,9 +10,13 @@
 namespace forcaInitialize {
 
     // Adiciona as palavras por nivel a struct words.
-    bool createWordsStructLeves(){
+    bool createWordsStructLevels(){
 
-        // std::string contentEasy = forcaFiles::read::getContent( forcaFiles::forcaCustomPath + forcaFiles::forcaPaths["WORDS_LEVELS_EASY"] );
+        std::string path = forcaFiles::utils::getPath("WORDS_LEVELS_EASY");
+
+        std::string content = forcaFiles::read::getContent(path);
+
+        std::cout<<path<<std::endl;
 
         return true;
 

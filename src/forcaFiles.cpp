@@ -140,6 +140,88 @@ namespace forcaFiles {
 
         }
 
+        /**
+         * @brief Retorna o caminho de um arquivo a partir de uma chave e do tipo (DEFAULT, CUSTOM ou ANY).
+         *
+         * A função busca a chave primeiramente em forcaFileKeys, que representa arquivos presentes em ambas as pastas.
+         * Se não encontrar, busca em forcaDefaultFiles (para DEFAULT) ou forcaCustomFiles (para CUSTOM).
+         * Para o tipo ANY, busca em forcaAnyFiles, que pode conter qualquer arquivo do sistema.
+         * 
+         * Prioridade de busca:
+         *   1. forcaFileKeys: prioridade máxima, pois representa arquivos compartilhados entre default e custom.
+         *   2. forcaDefaultFiles ou forcaCustomFiles: caso não encontre na anterior, busca nos arquivos exclusivos de cada pasta.
+         *   3. forcaAnyFiles: apenas se o tipo for ANY, busca em todos os arquivos conhecidos do sistema.
+         *
+         * @param key  Chave do arquivo a ser buscado.
+         * @param type Tipo do caminho desejado: "DEFAULT", "CUSTOM" ou "ANY".
+         * @return std::string Caminho do arquivo, já normalizado.
+         * @throws std::invalid_argument Se o tipo for inválido ou a chave não existir no(s) mapa(s) correspondente(s).
+         */
+        std::string getPath( std::string key, std::string type ) {
+
+            type = forcaStrings::normalizeWord(type);
+
+            if( type != "DEFAULT" && type != "CUSTOM" && type != "ANY"){
+                std::invalid_argument("O parametro type passado na funcao esta incorrete! Os valores esperados sao DEFAULT, CUSTOM OU ANY");
+            }
+
+            key = forcaStrings::removeSpaces(key);
+
+            if(type != "ANY"){
+
+                std::map<std::string, std::string>::const_iterator path = forcaFiles::forcaFileKeys.find(key);
+
+                if(path == forcaFiles::forcaFileKeys.end()){
+                    
+                    if(type == "DEFAULT"){
+
+                        path = forcaFiles::forcaDefaultFiles.find(key);
+
+                        if(path == forcaFiles::forcaDefaultFiles.end()){
+                            std::invalid_argument("O primeiro parametro (key) passado na funcao nao existe!");
+                        }
+
+                    }
+                    else{
+
+                        path = forcaFiles::forcaCustomFiles.find(key);
+
+                        if(path == forcaFiles::forcaDefaultFiles.end()){
+                            std::invalid_argument("O primeiro parametro (key) passado na funcao nao existe!");
+                        }
+
+                    }
+
+                }
+
+                std::string response;
+
+                if(type == "DEFAULT"){
+                    response = forcaFiles::utils::normalizePath(forcaFiles::forcaDefaultPath + path->second);
+                }
+                else{
+                    response = forcaFiles::utils::normalizePath(forcaFiles::forcaCustomPath + path->second);
+                }
+
+                return response;
+
+            }
+            else{
+             
+                std::map<std::string, std::string>::const_iterator path = forcaFiles::forcaAnyFiles.find(key);
+
+                if(path == forcaFiles::forcaAnyFiles.end()){
+                    std::invalid_argument("O primeiro parametro (key) passado na funcao nao existe!");
+                }
+
+                std::string response = forcaFiles::utils::normalizePath(path->second);
+
+                return response;
+
+            }
+
+        }
+
     }
 
     namespace create {
@@ -366,8 +448,8 @@ namespace forcaFiles {
          *                                 Se algum arquivo customizável não pode ser escrito
          */
         bool validateFiles() {
-
-            for( const auto& name : forcaFiles::forcaPaths ) {
+            // TODO: ADICIONAR A VALIDAÇÃO PARA ARQUIVOS SOMENTE DEFAULT.
+            for( const auto& name : forcaFiles::forcaFileKeys ) {
 
                 std::string filename = forcaFiles::utils::normalizePath( forcaFiles::forcaDefaultPath + name.second );
 

@@ -3,7 +3,7 @@
 
 namespace forcaInitialize {
 
-    bool createWordsStructLeves();
+    bool createWordsStructLevels();
 
     bool createWordsStruct();
 

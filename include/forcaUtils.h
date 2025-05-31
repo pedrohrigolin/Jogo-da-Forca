@@ -20,11 +20,11 @@ namespace forcaUtils {
 
     void clear_screen();
 
-    bool filter_validate_bool( std::string value, bool strict );
+    bool filter_validate_bool( std::string value, bool strict = false );
 
-    bool filter_validate_bool( bool value, bool strict );
+    bool filter_validate_bool( bool value, bool strict = false );
 
-    bool filter_validate_bool( int value, bool strict );
+    bool filter_validate_bool( int value, bool strict = false );
 
 }
 
