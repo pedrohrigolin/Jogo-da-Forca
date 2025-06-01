@@ -2,6 +2,7 @@
 #include <string>
 #include <vector>
 #include <regex>
+#include <iostream>
 #include "forcaStrings.h"
 
 namespace forcaStrings {
@@ -197,37 +198,160 @@ namespace forcaStrings {
     }
 
     /**
-     * @brief Divide uma string em substrings com base em um separador e armazena o resultado em um vetor.
-     *
-     * Esta função simula o comportamento da função explode do PHP, separando a string de entrada em partes,
-     * utilizando o separador informado, e armazenando cada parte no vetor passado por ponteiro.
-     *
-     * @param string     String a ser dividida.
-     * @param separator  Separador utilizado para dividir a string.
-     * @param reference  Ponteiro para o vetor onde as substrings resultantes serão armazenadas.
-     *
+     * Divide uma string em um vetor de strings usando um separador.
+     * Esta versão trabalha com strings passadas por referência constante.
+     * 
      * @note Por preferência pessoal, a implementação ideal seria retornar um std::vector<std::string> e utilizar um loop while,
      *       mas optei por esta abordagem recursiva com ponteiro para demonstrar conhecimento em manipulação de ponteiros e recursividade.
+     * 
+     * @param   const std::string& string    String a ser dividida
+     * @param   std::string separator        String usada como separador
+     * @param   std::vector<std::string>* reference    Ponteiro para o vetor que armazenará os resultados
+     * @return  void
      */
-    void explode( std::string string, std::string separator, std::vector<std::string>* reference ) {
+    void explode( const std::string& string, std::string separator, std::vector<std::string>* reference ) {
 
-        std::string::size_type pos = string.find(separator);
+        /*         
+            Cria uma cópia da string de entrada.
+            Isso é preciso pois se uma string const for passada, não será possível
+            modificar, e também evita alterar strings originais, já que são passadas por referência. 
+        */
+        std::string copy = string;
+
+        std::string::size_type pos = copy.find(separator);
 
         if( pos != std::string::npos ){
 
-            std::string substr = string.substr(0, pos);
+            std::string substr = copy.substr(0, pos);
 
             reference->push_back(substr);
 
-            string = string.erase( 0, pos + separator.length() );
+            copy = copy.erase( 0, pos + separator.length() );
 
-            explode(string, separator, reference);
+            explode(copy, separator, reference);
 
         }
         else{
-            reference->push_back(string);
+            reference->push_back(copy);
         }
 
+    }
+
+    /**
+     * Divide uma string em um vetor de strings usando um separador.
+     * Esta versão trabalha com strings mutáveis (char*).
+     * 
+     * @param   char* string                 String a ser dividida
+     * @param   std::string separator        String usada como separador
+     * @param   std::vector<std::string>* reference    Ponteiro para o vetor que armazenará os resultados
+     * @return  void
+     */
+    void explode( char* string, std::string separator, std::vector<std::string>* reference ) {
+
+        std::string copy = string;
+
+        explode(copy, separator, reference);
+
+    }
+
+    /**
+     * Divide uma string em um vetor de strings usando um separador.
+     * Esta versão trabalha com strings constantes (const char*).
+     * 
+     * @param   const char* string           String a ser dividida
+     * @param   std::string separator        String usada como separador
+     * @param   std::vector<std::string>* reference    Ponteiro para o vetor que armazenará os resultados
+     * @return  void
+     */
+    void explode( const char* string, std::string separator, std::vector<std::string>* reference ) {
+
+        std::string copy = string;
+
+        explode(copy, separator, reference);
+
+    }
+
+    /**
+     * Concatena elementos de um vetor de strings usando um delimitador.
+     * Esta versão trabalha com std::vector<std::string>.
+     * 
+     * @param   const std::vector<std::string>& array    Vetor de strings a ser concatenado
+     * @param   std::string delimiter                    String usada como delimitador
+     * @return  std::string                             String resultante da concatenação
+     */
+    std::string implode( const std::vector<std::string>& array, std::string delimiter ) {
+
+        if(array.empty()) return "";
+
+        std::size_t i, length = array.size();
+
+        std::string response = array[0];
+
+        for(i=1; i<length; i++){
+
+            response += delimiter;
+            response += array[i]; 
+
+        }
+
+        return response;
+
+    }
+
+    /**
+     * Concatena elementos de um array de strings usando um delimitador.
+     * Esta versão trabalha com arrays de strings mutáveis (char*).
+     * 
+     * @param   char* array[]               Array de strings a ser concatenado
+     * @param   int size                    Tamanho do array
+     * @param   std::string delimiter       String usada como delimitador
+     * @return  std::string                String resultante da concatenação
+     */
+    std::string implode(char* array[], int size, std::string delimiter) {
+
+        if (size <= 0 || array == nullptr) return "";
+        
+        std::string response = array[0];
+        
+        for(int i = 1; i < size; i++) {
+
+            if (array[i] == nullptr) break;
+
+            response += delimiter;
+            response += array[i];
+
+        }
+        
+        return response;
+        
+    }
+
+    /**
+     * Concatena elementos de um array de strings usando um delimitador.
+     * Esta versão trabalha com arrays de strings constantes (const char*).
+     * 
+     * @param   const char* array[]         Array de strings a ser concatenado
+     * @param   int size                    Tamanho do array
+     * @param   std::string delimiter       String usada como delimitador
+     * @return  std::string                String resultante da concatenação
+     */
+    std::string implode(const char* array[], int size, std::string delimiter) {
+
+        if (size <= 0 || array == nullptr) return "";
+        
+        std::string response = array[0];
+        
+        for(int i = 1; i < size; i++) {
+
+            if (array[i] == nullptr) break;
+
+            response += delimiter;
+            response += array[i];
+
+        }
+        
+        return response;
+        
     }
 
 }

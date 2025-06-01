@@ -16,7 +16,17 @@ namespace forcaStrings {
 
     bool checkAlphaCharacters( std::string word );
 
-    void explode( std::string string, std::string separator, std::vector<std::string>* reference );
+    void explode( const std::string& string, std::string separator, std::vector<std::string>* reference );
+
+    void explode( char* string, std::string separator, std::vector<std::string>* reference );
+
+    void explode( const char* string, std::string separator, std::vector<std::string>* reference );
+
+    std::string implode( const std::vector<std::string>& array, std::string delimeter );
+
+    std::string implode( char* array[], int size, std::string delimiter );
+
+    std::string implode( const char* array[], int size, std::string delimiter );
 
 }
 
