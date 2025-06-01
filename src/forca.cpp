@@ -24,7 +24,11 @@
 #define PCRE2_CODE_UNIT_WIDTH 8
 #include <pcre2.h>
 
-#include <curses.h>
+#if defined(_WIN32) || defined(_WIN64) || defined(__CYGWIN__)
+    #include <curses.h>
+#else
+
+#endif
 
 #include <iostream>
 #include <cstdlib>
@@ -154,7 +158,7 @@ int main(int argc, char* argv[]){
     |====================================
     */
 
-        // Inicializa o modo curses
+/*         // Inicializa o modo curses
     initscr();              // Inicia a tela
     cbreak();               // Desativa o buffer de linha (recebe input imediatamente)
     noecho();               // Não mostra os caracteres digitados
@@ -173,7 +177,7 @@ int main(int argc, char* argv[]){
     getch();
 
     // Finaliza o modo curses
-    endwin();
+    endwin(); */
 
     return 0;
 }
