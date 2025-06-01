@@ -16,6 +16,10 @@ if(WIN32)
     target_include_directories(JogoDaForca PRIVATE
         ${CMAKE_SOURCE_DIR}/libs/pdcurses/include
     )
+else()
+    target_include_directories(JogoDaForca PRIVATE
+        "${CMAKE_SOURCE_DIR}/libs/ncurses/include"
+    )
 endif()
 
 target_compile_definitions(JogoDaForca PRIVATE PCRE2_STATIC)
@@ -30,7 +34,7 @@ if(WIN32)
         "${CMAKE_SOURCE_DIR}/libs/pcre2/win/libpcre2-16.a"
         "${CMAKE_SOURCE_DIR}/libs/pcre2/win/libpcre2-32.a"
         "${CMAKE_SOURCE_DIR}/libs/pcre2/win/libpcre2-posix.a"
-        "${CMAKE_SOURCE_DIR}/libs/pdcurses/win/pdcurses.a"
+        "${CMAKE_SOURCE_DIR}/libs/pdcurses/pdcurses.a"
         Ws2_32
         Advapi32
         Userenv
@@ -41,8 +45,12 @@ else()
         "${CMAKE_SOURCE_DIR}/libs/pcre2/unix/libpcre2-16.a"
         "${CMAKE_SOURCE_DIR}/libs/pcre2/unix/libpcre2-32.a"
         "${CMAKE_SOURCE_DIR}/libs/pcre2/unix/libpcre2-posix.a"
+        "${CMAKE_SOURCE_DIR}/libs/ncurses/libformw.a"
+        "${CMAKE_SOURCE_DIR}/libs/ncurses/libmenuw.a"
+        "${CMAKE_SOURCE_DIR}/libs/ncurses/libpanelw.a"
+        "${CMAKE_SOURCE_DIR}/libs/ncurses/libncursesw.a"
+        "${CMAKE_SOURCE_DIR}/libs/ncurses/libncurses++w.a"
         pthread
         dl
-        # Sem curses no Linux ainda
     )
 endif()

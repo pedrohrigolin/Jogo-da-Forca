@@ -27,7 +27,10 @@
 #if defined(_WIN32) || defined(_WIN64) || defined(__CYGWIN__)
     #include <curses.h>
 #else
-
+    #include <ncurses.h>
+    #include <form.h>
+    #include <menu.h>
+    #include <panel.h>
 #endif
 
 #include <iostream>
