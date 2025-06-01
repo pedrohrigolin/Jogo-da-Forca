@@ -100,7 +100,7 @@ namespace forcaFiles {
 
     namespace validate {
 
-        bool validateFiles();
+        bool validateEssentialFiles();
 
     }
 

@@ -20,6 +20,9 @@
 |=================================================================
 */
 
+#define PCRE2_CODE_UNIT_WIDTH 8
+#include <pcre2.h>
+
 #include <iostream>
 #include <cstdlib>
 #include <string>
@@ -49,12 +52,11 @@
 |==================
 */
 
-int main(){
+int main(int argc, char* argv[]){
 
-    std::cout<<forcaUtils::filter_validate_bool(0)<<std::endl;
+    forcaInitialize::init();
 
-    forcaInitialize::createWordsStructLevels();
-
+    std::cout<<forcaCore::words.levels.easy[12]<<std::endl;
 
     // std::string teste = " AB  C D EFGH IJ K  \n adsa AQUI áááâ üü  da \t adada  dsada \r dsads adadas \v dadagfa fdafa \f dasdsa dsada  ";
 
@@ -86,6 +88,57 @@ int main(){
     // std::string content = getContent(filepath);
 
     // std::cout<<content<<std::endl;
+
+        // Regex pattern
+    PCRE2_SPTR pattern = (PCRE2_SPTR)"hello";
+
+    // String para buscar
+    PCRE2_SPTR subject = (PCRE2_SPTR)"hello world";
+
+    int errornumber;
+    PCRE2_SIZE erroroffset;
+
+    // Compilar regex
+    pcre2_code *re = pcre2_compile(
+        pattern,               // padrão
+        PCRE2_ZERO_TERMINATED, // comprimento da string
+        0,                     // flags
+        &errornumber,          // para código de erro
+        &erroroffset,          // posição do erro
+        NULL                   // contexto de compilação
+    );
+
+    if (re == NULL) {
+        PCRE2_UCHAR buffer[256];
+        pcre2_get_error_message(errornumber, buffer, sizeof(buffer));
+        std::cerr << "Erro ao compilar regex: " << buffer << " na posição " << erroroffset << std::endl;
+        return 1;
+    }
+
+    // Criar o "match data" necessário para busca
+    pcre2_match_data *match_data = pcre2_match_data_create_from_pattern(re, NULL);
+
+    // Tentar casar
+    int rc = pcre2_match(
+        re,                   // código regex
+        subject,              // string alvo
+        PCRE2_ZERO_TERMINATED, // tamanho da string
+        0,                    // início da busca
+        0,                    // flags
+        match_data,           // estrutura pra resultado
+        NULL                  // contexto
+    );
+
+    if (rc < 0) {
+        std::cout << "No match found." << std::endl;
+    } else {
+        std::cout << "Match found!" << std::endl;
+    }
+
+    // Limpar alocação
+    pcre2_match_data_free(match_data);
+    pcre2_code_free(re);
+
 
     return 0;
 }

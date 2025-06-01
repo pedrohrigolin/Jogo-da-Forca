@@ -32,7 +32,7 @@ namespace forcaFiles {
         std::string normalizePath( std::string path ) {
 
             path = forcaStrings::removeSpaces(path);
-
+            
             std::string::size_type pos = path.find("\\");
 
             // Remove / invertidas, comium no windows mas que pode gerar problemas no codigo.
@@ -434,7 +434,7 @@ namespace forcaFiles {
         */
 
         /**
-         * Valida a existência e integridade de todos os arquivos do sistema.
+         * Valida a existência e integridade de todos os arquivos essenciais do sistema.
          * 
          * Verifica cada arquivo listado em forcaPaths, garantindo que:
          * - Existe uma versão padrão (default) do arquivo
@@ -447,7 +447,7 @@ namespace forcaFiles {
          * @throws  std::runtime_error     Se algum arquivo padrão não existe, não pode ser lido ou está vazio
          *                                 Se algum arquivo customizável não pode ser escrito
          */
-        bool validateFiles() {
+        bool validateEssentialFiles() {
            
             for( const auto& name : forcaFiles::forcaFileKeys ) {
 

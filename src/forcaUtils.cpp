@@ -1,6 +1,7 @@
 #include <cstdlib>
 #include <string>
 #include <vector>
+#include <iostream>
 #include <algorithm> // Para usar o std::find
 #include <stdexcept>
 #include "forcaUtils.h"
@@ -9,19 +10,31 @@
 namespace forcaUtils {
 
     /**
-     * Limpa a tela do terminal de acordo com o sistema operacional.
+     * @brief Limpa a tela do terminal de forma robusta para diferentes sistemas operacionais.
      *
-     * Utiliza o comando "cls" para sistemas Windows e "clear" para sistemas Unix-like.
-     * A escolha do comando é feita em tempo de compilação usando diretivas de pré-processador.
-     * É um código simples e bem conhecido.
+     * Esta função força a saída de qualquer conteúdo pendente no buffer de std::cout antes e depois do comando de limpeza.
+     * Utiliza o comando "cls" para sistemas Windows e "clear" para sistemas Unix-like, escolhendo em tempo de compilação.
+     * Após o comando do sistema, utiliza também a sequência ANSI "\033[2J\033[1;1H" para garantir a limpeza em terminais modernos,
+     * aumentando a compatibilidade e robustez da função.
+     *
+     * Observação: Em alguns terminais integrados (como o terminal de debug do VS Code), nenhum método pode funcionar.
      */
     void clear_screen(){
         
+        // Força a saída de possíveis buffers acumulados no std::cout
+        std::cout<<std::flush;
+
         #if defined(_WIN32) || defined(_WIN64) || defined(__CYGWIN__)
             std::system("cls");
         #else
             std::system("clear");
         #endif
+
+        // Depois tenta ANSI (caso o terminal suporte), isso melhora a robustes da função
+        std::cout << "\033[2J\033[1;1H" << std::flush;
+
+        // Força a saída de possíveis buffers acumulados no std::cout
+        std::cout<<std::flush;
         
     }
 
@@ -120,40 +133,6 @@ namespace forcaUtils {
         }
 
         return false;
-
-    }
-
-    /**
-     * @brief Divide uma string em substrings com base em um separador e armazena o resultado em um vetor.
-     *
-     * Esta função simula o comportamento da função explode do PHP, separando a string de entrada em partes,
-     * utilizando o separador informado, e armazenando cada parte no vetor passado por ponteiro.
-     *
-     * @param string     String a ser dividida.
-     * @param separator  Separador utilizado para dividir a string.
-     * @param reference  Ponteiro para o vetor onde as substrings resultantes serão armazenadas.
-     *
-     * @note Por preferência pessoal, a implementação ideal seria retornar um std::vector<std::string> e utilizar um loop while,
-     *       mas optei por esta abordagem recursiva com ponteiro para demonstrar conhecimento em manipulação de ponteiros e recursividade.
-     */
-    void explode( std::string string, std::string separator, std::vector<std::string>* reference ) {
-
-        std::string::size_type pos = string.find(separator);
-
-        if( pos != std::string::npos ){
-
-            std::string substr = string.substr(0, pos);
-
-            reference->push_back(substr);
-
-            string = string.erase( 0, pos + separator.length() );
-
-            explode(string, separator, reference);
-
-        }
-        else{
-            reference->push_back(string);
-        }
 
     }
 

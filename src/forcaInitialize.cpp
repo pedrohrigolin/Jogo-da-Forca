@@ -29,7 +29,7 @@ namespace forcaInitialize {
 
         std::vector<std::string> explode;
 
-        forcaUtils::explode(content, "\n", &explode);
+        forcaStrings::explode(content, "\n", &explode);
 
         std::size_t i, size = explode.size();
 
@@ -45,7 +45,7 @@ namespace forcaInitialize {
 
         content = forcaFiles::read::getContent(path);
 
-        forcaUtils::explode(content, "\n", &explode);
+        forcaStrings::explode(content, "\n", &explode);
 
         size = explode.size();
 
@@ -61,7 +61,7 @@ namespace forcaInitialize {
 
         content = forcaFiles::read::getContent(path);
 
-        forcaUtils::explode(content, "\n", &explode);
+        forcaStrings::explode(content, "\n", &explode);
 
         size = explode.size();
 
@@ -79,6 +79,9 @@ namespace forcaInitialize {
 
     bool createWordsStruct(){
 
+        if( ! forcaInitialize::createWordsStructLevels() ){
+            std::runtime_error("Nao foi possivel inicializar as palavras da categoria dificuldade!");
+        }
 
         return true;
 
@@ -91,6 +94,18 @@ namespace forcaInitialize {
         std::cout<<std::endl<<std::endl<<"Iniciando o jogo da forca..."<<std::endl;
 
         std::cout<<std::endl<<std::endl<<"Verificando a integridade dos arquivos..."<<std::endl;
+
+        if( ! forcaFiles::validate::validateEssentialFiles() ){
+            std::runtime_error("A validacao dos arquivos essenciais para o funcionamento do sistema resultou em erro!");
+        }
+
+        std::cout<<std::endl<<std::endl<<"Inicializando a estrutura de palavras..."<<std::endl;
+
+        if( ! forcaInitialize::createWordsStruct() ){
+            std::runtime_error("Nao foi possivel inicializar a estrutura de palavras!");
+        }
+
+        std::cout<<std::endl<<std::endl<<"Inicializacao concluida!"<<std::endl<<std::endl;
 
         return true;
 

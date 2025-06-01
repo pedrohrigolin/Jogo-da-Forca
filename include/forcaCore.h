@@ -23,9 +23,9 @@ namespace forcaCore {
         std::string temporary;
     };
 
-    extern words_game words;
-
     // ? PARA PALAVRAS DIVIDIDAS EM CATEGORIAS, PROVAVELMENTE TERIA QUE USAR ALGUM MAPA
+    
+    extern words_game words;
 
 }
 
