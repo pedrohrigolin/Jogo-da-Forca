@@ -20,8 +20,11 @@
 |=================================================================
 */
 
+// Lib para regex. PCRE2 É O MESMO MOTOR REGEX USADO NO PHP.
 #define PCRE2_CODE_UNIT_WIDTH 8
 #include <pcre2.h>
+
+#include <curses.h>
 
 #include <iostream>
 #include <cstdlib>
@@ -89,6 +92,12 @@ int main(int argc, char* argv[]){
 
     // std::cout<<content<<std::endl;
 
+    /* 
+    |=================================
+    |   TESTE PARA REGEX COM PCRE2
+    |=================================
+    */
+
         // Regex pattern
     PCRE2_SPTR pattern = (PCRE2_SPTR)"hello";
 
@@ -139,6 +148,32 @@ int main(int argc, char* argv[]){
     pcre2_match_data_free(match_data);
     pcre2_code_free(re);
 
+    /* 
+    |====================================
+    |   TESTE PARA O PDCURSES/NCURSES
+    |====================================
+    */
+
+        // Inicializa o modo curses
+    initscr();              // Inicia a tela
+    cbreak();               // Desativa o buffer de linha (recebe input imediatamente)
+    noecho();               // Não mostra os caracteres digitados
+    keypad(stdscr, TRUE);   // Habilita teclas especiais (setas, etc.)
+
+    // Mensagem inicial
+    mvprintw(5, 10, "Pressione qualquer tecla para continuar...");
+    refresh();              // Atualiza a tela
+
+    getch();                // Espera por uma tecla
+
+    // Limpa e imprime outra mensagem
+    clear();
+    mvprintw(5, 10, "Funcionando! Pressione outra tecla para sair.");
+    refresh();
+    getch();
+
+    // Finaliza o modo curses
+    endwin();
 
     return 0;
 }
