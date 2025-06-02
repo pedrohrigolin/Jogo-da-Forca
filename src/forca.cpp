@@ -66,6 +66,8 @@ int main(int argc, char* argv[]){
 
     forcaInitialize::init();
 
+    std::cout<<"B"<<forcaStrings::rtrim("  AAAA   ")<<"B"<<std::endl;
+
     // std::string teste = " AB  C D EFGH IJ K  \n adsa AQUI áááâ üü  da \t adada  dsada \r dsads adadas \v dadagfa fdafa \f dasdsa dsada  ";
 
     // teste = forcaStrings::normalizeWord(teste);

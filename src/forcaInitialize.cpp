@@ -31,6 +31,8 @@ namespace forcaInitialize {
 
         forcaStrings::explode(content, "\n", &explode);
 
+        // TODO: VERIFICAR SE O ARRAY ESTÁ VAZIO!!!
+
         std::size_t i, size = explode.size();
 
         for(i=0; i<size; i++){

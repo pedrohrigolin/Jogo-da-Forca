@@ -1,6 +1,7 @@
 #include <cstring>
 #include <string>
 #include <vector>
+#include <iostream>
 #include "forcaStrings.h"
 
 namespace forcaStrings {
@@ -132,6 +133,102 @@ namespace forcaStrings {
 
             // Cast para unsigned char para evitar comportamento indefinido em caracteres >127
             text[i] = static_cast<char>( std::toupper(static_cast<unsigned char>( text[i] ) ) );
+
+        }
+
+        return text;
+
+    }
+
+    /**
+     * Converte todos os caracteres de uma string para minúsculos. A função lida 
+     * corretamente com caracteres ASCII estendido (>127) através de um cast para 
+     * unsigned char.
+     *
+     * @param   std::string text    String que será convertida para minúsculo
+     * @return  std::string         String com todos os caracteres em minúsculo
+     */
+    std::string to_lowercase( std::string text ) {
+
+        std::string::size_type i, length;
+
+        length = text.size();
+
+        for (i = 0; i < length; i++) {
+
+            // Cast para unsigned char para evitar comportamento indefinido em caracteres >127
+            text[i] = static_cast<char>( std::tolower(static_cast<unsigned char>( text[i] ) ) );
+
+        }
+
+        return text;
+
+    }
+
+    /**
+     * Remove espaços em branco do início e do fim de uma string.
+     * Combina as funcionalidades de ltrim() e rtrim() em uma única chamada.
+     * 
+     * @param   const std::string& string    String que terá os espaços removidos
+     * @return  std::string                  String sem espaços no início e fim
+     */
+    std::string trim( const std::string& string ) {
+
+        std::string text = string;
+
+        while( isspace(text[0]) && text.length() != 0 ){
+        
+            text.erase(0, 1);
+
+        }
+
+        while( isspace( text[ text.length() - 1 ] ) && text.length() > 0 ){
+        
+            text.erase( (text.length() - 1), 1 );
+
+        }
+
+        return text;
+
+    }
+
+    /**
+     * Remove espaços em branco do início de uma string (left trim).
+     * Remove espaços, tabs, quebras de linha e outros caracteres de espaçamento
+     * do início da string.
+     * 
+     * @param   const std::string& string    String que terá os espaços removidos do início
+     * @return  std::string                  String sem espaços no início
+     */
+    std::string ltrim( const std::string& string ) {
+
+        std::string text = string;
+
+        while( isspace(text[0]) && text.length() != 0 ){
+        
+            text.erase(0, 1);
+
+        }
+
+        return text;
+
+    }
+
+    /**
+     * Remove espaços em branco do fim de uma string (right trim).
+     * Remove espaços, tabs, quebras de linha e outros caracteres de espaçamento
+     * do final da string.
+     * 
+     * @param   const std::string& string    String que terá os espaços removidos do fim
+     * @return  std::string                  String sem espaços no fim
+     */
+    std::string rtrim( const std::string& string ) {
+
+        std::string text = string;
+
+        while( isspace( text[ text.length() - 1 ] ) && text.length() > 0 ){
+        
+            text.erase( (text.length() - 1), 1 );
 
         }
 

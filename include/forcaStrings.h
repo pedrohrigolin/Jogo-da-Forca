@@ -12,6 +12,14 @@ namespace forcaStrings {
 
     std::string to_uppercase( std::string text );
 
+    std::string to_lowercase( std::string text );
+
+    std::string trim( const std::string& string );
+
+    std::string ltrim( const std::string& string );
+
+    std::string rtrim( const std::string& string );
+
     std::string normalizeWord( std::string text );
 
     bool checkAlphaCharacters( std::string word );
