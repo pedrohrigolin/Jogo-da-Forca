@@ -139,7 +139,7 @@ cmake --build .
 
 ### ▶️ **4. Rodar o executável**
 ```bash
-.\..bin\JogoDaForca.exe
+.\bin\JogoDaForca.exe
 ```
 
 ---
