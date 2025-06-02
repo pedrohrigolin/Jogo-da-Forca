@@ -1,8 +1,6 @@
 #include <cstring>
 #include <string>
 #include <vector>
-#include <regex>
-#include <iostream>
 #include "forcaStrings.h"
 
 namespace forcaStrings {
@@ -201,6 +199,8 @@ namespace forcaStrings {
      * Divide uma string em um vetor de strings usando um separador.
      * Esta versão trabalha com strings passadas por referência constante.
      * 
+     * Essa função foi inspirada pela função explode do PHP.
+     * 
      * @note Por preferência pessoal, a implementação ideal seria retornar um std::vector<std::string> e utilizar um loop while,
      *       mas optei por esta abordagem recursiva com ponteiro para demonstrar conhecimento em manipulação de ponteiros e recursividade.
      * 
@@ -274,6 +274,8 @@ namespace forcaStrings {
     /**
      * Concatena elementos de um vetor de strings usando um delimitador.
      * Esta versão trabalha com std::vector<std::string>.
+     * 
+     * Essa função foi inspirada na função implode do PHP.
      * 
      * @param   const std::vector<std::string>& array    Vetor de strings a ser concatenado
      * @param   std::string delimiter                    String usada como delimitador
