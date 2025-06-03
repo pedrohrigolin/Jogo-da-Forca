@@ -46,6 +46,7 @@
 #include "forcaFiles.h"
 #include "forcaInitialize.h"
 #include "forcaCore.h"
+#include "forcaRegex.h"
 
 /*
 |================================================================
@@ -66,7 +67,9 @@ int main(int argc, char* argv[]){
 
     forcaInitialize::init();
 
-    std::cout<<"B"<<forcaStrings::rtrim("  AAAA   ")<<"B"<<std::endl;
+    std::cout<<forcaRegex::normalizePattern("  /[a-zA-Z].+?[0-9]/imu ")<<std::endl;
+
+    // std::cout<<"B"<<forcaStrings::rtrim("  AAAA   ")<<"B"<<std::endl;
 
     // std::string teste = " AB  C D EFGH IJ K  \n adsa AQUI áááâ üü  da \t adada  dsada \r dsads adadas \v dadagfa fdafa \f dasdsa dsada  ";
 
