@@ -10,8 +10,45 @@
 
 #include <iostream> // !! TIRAR DEPOIS DE CONCLUIR TODOS OS TESTES
 
+/**
+ * Namespace que implementa funcionalidades de expressões regulares inspiradas no PHP.
+ * Oferece uma interface familiar para usar regex no C++, seguindo o padrão do PHP.
+ * 
+ * As funções deste namespace utilizam a biblioteca PCRE2 (mesmo motor usado pelo PHP)
+ * para realizar operações de busca e substituição em strings, mantendo compatibilidade
+ * com a sintaxe e comportamento do PHP.
+ * 
+ * Características:
+ *   - Usa a mesma sintaxe de delimitadores do PHP (/ ou #)
+ *   - Suporta as mesmas flags de modificadores (i, m, s, u, x, U)
+ *   - Mantém compatibilidade com padrões regex do PHP
+ *   - Otimizado para operações em strings grandes
+ *   - Usa PCRE2 como motor regex (mesmo do PHP)
+ * 
+ * @namespace   forcaRegex
+ * @see         https://www.php.net/manual/pt_BR/book.pcre.php
+ */
 namespace forcaRegex {
 
+    /**
+     * Cria e compila um padrão de expressão regular no estilo PHP.
+     * Aceita delimitadores '/' ou '#' e suporta as flags: i, m, s, u, x, U.
+     * 
+     * Exemplo de padrão: "/regex/im" ou "#regex#u"
+     * 
+     * Flags suportadas:
+     *   i - PCRE2_CASELESS  - Case insensitive
+     *   m - PCRE2_MULTILINE - Multiline mode
+     *   s - PCRE2_DOTALL    - Dot matches all
+     *   u - PCRE2_UTF       - UTF-8 mode
+     *   x - PCRE2_EXTENDED  - Extended mode
+     *   U - PCRE2_UNGREEDY  - Ungreedy mode
+     * 
+     * @param   const std::string& pattern    String contendo o padrão regex no formato /pattern/flags
+     * @return  RegexPattern                  Estrutura contendo o padrão compilado e suas configurações
+     * @throws  std::invalid_argument         Se o padrão regex estiver malformado
+     * @throws  std::runtime_error           Se houver erro na compilação do padrão
+     */
     forcaRegex::RegexPattern createPattern( const std::string& pattern ) {
 
         std::string cpypattern = pattern;

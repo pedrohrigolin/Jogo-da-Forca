@@ -177,6 +177,8 @@ namespace forcaStrings {
      * Remove espaços em branco do início e do fim de uma string.
      * Combina as funcionalidades de ltrim() e rtrim() em uma única chamada.
      * 
+     * Inspirado na função PHP trim().
+     * 
      * @param   const std::string& string    String que terá os espaços removidos
      * @return  std::string                  String sem espaços no início e fim
      */
@@ -205,6 +207,8 @@ namespace forcaStrings {
      * Remove espaços, tabs, quebras de linha e outros caracteres de espaçamento
      * do início da string.
      * 
+     * Inspirado na função PHP ltrim().
+     * 
      * @param   const std::string& string    String que terá os espaços removidos do início
      * @return  std::string                  String sem espaços no início
      */
@@ -226,6 +230,8 @@ namespace forcaStrings {
      * Remove espaços em branco do fim de uma string (right trim).
      * Remove espaços, tabs, quebras de linha e outros caracteres de espaçamento
      * do final da string.
+     * 
+     * Inspirado na função PHP rtrim().
      * 
      * @param   const std::string& string    String que terá os espaços removidos do fim
      * @return  std::string                  String sem espaços no fim
