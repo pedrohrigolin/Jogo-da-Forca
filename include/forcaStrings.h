@@ -6,13 +6,13 @@
 
 namespace forcaStrings {
 
-    std::string removeSpaces( std::string text );
+    std::string removeSpaces( const std::string& string );
 
-    std::string removeAcentos( std::string text );
+    std::string removeAcentos( const std::string& string );
 
-    std::string to_uppercase( std::string text );
+    std::string to_uppercase( const std::string& string );
 
-    std::string to_lowercase( std::string text );
+    std::string to_lowercase( const std::string& string );
 
     std::string trim( const std::string& string );
 
@@ -20,9 +20,9 @@ namespace forcaStrings {
 
     std::string rtrim( const std::string& string );
 
-    std::string normalizeWord( std::string text );
+    std::string normalizeWord( const std::string& string );
 
-    bool checkAlphaCharacters( std::string word );
+    bool checkAlphaCharacters( const std::string& word );
 
     void explode( const std::string& string, std::string separator, std::vector<std::string>* reference );
 

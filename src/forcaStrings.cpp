@@ -21,7 +21,9 @@ namespace forcaStrings {
      * @param   std::string text    String que terá seus espaços removidos
      * @return  std::string         String normalizada sem espaços
      */
-    std::string removeSpaces( std::string text ) {
+    std::string removeSpaces( const std::string& string ) {
+
+        std::string text = string;
 
         std::string::size_type spacePos = text.find_first_of(" \t\n\r\v\f");
 
@@ -51,7 +53,9 @@ namespace forcaStrings {
      * @param   std::string text    String que terá seus acentos removidos
      * @return  std::string         String normalizada sem acentos
      */
-    std::string removeAcentos( std::string text ) {
+    std::string removeAcentos( const std::string& string ) {
+
+        std::string text = string;
 
         int i;
         std::string::size_type pos;
@@ -123,7 +127,9 @@ namespace forcaStrings {
      * @param   std::string text    String que será convertida para maiúsculo
      * @return  std::string         String com todos os caracteres em maiúsculo
      */
-    std::string to_uppercase( std::string text ) {
+    std::string to_uppercase( const std::string& string ) {
+
+        std::string text = string;
 
         std::string::size_type i, length;
 
@@ -148,7 +154,9 @@ namespace forcaStrings {
      * @param   std::string text    String que será convertida para minúsculo
      * @return  std::string         String com todos os caracteres em minúsculo
      */
-    std::string to_lowercase( std::string text ) {
+    std::string to_lowercase( const std::string& string ) {
+
+        std::string text = string;
 
         std::string::size_type i, length;
 
@@ -244,7 +252,9 @@ namespace forcaStrings {
      * @param   std::string text    String que será normalizada
      * @return  std::string         String normalizada sem espaços, acentos e em maiúsculo
      */
-    std::string normalizeWord( std::string text ) {
+    std::string normalizeWord( const std::string& string ) {
+
+        std::string text = string;
 
         text = forcaStrings::removeSpaces(text);
 
@@ -276,7 +286,7 @@ namespace forcaStrings {
      * @param   std::string word    String a ser verificada.
      * @return  bool                true se todos os caracteres são letras, false caso contrário.
      */
-    bool checkAlphaCharacters( std::string word ) {
+    bool checkAlphaCharacters( const std::string& word ) {
 
         std::string::size_type length = word.length();
 
