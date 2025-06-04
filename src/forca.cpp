@@ -67,7 +67,7 @@ int main(int argc, char* argv[]){
 
     forcaInitialize::init();
 
-    std::cout<<forcaRegex::normalizePattern("  /[a-zA-Z].+?[0-9]/imu ")<<std::endl;
+    // std::cout<<forcaRegex::normalizePattern("  /[a-zA-Z].+?[0-9]/imu ")<<std::endl;
 
     // std::cout<<"B"<<forcaStrings::rtrim("  AAAA   ")<<"B"<<std::endl;
 

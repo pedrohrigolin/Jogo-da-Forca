@@ -193,6 +193,8 @@ namespace forcaRegex {
 
         RegexPattern finalPattern = createPattern(pattern);
 
+        return true;
+
     }
 
 }

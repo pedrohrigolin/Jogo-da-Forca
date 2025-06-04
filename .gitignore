@@ -11,8 +11,9 @@
 # Diretórios comuns de build
 /output/
 /.vscode/
-/build/
+/build/*
 /bin/*
+/libs/pcre2/win/build/*
 
 # Diretórios gerais
 /markdown_andamento/
