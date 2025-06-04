@@ -65,7 +65,7 @@
 
 int main(int argc, char* argv[]){
 
-    forcaInitialize::init();
+    // forcaInitialize::init();
 
     // std::cout<<forcaRegex::normalizePattern("  /[a-zA-Z].+?[0-9]/imu ")<<std::endl;
 
@@ -103,16 +103,60 @@ int main(int argc, char* argv[]){
     // std::cout<<content<<std::endl;
 
     /* 
+    |====================================
+    |   TESTE PARA O PDCURSES/NCURSES
+    |====================================
+    */
+   
+    // Inicializa o modo curses
+    initscr();              // Inicia a tela
+    cbreak();               // Desativa o buffer de linha (recebe input imediatamente)
+    noecho();               // Não mostra os caracteres digitados
+    keypad(stdscr, TRUE);   // Habilita teclas especiais (setas, etc.)
+
+    mvprintw(0, 0, "Iniciando o jogo da forca...\n\n");
+
+    if( forcaInitialize::init() ){
+
+        mvprintw(2, 0, "Inicializacao concluida!\n\n");
+
+        forcaUtils::clear_screen();
+
+    }
+    else{
+        mvprintw(2, 0, "Erro ao iniciar o jogo da forca!\n\n");
+    }
+
+    // Mensagem inicial
+    mvprintw(4, 0, "Pressione qualquer tecla para testar o pdcurses...");
+    
+    refresh();              // Atualiza a tela
+
+    getch();                // Espera por uma tecla
+
+    mvprintw(6, 0, "Funcionando! Pressione outra tecla para testar o pcre2 (regex)...");
+
+    refresh();
+
+    getch();
+
+    /* 
     |=================================
     |   TESTE PARA REGEX COM PCRE2
     |=================================
     */
 
-        // Regex pattern
-    PCRE2_SPTR pattern = (PCRE2_SPTR)"hello";
+    const char* patternString = "hello";
+    const char* subjectString = "hello world";
+
+    std::string patternStringChar = patternString;
+    std::string subjectStringChar = subjectString;
+
+    // Regex pattern
+    PCRE2_SPTR pattern = reinterpret_cast<PCRE2_SPTR>( patternStringChar.data() );
 
     // String para buscar
-    PCRE2_SPTR subject = (PCRE2_SPTR)"hello world";
+    PCRE2_SPTR subject = reinterpret_cast<PCRE2_SPTR>( subjectStringChar.data() );
 
     int errornumber;
     PCRE2_SIZE erroroffset;
@@ -148,38 +192,36 @@ int main(int argc, char* argv[]){
         NULL                  // contexto
     );
 
-    if (rc < 0) {
-        std::cout << "No match found." << std::endl;
+    mvprintw(8, 0, "Padrao a se buscar: ");
+    mvprintw(8, 21, patternString);
+
+    mvprintw(10, 0, "String onde sera realizada a busca: ");
+    mvprintw(10, 37, subjectString);
+
+    if (rc >= 0) {
+
+        mvprintw(12, 0, "Resultado: o padrao regex ");
+        mvprintw(12, 27, patternString);
+        mvprintw(12, 27 + strlen(patternString), "  foi encontrado em  ");
+        mvprintw(12, 27 + strlen(patternString) + 22, subjectString);
+
     } else {
-        std::cout << "Match found!" << std::endl;
+
+        mvprintw(12, 0, "Resultado: o padrao regex ");
+        mvprintw(12, 27, patternString);
+        mvprintw(12, 27 + strlen(patternString), "  NAO foi encontrado em  ");
+        mvprintw(12, 27 + strlen(patternString) + 26, subjectString);
+
     }
 
     // Limpar alocação
     pcre2_match_data_free(match_data);
     pcre2_code_free(re);
 
-    /* 
-    |====================================
-    |   TESTE PARA O PDCURSES/NCURSES
-    |====================================
-    */
+    mvprintw(14, 0, "Aperte uma tecla para sair...");
 
-        // Inicializa o modo curses
-    initscr();              // Inicia a tela
-    cbreak();               // Desativa o buffer de linha (recebe input imediatamente)
-    noecho();               // Não mostra os caracteres digitados
-    keypad(stdscr, TRUE);   // Habilita teclas especiais (setas, etc.)
-
-    // Mensagem inicial
-    mvprintw(5, 10, "Pressione qualquer tecla para continuar...");
-    refresh();              // Atualiza a tela
-
-    getch();                // Espera por uma tecla
-
-    // Limpa e imprime outra mensagem
-    clear();
-    mvprintw(5, 10, "Funcionando! Pressione outra tecla para sair.");
     refresh();
+
     getch();
 
     // Finaliza o modo curses
