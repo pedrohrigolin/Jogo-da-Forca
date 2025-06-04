@@ -4,6 +4,8 @@
 *.o
 *.obj
 *.class
+*.so
+*.dll
 
 # Arquivos gerais
 /ideias_dir.txt
@@ -18,3 +20,17 @@
 # Diretórios gerais
 /markdown_andamento/
 /Imagens/
+
+# Ignorar builds e arquivos intermediários dentro das libs
+/libs/pcre2/**/build/
+/libs/pcre2/**/*.o
+/libs/pcre2/**/*.obj
+/libs/pcre2/**/*.a
+/libs/pcre2/**/*.so
+/libs/pcre2/**/*.dll
+/libs/pdcurses/**/build/
+/libs/pdcurses/**/*.o
+/libs/pdcurses/**/*.obj
+/libs/pdcurses/**/*.a
+/libs/pdcurses/**/*.so
+/libs/pdcurses/**/*.dll

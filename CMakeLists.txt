@@ -35,9 +35,26 @@ if(WIN32)
     # Adiciona a pasta do código-fonte do PCRE2 como subdiretório
     add_subdirectory(${CMAKE_SOURCE_DIR}/libs/pcre2/win ${CMAKE_SOURCE_DIR}/libs/pcre2/win/build)
 
-    # Inclui headers específicos do Windows
-    target_include_directories(JogoDaForca PRIVATE
-        ${CMAKE_SOURCE_DIR}/libs/pdcurses/include
+    # # Inclui headers específicos do Windows
+    # target_include_directories(JogoDaForca PRIVATE
+    #     ${CMAKE_SOURCE_DIR}/libs/pdcurses/include
+    # )
+
+    set(PDCURSES_LIB_PATH ${CMAKE_SOURCE_DIR}/libs/pdcurses/wincon/pdcurses.a)
+
+    # Alvo para compilar o PDCurses via Makefile.mgw
+    add_custom_command(
+        OUTPUT ${CMAKE_SOURCE_DIR}/libs/pdcurses/wincon/pdcurses.a
+        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/libs/pdcurses/wincon
+        COMMAND mingw32-make -f Makefile
+        COMMENT "Compilando PDCurses com Makefile"
+    )
+
+    add_custom_target(build_pdcurses DEPENDS ${CMAKE_SOURCE_DIR}/libs/pdcurses/wincon/pdcurses.a)
+    add_dependencies(JogoDaForca build_pdcurses)
+
+    target_link_libraries(JogoDaForca PRIVATE
+        ${CMAKE_SOURCE_DIR}/libs/pdcurses/wincon/pdcurses.a
     )
 
     # Linka bibliotecas PCRE2 (agora compiladas no momento do build)
@@ -46,7 +63,7 @@ if(WIN32)
         pcre2-16
         pcre2-32
         pcre2-posix
-        ${CMAKE_SOURCE_DIR}/libs/pdcurses/pdcurses.a
+        ${PDCURSES_LIB_PATH}
         Ws2_32
         Advapi32
         Userenv
