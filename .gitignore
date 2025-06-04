@@ -15,66 +15,70 @@
 /.vscode/
 /build/*
 /bin/*
-/libs/pcre2/win/build/*
 
 # Diretórios gerais
 /markdown_andamento/
 /Imagens/
 
 # Ignorar builds e arquivos intermediários dentro das libs
-/libs/pcre2/**/build/
-/libs/pcre2/**/*.o
-/libs/pcre2/**/*.obj
-/libs/pcre2/**/*.a
-/libs/pcre2/**/*.so
-/libs/pcre2/**/*.dll
-/libs/pdcurses/**/build/
-/libs/pdcurses/**/*.o
-/libs/pdcurses/**/*.obj
-/libs/pdcurses/**/*.a
-/libs/pdcurses/**/*.so
-/libs/pdcurses/**/*.dll
-/libs/ncurses/**/build/
-/libs/ncurses/**/*.o
-/libs/ncurses/**/*.obj
-/libs/ncurses/**/*.a
-/libs/ncurses/**/*.so
-/libs/ncurses/**/*.dll
+# /libs/pcre2/**/build/
+# /libs/pcre2/build
+# /libs/pcre2/unix/build
+# /libs/pcre2/win/build
+# /libs/pcre2/**/*.o
+# /libs/pcre2/**/*.obj
+# /libs/pcre2/**/*.a
+# /libs/pcre2/**/*.so
+# /libs/pcre2/**/*.dll
+# /libs/pdcurses/**/build/
+# /libs/pdcurses/build
+# /libs/pdcurses/**/*.o
+# /libs/pdcurses/**/*.obj
+# /libs/pdcurses/**/*.a
+# /libs/pdcurses/**/*.so
+# /libs/pdcurses/**/*.dll
+# /libs/ncurses/**/build/
+# /libs/ncurses/build
+# /libs/ncurses/**/*.o
+# /libs/ncurses/**/*.obj
+# /libs/ncurses/**/*.a
+# /libs/ncurses/**/*.so
+# /libs/ncurses/**/*.dll
 
 # Arquivos do CMake
-CMakeCache.txt
-CMakeFiles/
-cmake_install.cmake
+# CMakeCache.txt
+# CMakeFiles/
+# cmake_install.cmake
 
 # Ignorar apenas arquivos de build gerados
-/build/
-/**/build/
-*/build/Makefile
-*/build/CMakeFiles/
-*/build/CMakeCache.txt
-*/build/cmake_install.cmake
-*/build/*.a
-*/build/*.o
-*/build/*.so
-*/build/*.dll
-*/build/bin/
-*/build/lib/
-*/build/include/
-*/build/share/
+# /build/
+# /**/build/
+# */build/Makefile
+# */build/CMakeFiles/
+# */build/CMakeCache.txt
+# */build/cmake_install.cmake
+# */build/*.a
+# */build/*.o
+# */build/*.so
+# */build/*.dll
+# */build/bin/
+# */build/lib/
+# */build/include/
+# */build/share/
 
 # Ignorar Makefile da raiz, se gerado ali
-/Makefile
+# /Makefile
 
 # build geral no root ou em libs
-/build/
-/*/build/
-/*/build/**
+# /build/
+# /*/build/
+# /*/build/**
 
 # arquivos de config e metadados de IDEs
-compile_commands.json
+# compile_commands.json
 
 # arquivos binários gerados por bibliotecas (ex. ncurses)
-**/build/bin/
-**/build/lib/
-**/build/include/
-**/build/share/
+# **/build/bin/
+# **/build/lib/
+# **/build/include/
+# **/build/share/
