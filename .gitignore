@@ -1,4 +1,4 @@
-# Arquivos compilados e binários
+# Arquivos compilados
 *.exe
 *.out
 *.o
@@ -6,42 +6,75 @@
 *.class
 *.so
 *.dll
-*.a
 
-# Arquivos temporários de editores e sistema
-*~
-*.swp
-.DS_Store
-
-# Arquivos gerais (exemplo dado)
+# Arquivos gerais
 /ideias_dir.txt
 
-# Diretórios de build e binários (geral)
-/build/
+# Diretórios comuns de build
 /output/
-/bin/
 /.vscode/
+/build/*
+/bin/*
+/libs/pcre2/win/build/*
 
-# Build dentro das libs - geral para todas as libs na pasta libs
-/libs/*/build/
-/libs/*/build/**
+# Diretórios gerais
+/markdown_andamento/
+/Imagens/
 
-# Arquivos binários dentro das libs (obj, so, dll, a)
-/libs/*/**/*.o
-/libs/*/**/*.obj
-/libs/*/**/*.a
-/libs/*/**/*.so
-/libs/*/**/*.dll
+# Ignorar builds e arquivos intermediários dentro das libs
+/libs/pcre2/**/build/
+/libs/pcre2/**/*.o
+/libs/pcre2/**/*.obj
+/libs/pcre2/**/*.a
+/libs/pcre2/**/*.so
+/libs/pcre2/**/*.dll
+/libs/pdcurses/**/build/
+/libs/pdcurses/**/*.o
+/libs/pdcurses/**/*.obj
+/libs/pdcurses/**/*.a
+/libs/pdcurses/**/*.so
+/libs/pdcurses/**/*.dll
+/libs/ncurses/**/build/
+/libs/ncurses/**/*.o
+/libs/ncurses/**/*.obj
+/libs/ncurses/**/*.a
+/libs/ncurses/**/*.so
+/libs/ncurses/**/*.dll
 
 # Arquivos do CMake
 CMakeCache.txt
 CMakeFiles/
 cmake_install.cmake
-compile_commands.json
 
-# Makefile da raiz, se gerado
+# Ignorar apenas arquivos de build gerados
+/build/
+/**/build/
+*/build/Makefile
+*/build/CMakeFiles/
+*/build/CMakeCache.txt
+*/build/cmake_install.cmake
+*/build/*.a
+*/build/*.o
+*/build/*.so
+*/build/*.dll
+*/build/bin/
+*/build/lib/
+*/build/include/
+*/build/share/
+
+# Ignorar Makefile da raiz, se gerado ali
 /Makefile
 
-# Diretórios específicos ignorados (exemplos)
-/markdown_andamento/
-/Imagens/
+# build geral no root ou em libs
+/build/
+/*/build/
+/*/build/**
+
+# arquivos de config e metadados de IDEs
+compile_commands.json
+
+# arquivos binários gerados por bibliotecas (ex. ncurses)
+**/build/bin/
+**/build/lib/
+**/build/include/
+**/build/share/
