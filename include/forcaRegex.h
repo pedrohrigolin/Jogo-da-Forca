@@ -35,6 +35,8 @@ namespace forcaRegex {
 
     forcaRegex::RegexPattern createPattern( const std::string& pattern );
 
+    bool preg_match( std::string pattern, std::string subject );
+
 }
 
 #endif

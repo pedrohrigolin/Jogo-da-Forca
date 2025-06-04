@@ -189,4 +189,10 @@ namespace forcaRegex {
 
     }
 
+    bool preg_match( std::string pattern, std::string subject ) {
+
+        RegexPattern finalPattern = createPattern(pattern);
+
+    }
+
 }
