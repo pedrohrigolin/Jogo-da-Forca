@@ -146,8 +146,8 @@ int main(int argc, char* argv[]){
     |=================================
     */
 
-    const char* patternString = "hello";
-    const char* subjectString = "hello world";
+    const char patternString[] = "hello";
+    const char subjectString[] = "hello world";
 
     std::string patternStringChar = patternString;
     std::string subjectStringChar = subjectString;

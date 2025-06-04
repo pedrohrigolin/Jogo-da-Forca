@@ -1,4 +1,13 @@
 cmake_minimum_required(VERSION 3.10)
+
+if(NOT WIN32)
+
+# Força o uso do gcc e g++
+set(CMAKE_C_COMPILER /usr/bin/gcc CACHE FILEPATH "C compiler override" FORCE)
+set(CMAKE_CXX_COMPILER /usr/bin/g++ CACHE FILEPATH "C++ compiler override" FORCE)
+
+endif()
+
 project(JogoDaForca)
 
 set(CMAKE_CXX_STANDARD 17)
@@ -35,11 +44,6 @@ if(WIN32)
     # Adiciona a pasta do código-fonte do PCRE2 como subdiretório
     add_subdirectory(${CMAKE_SOURCE_DIR}/libs/pcre2/win ${CMAKE_SOURCE_DIR}/libs/pcre2/win/build)
 
-    # # Inclui headers específicos do Windows
-    # target_include_directories(JogoDaForca PRIVATE
-    #     ${CMAKE_SOURCE_DIR}/libs/pdcurses/include
-    # )
-
     set(PDCURSES_LIB_PATH ${CMAKE_SOURCE_DIR}/libs/pdcurses/wincon/pdcurses.a)
 
     # Alvo para compilar o PDCurses via Makefile.mgw
@@ -71,22 +75,58 @@ if(WIN32)
 
 else() # Linux
 
-    # Inclui headers e bibliotecas estáticas compiladas previamente
-    target_include_directories(JogoDaForca PRIVATE
-        ${CMAKE_SOURCE_DIR}/libs/ncurses/include
-        ${CMAKE_SOURCE_DIR}/libs/pcre2/include
+    # Define as opções da PCRE2 antes de add_subdirectory
+    set(PCRE2_BUILD_PCRE2_8 ON CACHE BOOL "" FORCE)
+    set(PCRE2_BUILD_PCRE2_16 ON CACHE BOOL "" FORCE)
+    set(PCRE2_BUILD_PCRE2_32 ON CACHE BOOL "" FORCE)
+    set(PCRE2_BUILD_PCRE2POSIX ON CACHE BOOL "" FORCE)
+    set(PCRE2_SUPPORT_JIT ON CACHE BOOL "" FORCE)
+    set(PCRE2_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+    set(PCRE2_BUILD_PCRE2GREP OFF CACHE BOOL "" FORCE)
+    set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
+
+    # Adiciona o código-fonte do PCRE2 como subdiretório
+    add_subdirectory(${CMAKE_SOURCE_DIR}/libs/pcre2/unix ${CMAKE_SOURCE_DIR}/libs/pcre2/unix/build)
+
+    # Define as opções do ncurses
+    set(NCURSES_SRC_DIR ${CMAKE_SOURCE_DIR}/libs/ncurses)
+    set(NCURSES_BUILD_DIR ${NCURSES_SRC_DIR}/build)
+    set(NCURSES_LIB_DIR ${NCURSES_BUILD_DIR}/lib)
+    set(NCURSES_INCLUDE_DIR ${NCURSES_BUILD_DIR}/include/ncursesw)
+
+    # Comando de compilação do ncurses
+    add_custom_command(
+        OUTPUT ${NCURSES_LIB_DIR}/libncursesw.a
+        WORKING_DIRECTORY ${NCURSES_SRC_DIR}
+        COMMAND ./configure --prefix=${NCURSES_BUILD_DIR} --with-normal --without-shared --without-debug --enable-widec --enable-static
+        COMMAND make -j
+        COMMAND make install
+        COMMENT "Compilando ncurses estático para Linux"
     )
 
+    add_custom_target(build_ncurses DEPENDS ${NCURSES_LIB_DIR}/libncursesw.a)
+    add_dependencies(JogoDaForca build_ncurses)
+
+    # Diretórios de includes comuns
+    target_include_directories(JogoDaForca PRIVATE
+        ${NCURSES_INCLUDE_DIR}
+        ${NCURSES_BUILD_DIR}/include
+    )
+
+    # Linkagem de libs estáticas compiladas no build
     target_link_libraries(JogoDaForca PRIVATE
-        ${CMAKE_SOURCE_DIR}/libs/pcre2/unix/libpcre2-8.a
-        ${CMAKE_SOURCE_DIR}/libs/pcre2/unix/libpcre2-16.a
-        ${CMAKE_SOURCE_DIR}/libs/pcre2/unix/libpcre2-32.a
-        ${CMAKE_SOURCE_DIR}/libs/pcre2/unix/libpcre2-posix.a
-        ${CMAKE_SOURCE_DIR}/libs/ncurses/libformw.a
-        ${CMAKE_SOURCE_DIR}/libs/ncurses/libmenuw.a
-        ${CMAKE_SOURCE_DIR}/libs/ncurses/libpanelw.a
-        ${CMAKE_SOURCE_DIR}/libs/ncurses/libncursesw.a
-        ${CMAKE_SOURCE_DIR}/libs/ncurses/libncurses++w.a
+
+        pcre2-8
+        pcre2-16
+        pcre2-32
+        pcre2-posix
+
+        ${NCURSES_LIB_DIR}/libncurses++w.a
+        ${NCURSES_LIB_DIR}/libncursesw.a
+        ${NCURSES_LIB_DIR}/libformw.a
+        ${NCURSES_LIB_DIR}/libmenuw.a
+        ${NCURSES_LIB_DIR}/libpanelw.a
+
         pthread
         dl
     )

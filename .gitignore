@@ -1,4 +1,4 @@
-# Arquivos compilados
+# Arquivos compilados e binários
 *.exe
 *.out
 *.o
@@ -6,31 +6,42 @@
 *.class
 *.so
 *.dll
+*.a
 
-# Arquivos gerais
+# Arquivos temporários de editores e sistema
+*~
+*.swp
+.DS_Store
+
+# Arquivos gerais (exemplo dado)
 /ideias_dir.txt
 
-# Diretórios comuns de build
+# Diretórios de build e binários (geral)
+/build/
 /output/
+/bin/
 /.vscode/
-/build/*
-/bin/*
-/libs/pcre2/win/build/*
 
-# Diretórios gerais
+# Build dentro das libs - geral para todas as libs na pasta libs
+/libs/*/build/
+/libs/*/build/**
+
+# Arquivos binários dentro das libs (obj, so, dll, a)
+/libs/*/**/*.o
+/libs/*/**/*.obj
+/libs/*/**/*.a
+/libs/*/**/*.so
+/libs/*/**/*.dll
+
+# Arquivos do CMake
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+compile_commands.json
+
+# Makefile da raiz, se gerado
+/Makefile
+
+# Diretórios específicos ignorados (exemplos)
 /markdown_andamento/
 /Imagens/
-
-# Ignorar builds e arquivos intermediários dentro das libs
-/libs/pcre2/**/build/
-/libs/pcre2/**/*.o
-/libs/pcre2/**/*.obj
-/libs/pcre2/**/*.a
-/libs/pcre2/**/*.so
-/libs/pcre2/**/*.dll
-/libs/pdcurses/**/build/
-/libs/pdcurses/**/*.o
-/libs/pdcurses/**/*.obj
-/libs/pdcurses/**/*.a
-/libs/pdcurses/**/*.so
-/libs/pdcurses/**/*.dll
