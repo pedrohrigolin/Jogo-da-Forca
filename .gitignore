@@ -59,7 +59,7 @@ compile_commands.json
 **/build/share/
 
 # Mantendo só o código fonte do pcre2 win precisamente.
-/libs/pcre2/win/*
+/libs/pcre2/win/**
 !/libs/pcre2/win/aclocal.m4
 !/libs/pcre2/win/ar-lib
 !/libs/pcre2/win/AUTHORS.md
@@ -625,7 +625,7 @@ compile_commands.json
 !/libs/pcre2/win/vms/stdint.h
 
 # Mantendo só o código fonte do pdcurses precisamente.
-/libs/pdcurses/*
+/libs/pdcurses/**
 !/libs/pdcurses/
 !/libs/pdcurses/CNAME
 !/libs/pdcurses/curses.h
@@ -800,7 +800,7 @@ compile_commands.json
 !/libs/pdcurses/x11/xcurses-config.in
 
 # Mantendo só o código do pdcurses unix precisamente.
-/libs/pcre2/unix/*
+/libs/pcre2/unix/**
 !/libs/pcre2/unix/.gitattributes
 !/libs/pcre2/unix/.github
 !/libs/pcre2/unix/.github/codecov.yml
@@ -1379,7 +1379,7 @@ compile_commands.json
 !/libs/pcre2/unix/vms/stdint.h
 
 # Mantendo só o código fonte do ncurses precisamente.
-/libs/ncurses/*
+/libs/ncurses/**
 !/libs/ncurses/menu
 !/libs/ncurses/menu/m_scale.c
 !/libs/ncurses/menu/Makefile.in
