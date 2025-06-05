@@ -1,6 +1,5 @@
 # Ignorar arquivos C e headers
 *.c linguist-detectable=false
-*.h linguist-detectable=false
 
 # Ignorar arquivos HTML
 *.html linguist-detectable=false
