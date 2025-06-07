@@ -189,11 +189,325 @@ namespace forcaRegex {
 
     }
 
-    bool preg_match( std::string pattern, std::string subject ) {
+    /**
+     * Executa uma busca por um padrão em uma string (primeira ocorrência).
+     * Similar à função preg_match() do PHP.
+     * 
+     * @param   const std::string& pattern    Padrão regex no formato /pattern/flags
+     * @param   const std::string& subject    String onde será feita a busca
+     * @param   PCRE2_SIZE offset            Posição onde iniciar a busca (default: 0)
+     * @return  RegexResult                   Estrutura contendo os resultados da busca
+     *                                       - match: true se encontrou match, false caso contrário
+     *                                       - Grupos numéricos e nomeados acessíveis via get()
+     * @throws  std::invalid_argument         Se o padrão regex estiver malformado
+     * @throws  std::runtime_error           Se houver erro na compilação do padrão
+     */
+    forcaRegex::RegexResult preg_match( const std::string& pattern, const std::string& subject, PCRE2_SIZE offset ) {
+
+        forcaRegex::RegexResult finalResult;
+
+        finalResult.match = false;
+
+        if( offset >= subject.length() ) return finalResult;
 
         RegexPattern finalPattern = createPattern(pattern);
 
-        return true;
+        RegexMatchData regex_data;
+
+        regex_data.match_data = pcre2_match_data_create_from_pattern( finalPattern.compiled.code, regex_data.gcontext );
+
+        PCRE2_SPTR subject_string = reinterpret_cast<PCRE2_SPTR>( subject.data() );
+
+        PCRE2_SIZE subject_length = static_cast<PCRE2_SIZE>( subject.length() );
+
+        pcre2_match_context *mcontext = nullptr;
+
+        int regex_result = pcre2_match( finalPattern.compiled.code, subject_string, subject_length, offset,
+        0, regex_data.match_data, mcontext );
+
+        // Se não houve match, limpa e retorna
+        if (regex_result <= 0) {
+
+            finalResult.match = false;
+
+            return finalResult;
+
+        }
+
+        // Armazena os grupos numéricos
+        PCRE2_SIZE* ovector = pcre2_get_ovector_pointer(regex_data.match_data);
+
+        for (int i = 0; i < regex_result; ++i) {
+
+            PCRE2_SIZE start = ovector[2 * i];
+            PCRE2_SIZE end = ovector[2 * i + 1];
+
+            std::string match = subject.substr(start, end - start);
+
+            finalResult.push(start, end, match, i);
+
+        }
+
+        // Armazena os grupos nomeados
+        PCRE2_SPTR name_table;
+        uint32_t namecount;
+        uint32_t name_entry_size;
+
+        pcre2_pattern_info(finalPattern.compiled.code, PCRE2_INFO_NAMECOUNT, &namecount);
+
+        if (namecount > 0) {
+
+            pcre2_pattern_info(finalPattern.compiled.code, PCRE2_INFO_NAMETABLE, &name_table);
+            pcre2_pattern_info(finalPattern.compiled.code, PCRE2_INFO_NAMEENTRYSIZE, &name_entry_size);
+
+            PCRE2_SPTR entry = name_table;
+
+            for (uint32_t i = 0; i < namecount; ++i) {
+
+                uint16_t group_number = (entry[0] << 8) | entry[1];
+                std::string group_name(reinterpret_cast<const char*>(entry + 2));
+
+                PCRE2_UCHAR* substr;
+                PCRE2_SIZE substr_length;
+
+                int res = pcre2_substring_get_bynumber(regex_data.match_data, group_number, &substr, &substr_length);
+
+                if (res == 0) {
+
+                    std::string match(reinterpret_cast<char*>(substr), substr_length);
+
+                    PCRE2_SIZE start = ovector[2 * group_number];
+                    PCRE2_SIZE end = ovector[2 * group_number + 1];
+
+                    finalResult.push(start, end, match, group_name);
+
+                    pcre2_substring_free(substr);
+
+                }
+
+                entry += name_entry_size;
+            }
+
+        }
+
+        if( mcontext != nullptr ) pcre2_match_context_free(mcontext);
+
+        finalResult.match = true;
+
+        return finalResult;
+
+    }
+
+    /**
+     * Executa uma busca por um padrão em uma string (todas ocorrências).
+     * Similar à função preg_match_all() do PHP.
+     * 
+     * @param   const std::string& pattern    Padrão regex no formato /pattern/flags
+     * @param   const std::string& subject    String onde será feita a busca
+     * @param   PCRE2_SIZE offset            Posição onde iniciar a busca (default: 0)
+     * @return  RegexResult                   Estrutura contendo os resultados da busca
+     *                                       - match: true se encontrou matches, false caso contrário
+     *                                       - Grupos numéricos e nomeados acessíveis via get()
+     * @throws  std::invalid_argument         Se o padrão regex estiver malformado
+     * @throws  std::runtime_error           Se houver erro na compilação do padrão
+     */
+    forcaRegex::RegexResult preg_match_all( const std::string& pattern, const std::string& subject, PCRE2_SIZE offset ) {
+
+        forcaRegex::RegexResult finalResult;
+
+        finalResult.match = false;
+
+        if (offset >= subject.length()) return finalResult;
+
+        RegexPattern finalPattern = createPattern(pattern);
+
+        RegexMatchData regex_data;
+
+        regex_data.match_data = pcre2_match_data_create_from_pattern(finalPattern.compiled.code, regex_data.gcontext);
+
+        PCRE2_SPTR subject_string = reinterpret_cast<PCRE2_SPTR>(subject.data());
+        PCRE2_SIZE subject_length = static_cast<PCRE2_SIZE>(subject.length());
+
+        pcre2_match_context *mcontext = nullptr;
+
+        bool foundAny = false;
+
+        while (offset < subject_length) {
+
+            int regex_result = pcre2_match(
+                finalPattern.compiled.code,
+                subject_string,
+                subject_length,
+                offset,
+                0,
+                regex_data.match_data,
+                mcontext
+            );
+
+            if (regex_result <= 0) break;
+
+            foundAny = true;
+
+            // Grupos numéricos
+            PCRE2_SIZE* ovector = pcre2_get_ovector_pointer(regex_data.match_data);
+
+            for (int i = 0; i < regex_result; ++i) {
+
+                PCRE2_SIZE start = ovector[2 * i];
+                PCRE2_SIZE end = ovector[2 * i + 1];
+
+                std::string match = subject.substr(start, end - start);
+
+                finalResult.push(start, end, match, i);
+
+            }
+
+            // Grupos nomeados
+            PCRE2_SPTR name_table;
+            uint32_t namecount;
+            uint32_t name_entry_size;
+
+            pcre2_pattern_info(finalPattern.compiled.code, PCRE2_INFO_NAMECOUNT, &namecount);
+
+            if (namecount > 0) {
+
+                pcre2_pattern_info(finalPattern.compiled.code, PCRE2_INFO_NAMETABLE, &name_table);
+                pcre2_pattern_info(finalPattern.compiled.code, PCRE2_INFO_NAMEENTRYSIZE, &name_entry_size);
+
+                PCRE2_SPTR entry = name_table;
+
+                for (uint32_t i = 0; i < namecount; ++i) {
+
+                    uint16_t group_number = (entry[0] << 8) | entry[1];
+
+                    std::string group_name(reinterpret_cast<const char*>(entry + 2));
+
+                    PCRE2_UCHAR* substr;
+                    PCRE2_SIZE substr_length;
+
+                    int res = pcre2_substring_get_bynumber(regex_data.match_data, group_number, &substr, &substr_length);
+                    
+                    if (res == 0) {
+
+                        std::string match(reinterpret_cast<char*>(substr), substr_length);
+
+                        PCRE2_SIZE start = ovector[2 * group_number];
+                        PCRE2_SIZE end = ovector[2 * group_number + 1];
+
+                        finalResult.push(start, end, match, group_name);
+
+                        pcre2_substring_free(substr);
+
+                    }
+
+                    entry += name_entry_size;
+
+                }
+
+            }
+
+            // Atualiza offset
+            PCRE2_SIZE new_offset = ovector[1];
+            
+            if (new_offset <= offset) offset++; // evita loop infinito com zero-width matches
+            else offset = new_offset;
+
+        }
+
+        if( mcontext != nullptr ) pcre2_match_context_free(mcontext);
+
+        finalResult.match = foundAny;
+
+        return finalResult;
+
+    }
+
+    /**
+     * Realiza substituições em uma string baseadas em um padrão regex.
+     * Similar à função preg_replace() do PHP.
+     * 
+     * Suporta referências para grupos capturados no texto de substituição:
+     * - $0: Match completo
+     * - $1, $2, etc: Grupos numéricos
+     * - $name: Grupos nomeados
+     * 
+     * @param   const std::string& pattern      Padrão regex no formato /pattern/flags
+     * @param   const std::string& subject      String onde serão feitas as substituições
+     * @param   const std::string& replacement  String de substituição (pode conter $0, $1, $name etc)
+     * @param   PCRE2_SIZE offset              Posição onde iniciar as substituições (default: 0)
+     * @return  std::string                     Nova string com as substituições realizadas
+     * @throws  std::invalid_argument           Se o padrão regex estiver malformado
+     * @throws  std::runtime_error             Se houver erro na compilação do padrão
+     */
+    std::string preg_replace( const std::string& pattern, const std::string& subject, const std::string& replacement, PCRE2_SIZE offset ) {
+
+        RegexResult result = preg_match_all(pattern, subject, offset);
+
+        if (!result.match) return subject;
+
+        std::string output;
+        std::string::size_type last_pos = 0;
+
+        std::vector<forcaRegex::RegexStructData>* full_matches = result.get(0);
+
+        if (!full_matches) return subject;
+
+        for (const auto& match_data : *full_matches) {
+
+            // Adiciona parte do subject entre o último match e o início do atual
+            output += subject.substr(last_pos, match_data.start - last_pos);
+
+            // Constrói substituição
+            std::string replaced = replacement;
+
+            // Substituição de grupos posicionais: $0, $1, ...
+            for (int group_id : result.int_keys) {
+
+                auto group = result.get(group_id);
+
+                if (!group || group->empty()) continue;
+
+                std::string tag = "$" + std::to_string(group_id);
+
+                std::string::size_type pos = 0;
+
+                while ((pos = replaced.find(tag, pos)) != std::string::npos) {
+
+                    replaced.replace(pos, tag.size(), (*group)[&match_data - &(*full_matches)[0]].match);
+                    pos += (*group)[&match_data - &(*full_matches)[0]].match.size();
+
+                }
+
+            }
+
+            // Substituição de grupos nomeados: $name, $email, etc.
+            for (const std::string& name : result.string_keys) {
+
+                auto group = result.get(name);
+
+                if (!group || group->empty()) continue;
+
+                std::string tag = "$" + name;
+
+                std::string::size_type pos = 0;
+
+                while ((pos = replaced.find(tag, pos)) != std::string::npos) {
+
+                    replaced.replace(pos, tag.size(), (*group)[&match_data - &(*full_matches)[0]].match);
+                    pos += (*group)[&match_data - &(*full_matches)[0]].match.size();
+
+                }
+
+            }
+
+            output += replaced;
+            last_pos = match_data.end;
+
+        }
+
+        // Adiciona o restante do subject após o último match
+        output += subject.substr(last_pos);
+        return output;
 
     }
 

@@ -3,6 +3,7 @@
 #include <vector>
 #include <iostream>
 #include "forcaStrings.h"
+#include "forcaRegex.h"
 
 namespace forcaStrings {
 
@@ -272,10 +273,39 @@ namespace forcaStrings {
 
     }
 
-    // std::string normalizeBreakLines( std::string text ){
+    /**
+     * Normaliza quebras de linha em uma string, convertendo diferentes tipos de quebra
+     * para o formato Unix (\n).
+     * 
+     * Converte as seguintes sequências para \n:
+     * - \r\n (Windows)
+     * - \v (Vertical tab)
+     * - \f (Form feed)
+     * - \n (Unix)
+     *
+     * @param   const std::string& text    String que terá as quebras de linha normalizadas
+     * @return  std::string               String com quebras de linha normalizadas para \n
+     */
+    std::string normalizeBreakLines( const std::string& text ) {
 
+        return forcaRegex::preg_replace("/(?:\r\n|\v|\f|\n)/", text, "\n");
 
-    // }
+    }
+
+    /**
+     * Remove quebras de linha múltiplas consecutivas, substituindo-as por uma única quebra.
+     * 
+     * Por exemplo:
+     * "texto\n\n\n\ntexto" se torna "texto\ntexto"
+     *
+     * @param   const std::string& text    String que terá as quebras de linha extras removidas
+     * @return  std::string               String com apenas quebras de linha simples
+     */
+    std::string removeExtraLineBreaks( const std::string& text ) {
+
+        return forcaRegex::preg_replace("/(?:\r\n|\v|\f|\n)+/", text, "\n");
+
+    }
 
     /*
     |=============================

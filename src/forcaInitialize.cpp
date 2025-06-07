@@ -7,6 +7,7 @@
 #include "forcaFiles.h"
 #include "forcaInitialize.h"
 #include "forcaCore.h"
+#include "forcaRegex.h"
 
 namespace forcaInitialize {
 
@@ -27,11 +28,19 @@ namespace forcaInitialize {
 
         std::string content = forcaFiles::read::getContent(path);
 
+        content = forcaStrings::removeExtraLineBreaks(content);
+        
+        content = forcaRegex::preg_replace("/^\\s+|\\s+$|[ \t\r\f\v]+/m", content, "");
+
         std::vector<std::string> explode;
 
         forcaStrings::explode(content, "\n", &explode);
 
-        // TODO: VERIFICAR SE O ARRAY ESTÁ VAZIO!!!
+        if( explode.empty() ){
+
+            std::runtime_error("O arquivo de palavras nao pode estar vazio!");
+
+        }
 
         std::size_t i, size = explode.size();
 
@@ -47,7 +56,17 @@ namespace forcaInitialize {
 
         content = forcaFiles::read::getContent(path);
 
+        content = forcaStrings::removeExtraLineBreaks(content);
+        
+        content = forcaRegex::preg_replace("/^\\s+|\\s+$|[ \t\r\f\v]+/m", content, "");
+
         forcaStrings::explode(content, "\n", &explode);
+
+        if( explode.empty() ){
+
+            std::runtime_error("O arquivo de palavras nao pode estar vazio!");
+
+        }
 
         size = explode.size();
 
@@ -63,7 +82,17 @@ namespace forcaInitialize {
 
         content = forcaFiles::read::getContent(path);
 
+        content = forcaStrings::removeExtraLineBreaks(content);
+        
+        content = forcaRegex::preg_replace("/^\\s+|\\s+$|[ \t\r\f\v]+/m", content, "");
+
         forcaStrings::explode(content, "\n", &explode);
+
+        if( explode.empty() ){
+
+            std::runtime_error("O arquivo de palavras nao pode estar vazio!");
+
+        }
 
         size = explode.size();
 

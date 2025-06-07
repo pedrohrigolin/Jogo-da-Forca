@@ -122,10 +122,10 @@ else() # Linux
         pcre2-posix
 
         ${NCURSES_LIB_DIR}/libncurses++w.a
-        ${NCURSES_LIB_DIR}/libncursesw.a
         ${NCURSES_LIB_DIR}/libformw.a
         ${NCURSES_LIB_DIR}/libmenuw.a
         ${NCURSES_LIB_DIR}/libpanelw.a
+        ${NCURSES_LIB_DIR}/libncursesw.a
 
         pthread
         dl
