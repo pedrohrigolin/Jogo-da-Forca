@@ -197,7 +197,7 @@ cmake .. -G "Unix Makefiles"
 
 #### 3️⃣ Compilar
 ```bash
-cmake --build . --config Release
+cmake --build .
 ```
 
 #### 4️⃣ Executar
