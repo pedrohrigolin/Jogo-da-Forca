@@ -1,156 +1,271 @@
-# 🎮 Projeto Jogo da Forca — Planejamento e Estrutura
+# 🎮 Jogo da Forca em C++
 
-## ✅ Funcionalidades já implementadas
+Um projeto acadêmico completo de Jogo da Forca desenvolvido em C++ com foco em boas práticas de programação, modularidade e robustez. O jogo é projetado para rodar no terminal e utiliza bibliotecas modernas como ncurses/pdcurses e pcre2.
 
-### 🔤 Strings
-- ✅ Função de normalização de strings *(remove espaços, acentos e converte para maiúsculas)*
+## 📊 STATUS DO PROJETO
 
-### 🧰 Utilitárias gerais
-- ✅ Função que limpa a tela *(diferencia Linux e Windows)*
+**🚀 EM DESENVOLVIMENTO ATIVO**
 
-### 📂 Utilitárias de arquivo
-- ✅ Verificação se o arquivo existe  
-- ✅ Leitura de arquivo e retorno de conteúdo completo  
-- ✅ Escrita de conteúdo em arquivo *(com sobreposição)*  
-- ✅ Normalização do caminho do arquivo com base no SO  
+### ✅ Módulos Implementados
 
-### 📄 Criação de arquivos
-- ✅ Criação de arquivos com segurança *(verifica permissão, erro, etc.)*
+O projeto já possui uma base sólida com diversos módulos robustos e bem estruturados:
 
-### 📖 Leitura de arquivos
-- ✅ Extração completa e validação do conteúdo
+#### ⚙️ Módulo de Inicialização (`forcaInitialize`)
+- **Sequência de Inicialização**: Executa verificações e preparações essenciais
+- **Validação de Arquivos**: Verifica integridade, existência e permissões
+- **Carregamento de Palavras**: Lê listas de palavras por nível de dificuldade
+- **Sistema de Cache**: Carrega dados na memória para acesso rápido
 
-### 🔍 Verificação
-- ✅ Verificação se o conteúdo do arquivo está em conformidade *(somente letras, etc.)*
+#### 📂 Módulo de Arquivos (`forcaFiles`)
+- **Gerenciamento de Caminhos**: Sistema organizado com pastas `default` e `custom`
+- **Utilitários Completos**: `fileExist`, `canRead`, `canWrite`, `isEmpty`, `normalizePath`
+- **Sistema de Restauração**: Criação automática de arquivos customizáveis
+- **Operações Seguras**: Validação de permissões e tratamento de erros
 
----
+#### 🔤 Módulo de Strings (`forcaStrings`)
+- **Normalização**: `removeSpaces`, `removeAcentos`, `to_uppercase`, `to_lowercase`, `trim`
+- **Funções PHP-like**: `explode` (com sobrecarga) e `implode` para vetores
+- **Validação de Conteúdo**: Verificação de conformidade (apenas letras, etc.)
 
-## 🚧 Funcionalidades em desenvolvimento / planejadas
+#### 🔍 Módulo de Regex (`forcaRegex`)
+- **Wrapper PCRE2**: Abstração completa da biblioteca PCRE2
+- **Funções preg_***: `preg_match`, `preg_match_all`, `preg_replace`
+- **Suporte Avançado**: Delimitadores, flags (i, m, s), grupos nomeados
+- **Gerenciamento de Memória**: Destrutores automáticos para limpeza
 
-### 🔐 Verificação e integridade
-- 🔄 Finalizar função de verificação de integridade de arquivos *(palavras e usuários)*
+#### 🧰 Módulo de Utilitários (`forcaUtils`)
+- **Limpeza Multiplataforma**: `clear_screen` para Windows e Unix-like
+- **Validação Booleana**: `filter_validate_bool` inspirado no PHP
+- **Funções Auxiliares**: Utilitários gerais do sistema
 
-### ⚙️ Inicialização
-- 🔄 Função de inicialização do programa:
-  - Verifica existência e integridade dos arquivos
-  - Cria arquivos padrão se necessário
-  - Lê e extrai palavras para memória (cache)
-  - Lê e extrai usuários para memória (cache)
+### 🔄 Funcionalidades Core em Desenvolvimento
 
-### 🧠 Cache
-- 🔄 Sistema de cache de palavras em memória (RAM) por nível *(fácil, normal, difícil)*
+#### 🎯 Sistema de Usuários
+- Cadastro e login de usuários
+- Perfis personalizados
+- Estatísticas individuais por jogador
+- Palavras personalizadas por usuário
 
-### ✏️ Edição de palavras
-- 🔄 Sistema de edição de palavras *(adicionar, excluir, substituir tudo)*  
-- 🔄 Opção de definir conjunto manualmente ou automaticamente *(por tamanho da palavra)*
+#### 📝 Gerenciamento de Palavras
+- Cache inteligente por nível de dificuldade
+- Sistema CRUD (Criar, Ler, Atualizar, Deletar)
+- Validação automática de conteúdo
+- Backup e restauração de listas
 
-### 👤 Sistema de perfis
-- 🔄 Cadastro, login, remoção  
-- 🔄 Armazenamento de palavras personalizadas *(talvez)*
+#### 🎮 Lógica do Jogo
+- Sistema de tentativas e validação
+- Progressão visual da forca
+- Sistema de dicas contextuais
+- Estatísticas de partida em tempo real
 
-### 🧭 Menu
-- 🔄 Sistema de interação: jogar, editar palavras, escolher perfil, nível, estatísticas, etc.
+## 🚧 Roadmap de Desenvolvimento
 
-### 📦 Modularização
-- 🔄 Separação do código em múltiplos arquivos `.cpp` e `.h`
+### 🎯 Fase 1: Interface Terminal (Em Andamento)
+**Objetivo**: Construção da interface interativa completa
 
-### 📜 Regras
-- 🔄 Criar documento com as regras do jogo
+#### 🖥️ Interface com ncurses/pdcurses
+- [ ] **Sistema de Menus Navegáveis**
+  - Menu principal com navegação por setas
+  - Submenus para configurações e estatísticas
+  - Sistema de validação de entrada
+  
+- [ ] **Interface de Jogo Interativa**
+  - Exibição visual da forca (ASCII art)
+  - Palavra oculta com letras reveladas
+  - Painel de letras já utilizadas
+  - Indicador de tentativas restantes
+  
+- [ ] **Captura e Validação de Entrada**
+  - Detecção de teclas especiais
+  - Validação em tempo real
+  - Feedback visual imediato
+  
+- [ ] **Sistema de Notificações**
+  - Mensagens de erro e sucesso
+  - Alertas contextuais
+  - Confirmações de ações
 
-### 📊 Estatísticas *(opcional)*
-- 🔄 Sistema de estatísticas por usuário *(partidas, acertos, erros)*
+#### 🔧 Melhorias Técnicas
+- [ ] **Otimização de Performance**
+  - Refinamento do sistema de cache
+  - Otimização de operações de arquivo
+  - Melhoria no gerenciamento de memória
+  
+- [ ] **Robustez e Tratamento de Erros**
+  - Sistema abrangente de logging
+  - Recuperação automática de falhas
+  - Validação rigorosa de dados
 
-### 💡 Dicas *(opcional)*
-- 🔄 Implementar sistema de dicas dependendo da dificuldade
+### 🎯 Fase 2: Funcionalidades Essenciais (Opcional)
+**Objetivo**: Melhorias básicas na experiência de jogo
 
-### 🌀 Recursividade *(pensar em aplicações)*
-- 🔄 Tentar aplicar alguma parte do fluxo com recursividade se possível
+#### ✨ Funcionalidades Simples
+- [ ] **Sistema de Pontuação Básico**
+  - Pontos por palavra acertada
+  - Contagem de vitórias/derrotas
+  
+- [ ] **Estatísticas Simples**
+  - Total de jogos
+  - Percentual de acertos
+  - Palavra mais difícil acertada
+  
+- [ ] **Melhorias de Usabilidade**
+  - Dicas simples (primeira/última letra)
+  - Confirmação antes de sair
+  - Histórico da sessão atual
 
----
+### 🎯 Fase 3: Interface Gráfica (Opcional)
+**Objetivo**: Modernização com interface gráfica
 
-## 🧩 Fluxo geral do programa (descrição)
+#### 🖼️ Interface com CEF (Chromium Embedded Framework)
+**Dependente de cronograma e recursos disponíveis**
 
-### 🚀 Ao iniciar o programa:
-1. Chama a função de inicialização:
-   - Verifica se os arquivos existem
-   - Cria arquivos padrão, se necessário
-   - Lê e extrai dados dos arquivos
-   - Carrega dados na memória (palavras e usuários)
-2. Se a inicialização falhar, o programa é encerrado.
+- [ ] **Arquitetura Híbrida**
+  - Backend C++ mantido
+  - Frontend HTML5/CSS3/JavaScript
+  - Comunicação via bindings CEF
+  
+- [ ] **Interface Visual Moderna**
+  - Design responsivo e atrativo
+  - Animações suaves
+  - Temas personalizáveis
 
-### 📋 No menu inicial:
-- Criar / apagar perfil  
-- Escolher nível de dificuldade  
-- Adicionar / excluir / substituir palavras  
-- Definir palavra temporária  
-- Jogar  
-- Ver estatísticas *(talvez)*
+## 🧩 Arquitetura do Sistema
 
-### 🎲 Ao jogar:
-- Se não houver palavra temporária, seleciona aleatória do cache  
-- Usuário tenta acertar letras  
-- Valida se a letra existe na palavra  
-- Atualiza progresso, tentativas, etc.  
-- Mostra boneco da forca  
-- Talvez mostra dica  
-- Ao fim, retorna ao menu
+### 📁 Estrutura Modular
 
----
+| Módulo | Arquivos | Responsabilidade Principal |
+|--------|----------|---------------------------|
+| **Core** | `forcaCore.h/.cpp` | Estruturas de dados centrais e definições |
+| **Inicialização** | `forcaInitialize.h/.cpp` | Orquestração da inicialização do sistema |
+| **Arquivos** | `forcaFiles.h/.cpp` | Gerenciamento completo de operações de arquivo |
+| **Strings** | `forcaStrings.h/.cpp` | Manipulação e normalização de strings |
+| **Regex** | `forcaRegex.h/.cpp` | Wrapper de alto nível para PCRE2 |
+| **Utilitários** | `forcaUtils.h/.cpp` | Funções auxiliares multiplataforma |
+| **Interface** | `forcaInterface.h/.cpp` | *[Planejado]* Sistema de interface ncurses |
+| **Jogo** | `forcaGame.h/.cpp` | *[Planejado]* Lógica principal do jogo |
+| **Usuários** | `forcaUsers.h/.cpp` | *[Planejado]* Gerenciamento de perfis |
+| **Principal** | `main.cpp` | Ponto de entrada e loop principal |
 
-## 🗂️ Modularização planejada
+### 🔄 Fluxo de Execução
 
-| Arquivo / Módulo       | Responsabilidade                                 |
-|------------------------|--------------------------------------------------|
-| `main.cpp`             | Função principal, lógica do menu inicial         |
-| `init.cpp` / `init.h`  | Inicialização, verificação de arquivos           |
-| `strings.cpp` / `.h`   | Funções de normalização de strings               |
-| `fileio.cpp` / `.h`    | Leitura e escrita de arquivos                    |
-| `usuarios.cpp` / `.h`  | Manipulação dos perfis de usuários               |
-| `palavras.cpp` / `.h`  | Cache, leitura e edição das palavras             |
-| `jogo.cpp` / `.h`      | Lógica do jogo da forca                          |
-| `menu.cpp` / `.h`      | Sistema de menu e opções                         |
-| `utils.cpp` / `.h`     | Funções auxiliares gerais                        |
+```mermaid
+graph TD
+    A[Inicialização] --> B{Arquivos OK?}
+    B -->|Não| C[Criar Arquivos Padrão]
+    B -->|Sim| D[Carregar Cache]
+    C --> D
+    D --> E[Menu Principal]
+    E --> F{Opção Selecionada}
+    F -->|Jogar| G[Seleção de Nível]
+    F -->|Perfis| H[Gerenciar Usuários]
+    F -->|Palavras| I[Editar Palavras]
+    F -->|Estatísticas| J[Ver Stats]
+    G --> K[Loop do Jogo]
+    K --> E
+    H --> E
+    I --> E
+    J --> E
+```
 
----
+## 🛠️ Compilação e Execução
 
-# 🧪 Rodando Código via Terminal (CMake + MinGW)
+### 📋 Pré-requisitos
 
-### 📁 **1. Criar e acessar a pasta `build/`**
+- **Compilador C++17** (GCC 7+ ou equivalente)
+- **CMake 3.15+**
+- **Bibliotecas**:
+  - `pdcurses` (Windows) ou `ncurses` (Unix-like)
+  - `pcre2` para expressões regulares
+
+### ⚙️ Processo de Build
+
+#### 1️⃣ Preparar Ambiente
 ```bash
 mkdir build
 cd build
 ```
 
----
-
-### ⚙️ **2. Gerar arquivos com MinGW**
+#### 2️⃣ Configurar com CMake
 ```bash
+# Para MinGW (Windows)
 cmake .. -G "MinGW Makefiles"
+
+# Para Make (Linux/macOS)
+cmake .. -G "Unix Makefiles"
 ```
 
----
-
-### 🛠️ **3. Compilar o projeto**
+#### 3️⃣ Compilar
 ```bash
-cmake --build .
+cmake --build . --config Release
 ```
 
----
-
-### ▶️ **4. Rodar o executável**
+#### 4️⃣ Executar
 ```bash
-.\bin\JogoDaForca.exe
+# Windows
+.\bin\forca.exe
+
+# Linux/macOS
+./bin/forca
 ```
 
----
-
-## 🔄 Caso já tenha gerado arquivos CMake anteriormente...
-
-### ❌ **Limpar cache antigo (Importante!)**
-```powershell
+### 🧹 Limpeza de Build
+```bash
+# Windows (PowerShell)
 Remove-Item -Recurse -Force CMakeCache.txt, CMakeFiles
+
+# Linux/macOS
+rm -rf CMakeCache.txt CMakeFiles
 ```
 
-> 💡 **Dica:** Sempre limpe o cache e apague os arquivos da pasta build se mudar configurações do CMake ou trocar compilador.
+## 📚 Documentação Técnica
+
+### 🎯 Princípios de Design
+
+- **Modularidade**: Cada módulo tem responsabilidade bem definida
+- **Robustez**: Tratamento abrangente de erros e casos extremos
+- **Performance**: Otimização com cache e estruturas eficientes
+- **Portabilidade**: Compatibilidade entre Windows e sistemas Unix-like
+- **Manutenibilidade**: Código limpo e bem documentado
+
+### 🔧 Padrões Utilizados
+
+- **RAII** (Resource Acquisition Is Initialization)
+- **Strategy Pattern** para diferentes níveis de dificuldade
+- **Factory Pattern** para criação de objetos de jogo
+- **Observer Pattern** para notificações de eventos
+
+### 📖 Convenções de Código
+
+- **Nomes de Funções**: camelCase (`loadWordList`)
+- **Nomes de Classes**: PascalCase (`WordManager`)
+- **Constantes**: UPPER_SNAKE_CASE (`MAX_ATTEMPTS`)
+- **Arquivos**: kebab-case (`forca-utils.cpp`)
+
+## 🤝 Contribuição e Desenvolvimento
+
+### 🎓 Contexto Acadêmico
+Este é um projeto acadêmico desenvolvido para demonstrar:
+- Domínio de C++ moderno
+- Arquitetura de software modular
+- Boas práticas de desenvolvimento
+- Integração de bibliotecas externas
+
+### 📋 TODO Imediato
+- [ ] Finalizar sistema de cache de palavras
+- [ ] Implementar interface ncurses básica
+- [ ] Criar sistema de usuários simples
+- [ ] Desenvolver lógica principal do jogo
+- [ ] Adicionar funcionalidades básicas de jogo
+
+### 🐛 Reporte de Issues
+Para questões académicas ou sugestões de melhoria, abra uma issue no repositório com:
+- Descrição clara do problema/sugestão
+- Contexto de uso
+- Exemplos quando aplicável
+
+## 📄 Licença
+
+Este projeto é desenvolvido para fins acadêmicos. Consulte o arquivo LICENSE para mais detalhes.
 
 ---
