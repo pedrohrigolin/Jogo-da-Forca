@@ -6,6 +6,7 @@
 #include <stdexcept>
 #include <map>
 #include <vector>
+#include <memory> // Para gerenciamento de memória com unique_ptr
 #include "forcaRegex.h"
 
 #include <iostream> // !! TIRAR DEPOIS DE CONCLUIR TODOS OS TESTES
@@ -13,19 +14,16 @@
 /**
  * Namespace que implementa funcionalidades de expressões regulares inspiradas no PHP.
  * Oferece uma interface familiar para usar regex no C++, seguindo o padrão do PHP.
- * 
- * As funções deste namespace utilizam a biblioteca PCRE2 (mesmo motor usado pelo PHP)
+ * * As funções deste namespace utilizam a biblioteca PCRE2 (mesmo motor usado pelo PHP)
  * para realizar operações de busca e substituição em strings, mantendo compatibilidade
  * com a sintaxe e comportamento do PHP.
- * 
- * Características:
- *   - Usa a mesma sintaxe de delimitadores do PHP (/ ou #)
- *   - Suporta as mesmas flags de modificadores (i, m, s, u, x, U)
- *   - Mantém compatibilidade com padrões regex do PHP
- *   - Otimizado para operações em strings grandes
- *   - Usa PCRE2 como motor regex (mesmo do PHP)
- * 
- * @namespace   forcaRegex
+ * * Características:
+ * - Usa a mesma sintaxe de delimitadores do PHP (/ ou #)
+ * - Suporta as mesmas flags de modificadores (i, m, s, u, x, U)
+ * - Mantém compatibilidade com padrões regex do PHP
+ * - Otimizado para operações em strings grandes
+ * - Usa PCRE2 como motor regex (mesmo do PHP)
+ * * @namespace   forcaRegex
  * @see         https://www.php.net/manual/pt_BR/book.pcre.php
  */
 namespace forcaRegex {
@@ -33,23 +31,23 @@ namespace forcaRegex {
     /**
      * Cria e compila um padrão de expressão regular no estilo PHP.
      * Aceita delimitadores '/' ou '#' e suporta as flags: i, m, s, u, x, U.
-     * 
-     * Exemplo de padrão: "/regex/im" ou "#regex#u"
-     * 
-     * Flags suportadas:
-     *   i - PCRE2_CASELESS  - Case insensitive
-     *   m - PCRE2_MULTILINE - Multiline mode
-     *   s - PCRE2_DOTALL    - Dot matches all
-     *   u - PCRE2_UTF       - UTF-8 mode
-     *   x - PCRE2_EXTENDED  - Extended mode
-     *   U - PCRE2_UNGREEDY  - Ungreedy mode
-     * 
-     * @param   const std::string& pattern    String contendo o padrão regex no formato /pattern/flags
+     * * Exemplo de padrão: "/regex/im" ou "#regex#u"
+     * * Flags suportadas:
+     * i - PCRE2_CASELESS  - Case insensitive
+     * m - PCRE2_MULTILINE - Multiline mode
+     * s - PCRE2_DOTALL    - Dot matches all
+     * u - PCRE2_UTF       - UTF-8 mode
+     * x - PCRE2_EXTENDED  - Extended mode
+     * U - PCRE2_UNGREEDY  - Ungreedy mode
+     * * @param   const std::string& pattern    String contendo o padrão regex no formato /pattern/flags
      * @return  RegexPattern                  Estrutura contendo o padrão compilado e suas configurações
      * @throws  std::invalid_argument         Se o padrão regex estiver malformado
      * @throws  std::runtime_error           Se houver erro na compilação do padrão
      */
-    forcaRegex::RegexPattern createPattern( const std::string& pattern ) {
+    // CORREÇÃO: A função agora retorna um unique_ptr e gerencia a memória corretamente
+    std::unique_ptr<forcaRegex::RegexPattern> createPattern( const std::string& pattern ) {
+
+        auto finalPattern = std::make_unique<forcaRegex::RegexPattern>();
 
         std::string cpypattern = pattern;
 
@@ -148,36 +146,32 @@ namespace forcaRegex {
 
         }
 
-        forcaRegex::RegexPattern finalPattern;
+        // CORREÇÃO: Usa o operador '->' para acessar os membros do objeto no ponteiro inteligente
+        finalPattern->expression = expression;
+        finalPattern->pattern = reinterpret_cast<PCRE2_SPTR>( finalPattern->expression.c_str() );
+        finalPattern->length = static_cast<PCRE2_SIZE>( expressionLength );
+        finalPattern->options = options;
 
-        finalPattern.expression = expression;
-
-        finalPattern.pattern = reinterpret_cast<PCRE2_SPTR>( finalPattern.expression.data() );
-
-        finalPattern.length = static_cast<PCRE2_SIZE>( expressionLength );
-
-        finalPattern.options = options;
-
-        finalPattern.compiled.code = pcre2_compile( finalPattern.pattern, finalPattern.length, finalPattern.options, 
-                                                    &finalPattern.compiled.error_code, &finalPattern.compiled.error_offset, 
-                                                    finalPattern.compiled.context );
+        finalPattern->compiled.code = pcre2_compile( finalPattern->pattern, finalPattern->length, finalPattern->options, 
+                                                    &finalPattern->compiled.error_code, &finalPattern->compiled.error_offset, 
+                                                    finalPattern->compiled.context );
 
         
-        if( finalPattern.compiled.code == nullptr ){
+        if( finalPattern->compiled.code == nullptr ){
 
             PCRE2_UCHAR buffer[256];
 
-            int result = pcre2_get_error_message(finalPattern.compiled.error_code, buffer, sizeof(buffer));
+            int result = pcre2_get_error_message(finalPattern->compiled.error_code, buffer, sizeof(buffer));
 
             std::string message;
 
             if (result < 0) {
-                message = "Erro desconhecido ao compilar regex. Código: " + std::to_string(finalPattern.compiled.error_code);
+                message = "Erro desconhecido ao compilar regex. Código: " + std::to_string(finalPattern->compiled.error_code);
             } else {
                 message = "Erro ao compilar regex: ";
                 message += reinterpret_cast<char*>(buffer);
                 message += " (na posição ";
-                message += std::to_string(finalPattern.compiled.error_offset);
+                message += std::to_string(finalPattern->compiled.error_offset);
                 message += ")";
             }
 
@@ -192,13 +186,12 @@ namespace forcaRegex {
     /**
      * Executa uma busca por um padrão em uma string (primeira ocorrência).
      * Similar à função preg_match() do PHP.
-     * 
-     * @param   const std::string& pattern    Padrão regex no formato /pattern/flags
+     * * @param   const std::string& pattern    Padrão regex no formato /pattern/flags
      * @param   const std::string& subject    String onde será feita a busca
      * @param   PCRE2_SIZE offset            Posição onde iniciar a busca (default: 0)
      * @return  RegexResult                   Estrutura contendo os resultados da busca
-     *                                       - match: true se encontrou match, false caso contrário
-     *                                       - Grupos numéricos e nomeados acessíveis via get()
+     * - match: true se encontrou match, false caso contrário
+     * - Grupos numéricos e nomeados acessíveis via get()
      * @throws  std::invalid_argument         Se o padrão regex estiver malformado
      * @throws  std::runtime_error           Se houver erro na compilação do padrão
      */
@@ -210,11 +203,12 @@ namespace forcaRegex {
 
         if( offset >= subject.length() ) return finalResult;
 
-        RegexPattern finalPattern = createPattern(pattern);
+        // CORREÇÃO: Pega a posse do padrão compilado de forma segura
+        auto finalPattern_ptr = createPattern(pattern);
 
         RegexMatchData regex_data;
 
-        regex_data.match_data = pcre2_match_data_create_from_pattern( finalPattern.compiled.code, regex_data.gcontext );
+        regex_data.match_data = pcre2_match_data_create_from_pattern( finalPattern_ptr->compiled.code, regex_data.gcontext );
 
         PCRE2_SPTR subject_string = reinterpret_cast<PCRE2_SPTR>( subject.data() );
 
@@ -222,7 +216,7 @@ namespace forcaRegex {
 
         pcre2_match_context *mcontext = nullptr;
 
-        int regex_result = pcre2_match( finalPattern.compiled.code, subject_string, subject_length, offset,
+        int regex_result = pcre2_match( finalPattern_ptr->compiled.code, subject_string, subject_length, offset,
         0, regex_data.match_data, mcontext );
 
         // Se não houve match, limpa e retorna
@@ -253,12 +247,12 @@ namespace forcaRegex {
         uint32_t namecount;
         uint32_t name_entry_size;
 
-        pcre2_pattern_info(finalPattern.compiled.code, PCRE2_INFO_NAMECOUNT, &namecount);
+        pcre2_pattern_info(finalPattern_ptr->compiled.code, PCRE2_INFO_NAMECOUNT, &namecount);
 
         if (namecount > 0) {
 
-            pcre2_pattern_info(finalPattern.compiled.code, PCRE2_INFO_NAMETABLE, &name_table);
-            pcre2_pattern_info(finalPattern.compiled.code, PCRE2_INFO_NAMEENTRYSIZE, &name_entry_size);
+            pcre2_pattern_info(finalPattern_ptr->compiled.code, PCRE2_INFO_NAMETABLE, &name_table);
+            pcre2_pattern_info(finalPattern_ptr->compiled.code, PCRE2_INFO_NAMEENTRYSIZE, &name_entry_size);
 
             PCRE2_SPTR entry = name_table;
 
@@ -301,13 +295,12 @@ namespace forcaRegex {
     /**
      * Executa uma busca por um padrão em uma string (todas ocorrências).
      * Similar à função preg_match_all() do PHP.
-     * 
-     * @param   const std::string& pattern    Padrão regex no formato /pattern/flags
+     * * @param   const std::string& pattern    Padrão regex no formato /pattern/flags
      * @param   const std::string& subject    String onde será feita a busca
      * @param   PCRE2_SIZE offset            Posição onde iniciar a busca (default: 0)
      * @return  RegexResult                   Estrutura contendo os resultados da busca
-     *                                       - match: true se encontrou matches, false caso contrário
-     *                                       - Grupos numéricos e nomeados acessíveis via get()
+     * - match: true se encontrou matches, false caso contrário
+     * - Grupos numéricos e nomeados acessíveis via get()
      * @throws  std::invalid_argument         Se o padrão regex estiver malformado
      * @throws  std::runtime_error           Se houver erro na compilação do padrão
      */
@@ -319,11 +312,12 @@ namespace forcaRegex {
 
         if (offset >= subject.length()) return finalResult;
 
-        RegexPattern finalPattern = createPattern(pattern);
+        // CORREÇÃO: Pega a posse do padrão compilado de forma segura
+        auto finalPattern_ptr = createPattern(pattern);
 
         RegexMatchData regex_data;
 
-        regex_data.match_data = pcre2_match_data_create_from_pattern(finalPattern.compiled.code, regex_data.gcontext);
+        regex_data.match_data = pcre2_match_data_create_from_pattern(finalPattern_ptr->compiled.code, regex_data.gcontext);
 
         PCRE2_SPTR subject_string = reinterpret_cast<PCRE2_SPTR>(subject.data());
         PCRE2_SIZE subject_length = static_cast<PCRE2_SIZE>(subject.length());
@@ -335,7 +329,7 @@ namespace forcaRegex {
         while (offset < subject_length) {
 
             int regex_result = pcre2_match(
-                finalPattern.compiled.code,
+                finalPattern_ptr->compiled.code,
                 subject_string,
                 subject_length,
                 offset,
@@ -367,12 +361,12 @@ namespace forcaRegex {
             uint32_t namecount;
             uint32_t name_entry_size;
 
-            pcre2_pattern_info(finalPattern.compiled.code, PCRE2_INFO_NAMECOUNT, &namecount);
+            pcre2_pattern_info(finalPattern_ptr->compiled.code, PCRE2_INFO_NAMECOUNT, &namecount);
 
             if (namecount > 0) {
 
-                pcre2_pattern_info(finalPattern.compiled.code, PCRE2_INFO_NAMETABLE, &name_table);
-                pcre2_pattern_info(finalPattern.compiled.code, PCRE2_INFO_NAMEENTRYSIZE, &name_entry_size);
+                pcre2_pattern_info(finalPattern_ptr->compiled.code, PCRE2_INFO_NAMETABLE, &name_table);
+                pcre2_pattern_info(finalPattern_ptr->compiled.code, PCRE2_INFO_NAMEENTRYSIZE, &name_entry_size);
 
                 PCRE2_SPTR entry = name_table;
 
@@ -425,13 +419,11 @@ namespace forcaRegex {
     /**
      * Realiza substituições em uma string baseadas em um padrão regex.
      * Similar à função preg_replace() do PHP.
-     * 
-     * Suporta referências para grupos capturados no texto de substituição:
+     * * Suporta referências para grupos capturados no texto de substituição:
      * - $0: Match completo
      * - $1, $2, etc: Grupos numéricos
      * - $name: Grupos nomeados
-     * 
-     * @param   const std::string& pattern      Padrão regex no formato /pattern/flags
+     * * @param   const std::string& pattern      Padrão regex no formato /pattern/flags
      * @param   const std::string& subject      String onde serão feitas as substituições
      * @param   const std::string& replacement  String de substituição (pode conter $0, $1, $name etc)
      * @param   PCRE2_SIZE offset              Posição onde iniciar as substituições (default: 0)

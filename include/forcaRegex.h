@@ -7,14 +7,14 @@
 #include <vector>
 #include <map>
 #include <algorithm> // Para usar o std::find
+#include <memory>  // Para gerenciamento de memória com unique_ptr
 
 namespace forcaRegex {
 
     /**
      * Estrutura que mantém o padrão regex compilado e suas configurações.
      * Armazena a expressão original, flags e o código compilado pelo PCRE2.
-     * 
-     * @struct  RegexPattern
+     * * @struct  RegexPattern
      * @member  expression   String contendo o padrão regex sem delimitadores/flags
      * @member  pattern      Ponteiro PCRE2 para o padrão
      * @member  length      Tamanho do padrão em bytes
@@ -51,8 +51,7 @@ namespace forcaRegex {
     /**
      * Estrutura que gerencia os dados de match do PCRE2.
      * Responsável por alocar e liberar a memória dos matches.
-     * 
-     * @struct  RegexMatchData
+     * * @struct  RegexMatchData
      * @member  gcontext     Contexto geral do PCRE2 para alocação
      * @member  match_data   Dados dos matches encontrados
      */
@@ -76,8 +75,7 @@ namespace forcaRegex {
     /**
      * Estrutura que armazena informações sobre um match específico.
      * Mantém a posição inicial, final e o texto encontrado.
-     * 
-     * @struct  RegexStructData
+     * * @struct  RegexStructData
      * @member  start   Posição inicial do match na string original
      * @member  end     Posição final do match na string original
      * @member  match   String contendo o texto encontrado
@@ -93,18 +91,15 @@ namespace forcaRegex {
     /**
      * Estrutura principal que armazena os resultados de uma busca regex.
      * Mantém grupos numéricos e nomeados, permitindo acesso via índice ou nome.
-     * 
-     * Membros públicos:
+     * * Membros públicos:
      * - match: indica se houve match
      * - int_keys: lista de grupos numéricos disponíveis
      * - string_keys: lista de grupos nomeados disponíveis
-     * 
-     * Métodos principais:
+     * * Métodos principais:
      * - key_exist(): verifica existência de um grupo
      * - push(): adiciona um novo match
      * - get(): obtém matches de um grupo
-     * 
-     * @struct  RegexResult
+     * * @struct  RegexResult
      * @method  key_exist   Verifica se um grupo existe (por nome ou número)
      * @method  push        Adiciona um novo match a um grupo
      * @method  get         Obtém os matches de um grupo específico
@@ -226,7 +221,8 @@ namespace forcaRegex {
 
     };
     
-    forcaRegex::RegexPattern createPattern( const std::string& pattern );
+    // CORREÇÃO: A assinatura agora retorna um ponteiro inteligente que gerencia a posse da memória
+    std::unique_ptr<forcaRegex::RegexPattern> createPattern( const std::string& pattern );
 
     forcaRegex::RegexResult preg_match( const std::string& pattern, const std::string& subject, PCRE2_SIZE offset = 0 );
 

@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Estudo de Integração CEF</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #2b2b2b;
+            color: #d4d4d4;
+            text-align: center;
+            padding: 40px;
+            margin: 0;
+            user-select: none; /* Impede a seleção de texto, dando uma sensação mais "nativa" */
+        }
+        h1 {
+            color: #61afef; /* Um tom de azul claro */
+            font-weight: 300;
+        }
+        #mensagem {
+            padding: 15px;
+            margin: 20px auto;
+            background-color: #3c3c3c;
+            border: 1px solid #555;
+            border-radius: 8px;
+            max-width: 600px;
+            min-height: 2.5em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.3s;
+        }
+        button {
+            background-color: #61afef;
+            color: black;
+            border: none;
+            padding: 12px 24px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 5px;
+            margin: 5px;
+            transition: background-color 0.2s;
+        }
+        button:hover {
+            background-color: #82c0f4;
+        }
+        button:active {
+            background-color: #4a91c8;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Interface de Estudo CEF</h1>
+
+    <div id="mensagem">
+        Aguardando interação...
+    </div>
+
+    <!-- Por enquanto as funções estão sendo chamadas diretamente com onclick, mas depois vou alterar e usar listener -->
+    <button onclick="enviarDadosParaCpp()">
+        Chamar 'salvarUsuario'
+    </button>
+
+    <button onclick="window.meuApp.abrirDevTools()">
+        Abrir DevTools
+    </button>
+
+    <hr>
+    <button onclick="solicitarVersaoDoApp()">
+        Obter Versão do App (C++)
+    </button>
+
+    <hr>
+
+    <button onclick="buscarDadosDoUsuario(123)">
+        Buscar Usuário ID 123 (Sucesso)
+    </button>
+    <button onclick="buscarDadosDoUsuario(999)">
+        Buscar Usuário ID 999 (Erro)
+    </button>
+
+    <script>
+
+        /**
+         * Objecto para fazer as chamadas de funções para o C++, tanto de forma 
+         * síncrona quanto assíncrona.
+         * 
+         * O nome do objeto vem da função call_user_func() do PHP, porém, a implementação é
+         * completamente diferente.
+         * 
+         * @author Pedro Rigolin
+        */
+        const callUserFunc = {
+
+            sync: function( functionName, ...args ){
+
+                if( typeof functionName !== "string" ){
+
+                    console.error("O parâmetro name passado na função deve ser do tipo String!");
+
+                    return false;
+
+                }
+
+                if (window.meuApp && window.meuApp.salvarUsuario) {
+
+                    window.meuApp[functionName](...args);
+                
+                    return true;
+
+                }
+                else{
+
+                    console.error( "Erro: a API C++ (window.meuApp." + functionName + ") não foi encontrada!" );
+
+                    return false;
+
+                }
+
+            },
+
+            async: function( functionName, ...args ){
+
+                if( typeof functionName !== "string" ){
+
+                    console.error("O parâmetro name passado na função deve ser do tipo String!");
+
+                    return false;
+
+                }
+
+                if ( ! window.meuApp || typeof window.meuApp[functionName] !== 'function' ) {
+                    return Promise.reject(new Error(`API C++ (window.meuApp.${functionName}) não foi encontrada!`));
+                }
+
+                return new Promise((resolve, reject) => {
+
+                    const promiseId = `promise-${callUserFunc.promiseCounter++}`;
+
+                    callUserFunc.pendingPromises[promiseId] = { resolve, reject };
+
+                    try {
+
+                        // Chama a função C++, passando os argumentos originais e o ID da promise por último.
+                        window.meuApp[functionName](...args, promiseId);
+
+                    } catch (e) {
+
+                        // Em caso de erro na própria chamada da ponte, rejeita a promise.
+                        callUserFunc.cefResolve(promiseId, false, e.message);
+
+                    }
+
+                });
+
+            },
+
+            promiseCounter: 0,
+
+            pendingPromises: {},
+
+            cefResolve: function( promiseId, success, resultOrError ){
+
+                if ( ! callUserFunc.pendingPromises[promiseId] ) {
+                    
+                    console.error(`Promise com ID ${promiseId} não encontrada.`);
+                    
+                    return;
+
+                }
+
+                const promise = callUserFunc.pendingPromises[promiseId];
+
+                if (success) {
+                    promise.resolve(resultOrError);
+                } else {
+                    promise.reject(new Error(resultOrError));
+                }
+
+                // Limpa a referência para evitar vazamento de memória
+                delete callUserFunc.pendingPromises[promiseId];
+
+            },
+
+        };
+
+        /**
+         * Esta função pode ser chamada pelo C++ para dar feedback à UI.
+         */
+        function atualizarMensagem(texto) {
+
+            const el = document.getElementById('mensagem');
+
+            el.innerText = texto;
+
+            el.style.backgroundColor = '#98c379'; // Verde para sucesso
+
+            setTimeout(() => { 
+
+                el.style.backgroundColor = '#3c3c3c'; 
+
+            }, 1000); // Volta ao normal
+
+        }
+
+        /**
+         * Esta função é chamada pelo primeiro botão.
+         * Ela invoca o método 'salvarUsuario' que foi exposto
+         * no objeto 'window.meuApp' pelo nosso código C++.
+         */
+        function enviarDadosParaCpp() {
+
+            const nome = 'Pedro';
+
+            const idade = 24;
+
+            if( callUserFunc.sync("salvarUsuario", nome, idade) ){
+
+                atualizarMensagem(`Chamada para 'salvarUsuario("${nome}", ${idade})' enviada. Verifique o console do terminal!`);
+
+            }
+
+            // Não precisa de um else, pois a própria callUserFunc já mostra se houve erro, porém 
+            // futuramente isso pode ser alterado!
+
+        }
+
+        /**
+         * Esta função é chamada pelo botão. Ela apenas envia a solicitação para o C++.
+         */
+        function solicitarVersaoDoApp() {
+            if (window.meuApp && window.meuApp.getAppVersion) {
+                atualizarMensagem("Solicitando versão do app ao C++...");
+                // Chama a função C++, mas não espera um retorno direto.
+                window.meuApp.getAppVersion();
+            } else {
+                alert("Erro: a função getAppVersion() não foi encontrada!");
+            }
+        }
+
+        /**
+         * Esta é a nossa função "callback". O C++ irá chamá-la pelo nome
+         * quando tiver o resultado pronto.
+         */
+        function receberVersaoDoApp(versao) {
+            atualizarMensagem(`Versão recebida do C++: ${versao}`);
+            alert(`A versão do aplicativo, retornada pelo C++, é: ${versao}`);
+        }
+
+        /**
+         * Esta função agora usa nosso novo sistema de Promises.
+         * Usando .then().catch()
+         */
+        function solicitarVersaoComThen() {
+            atualizarMensagem("Solicitando versão do app ao C++...");
+
+            invoke('getAppVersion')
+                .then(versao => {
+                    atualizarMensagem(`Versão recebida do C++: ${versao}`);
+                    alert(`A versão do aplicativo, retornada pelo C++, é: ${versao}`);
+                })
+                .catch(error => {
+                    atualizarMensagem(`Erro ao obter versão: ${error.message}`);
+                    alert(`Erro ao obter versão: ${error.message}`);
+                });
+        }
+
+        /**
+         * Exemplo usando a sintaxe moderna async/await, que é muito mais limpa.
+         */
+        async function solicitarVersaoComAsyncAwait() {
+            atualizarMensagem("Solicitando versão do app ao C++ (async/await)...");
+            try {
+                const versao = await invoke('getAppVersion');
+                atualizarMensagem(`Versão recebida do C++: ${versao}`);
+                alert(`A versão do aplicativo, retornada pelo C++, é: ${versao}`);
+            } catch (error) {
+                atualizarMensagem(`Erro ao obter versão: ${error.message}`);
+                alert(`Erro ao obter versão: ${error.message}`);
+            }
+        }
+
+        async function buscarDadosDoUsuario(id) {
+
+            atualizarMensagem(`Buscando dados para o usuário ID ${id}...`);
+
+            try {
+
+                callUserFunc.async("getUserData", id).then((response) => {
+
+                    const usuario = JSON.parse(response);
+
+                    const texto = `Usuário encontrado: ${usuario.nome} (Nível: ${usuario.nivel})`;
+                    atualizarMensagem(texto);
+                    alert(texto);
+
+                })
+
+            } catch (error) {
+
+                // 3. Se a Promise for rejeitada, o erro cai aqui.
+                console.error(error);
+                atualizarMensagem(`Erro: ${error.message}`);
+                alert(`Erro: ${error.message}`);
+
+            }
+        }
+
+        // A chamada para window.meuApp.abrirDevTools() é feita diretamente no atributo 'onclick' do botão.
+
+    </script>
+
+</body>
+</html>
