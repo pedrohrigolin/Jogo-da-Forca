@@ -1,134 +1,107 @@
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.20)
 
-if(NOT WIN32)
+# --- Definição do Projeto ---
+project(JogoDaForca LANGUAGES CXX C)
 
-# Força o uso do gcc e g++
-set(CMAKE_C_COMPILER /usr/bin/gcc CACHE FILEPATH "C compiler override" FORCE)
-set(CMAKE_CXX_COMPILER /usr/bin/g++ CACHE FILEPATH "C++ compiler override" FORCE)
+# Define os padrões C++ e C
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_C_STANDARD 11)
+set(CMAKE_C_STANDARD_REQUIRED ON)
 
+# --- Encontrando Dependências ---
+find_package(pcre2 CONFIG REQUIRED)
+
+# --- Configuração do Chromium Embedded Framework (CEF) ---
+if(UNIX AND NOT APPLE)
+    # --- Configuração para Linux ---
+    set(CEF_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/vendor/cef/linux") 
+
+    # 1. Encontra dependências de sistema para o CEF
+    find_package(PkgConfig REQUIRED)
+    pkg_search_module(GTK3 REQUIRED gtk+-3.0) 
+    find_package(X11 REQUIRED)
+    find_package(Threads REQUIRED)
+
+    # 2. Executa o script do CEF para encontrar a biblioteca principal
+    include(${CEF_ROOT}/cmake/FindCEF.cmake)
+
+    # 3. Compila a libcef_dll_wrapper como uma biblioteca ESTÁTICA
+    file(GLOB_RECURSE CEF_WRAPPER_SOURCES "${CEF_ROOT}/libcef_dll/*.cc")
+    
+    add_library(cef_wrapper STATIC ${CEF_WRAPPER_SOURCES})
+
+    target_include_directories(cef_wrapper PRIVATE ${CEF_ROOT})
+    
+    target_compile_definitions(cef_wrapper PRIVATE "WRAPPING_CEF_SHARED")
+    
+elseif(WIN32)
+    # --- Configuração para Windows (A ser adicionada depois) ---
+    message(STATUS "Configuração do CEF para Windows ainda não implementada.")
 endif()
 
-project(JogoDaForca)
+# --- Estrutura do Projeto ---
+file(GLOB SOURCES_CPP "src/*.cpp")
+file(GLOB SOURCES_C "src/*.c")
 
-set(CMAKE_CXX_STANDARD 17)
+add_executable(JogoDaForca ${SOURCES_CPP} ${SOURCES_C})
 
-file(GLOB SOURCES "src/*.cpp")
-add_executable(JogoDaForca ${SOURCES})
+# CORREÇÃO FINAL: GARANTE QUE O WRAPPER SEJA COMPILADO ANTES DO EXECUTÁVEL
+add_dependencies(JogoDaForca cef_wrapper)
 
-# Output do executável
+# CORREÇÃO DE EXECUÇÃO: Copia os recursos do CEF para a pasta de saída
+if(UNIX AND NOT APPLE)
+    add_custom_command(TARGET JogoDaForca POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+                "${CEF_ROOT}/Release"
+                "$<TARGET_FILE_DIR:JogoDaForca>"
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+                "${CEF_ROOT}/Resources"
+                "$<TARGET_FILE_DIR:JogoDaForca>"
+        COMMENT "Copiando recursos do CEF para o diretório bin/"
+    )
+endif()
+
 set_target_properties(JogoDaForca PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/bin"
+    ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/lib"
+    LIBRARY_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/lib"
 )
 
-# Diretórios de includes comuns
+# --- Configuração de Includes ---
 target_include_directories(JogoDaForca PRIVATE
-    ${CMAKE_SOURCE_DIR}/include
+    # Prioridade mais alta para includes do sistema/dependências
+    "${GTK3_INCLUDE_DIRS}"
+    "${CEF_INCLUDE_DIRS}"
+    "${CEF_ROOT}"
+    # Includes do nosso projeto
+    "${CMAKE_CURRENT_SOURCE_DIR}/include"
 )
 
-# Define uso de PCRE2 estática
-target_compile_definitions(JogoDaForca PRIVATE PCRE2_STATIC)
+# Adiciona as flags de compilação do GTK (essencial)
+target_compile_options(JogoDaForca PRIVATE "${GTK3_CFLAGS_OTHER}")
 
-# Compilação e link de dependências por plataforma
-if(WIN32)
+# --- Linkagem das Bibliotecas ---
 
-    # Define as opções da PCRE2 antes de add_subdirectory
-    set(PCRE2_BUILD_PCRE2_8 ON CACHE BOOL "" FORCE)
-    set(PCRE2_BUILD_PCRE2_16 ON CACHE BOOL "" FORCE)
-    set(PCRE2_BUILD_PCRE2_32 ON CACHE BOOL "" FORCE)
-    set(PCRE2_BUILD_PCRE2POSIX ON CACHE BOOL "" FORCE)
-    set(PCRE2_SUPPORT_JIT ON CACHE BOOL "" FORCE)
-    set(PCRE2_BUILD_TESTS OFF CACHE BOOL "" FORCE)
-    set(PCRE2_BUILD_PCRE2GREP OFF CACHE BOOL "" FORCE)
-    set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
+# VERSÃO FINAL COM GRUPOS DE LINKAGEM
+target_link_libraries(JogoDaForca PRIVATE
+    # Dependências não cíclicas
+    PCRE2::8BIT PCRE2::16BIT PCRE2::32BIT PCRE2::POSIX
 
-    # Adiciona a pasta do código-fonte do PCRE2 como subdiretório
-    add_subdirectory(${CMAKE_SOURCE_DIR}/libs/pcre2/win ${CMAKE_SOURCE_DIR}/libs/pcre2/win/build)
+    # Inicia o grupo de linkagem para resolver dependências cíclicas
+    -Wl,--start-group
+    
+    # Bibliotecas que dependem uma da outra
+    "${CEF_ROOT}/Release/libcef.so" 
+    cef_wrapper
 
-    set(PDCURSES_LIB_PATH ${CMAKE_SOURCE_DIR}/libs/pdcurses/wincon/pdcurses.a)
+    # Finaliza o grupo de linkagem
+    -Wl,--end-group
 
-    # Alvo para compilar o PDCurses via Makefile.mgw
-    add_custom_command(
-        OUTPUT ${CMAKE_SOURCE_DIR}/libs/pdcurses/wincon/pdcurses.a
-        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/libs/pdcurses/wincon
-        COMMAND mingw32-make -f Makefile
-        COMMENT "Compilando PDCurses com Makefile"
-    )
-
-    add_custom_target(build_pdcurses DEPENDS ${CMAKE_SOURCE_DIR}/libs/pdcurses/wincon/pdcurses.a)
-    add_dependencies(JogoDaForca build_pdcurses)
-
-    target_link_libraries(JogoDaForca PRIVATE
-        ${CMAKE_SOURCE_DIR}/libs/pdcurses/wincon/pdcurses.a
-    )
-
-    # Linka bibliotecas PCRE2 (agora compiladas no momento do build)
-    target_link_libraries(JogoDaForca PRIVATE
-        pcre2-8
-        pcre2-16
-        pcre2-32
-        pcre2-posix
-        ${PDCURSES_LIB_PATH}
-        Ws2_32
-        Advapi32
-        Userenv
-    )
-
-else() # Linux
-
-    # Define as opções da PCRE2 antes de add_subdirectory
-    set(PCRE2_BUILD_PCRE2_8 ON CACHE BOOL "" FORCE)
-    set(PCRE2_BUILD_PCRE2_16 ON CACHE BOOL "" FORCE)
-    set(PCRE2_BUILD_PCRE2_32 ON CACHE BOOL "" FORCE)
-    set(PCRE2_BUILD_PCRE2POSIX ON CACHE BOOL "" FORCE)
-    set(PCRE2_SUPPORT_JIT ON CACHE BOOL "" FORCE)
-    set(PCRE2_BUILD_TESTS OFF CACHE BOOL "" FORCE)
-    set(PCRE2_BUILD_PCRE2GREP OFF CACHE BOOL "" FORCE)
-    set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
-
-    # Adiciona o código-fonte do PCRE2 como subdiretório
-    add_subdirectory(${CMAKE_SOURCE_DIR}/libs/pcre2/unix ${CMAKE_SOURCE_DIR}/libs/pcre2/unix/build)
-
-    # Define as opções do ncurses
-    set(NCURSES_SRC_DIR ${CMAKE_SOURCE_DIR}/libs/ncurses)
-    set(NCURSES_BUILD_DIR ${NCURSES_SRC_DIR}/build)
-    set(NCURSES_LIB_DIR ${NCURSES_BUILD_DIR}/lib)
-    set(NCURSES_INCLUDE_DIR ${NCURSES_BUILD_DIR}/include/ncursesw)
-
-    # Comando de compilação do ncurses
-    add_custom_command(
-        OUTPUT ${NCURSES_LIB_DIR}/libncursesw.a
-        WORKING_DIRECTORY ${NCURSES_SRC_DIR}
-        COMMAND ./configure --prefix=${NCURSES_BUILD_DIR} --with-normal --without-shared --without-debug --enable-widec --enable-static
-        COMMAND make -j
-        COMMAND make install
-        COMMENT "Compilando ncurses estático para Linux"
-    )
-
-    add_custom_target(build_ncurses DEPENDS ${NCURSES_LIB_DIR}/libncursesw.a)
-    add_dependencies(JogoDaForca build_ncurses)
-
-    # Diretórios de includes comuns
-    target_include_directories(JogoDaForca PRIVATE
-        ${NCURSES_INCLUDE_DIR}
-        ${NCURSES_BUILD_DIR}/include
-    )
-
-    # Linkagem de libs estáticas compiladas no build
-    target_link_libraries(JogoDaForca PRIVATE
-
-        pcre2-8
-        pcre2-16
-        pcre2-32
-        pcre2-posix
-
-        ${NCURSES_LIB_DIR}/libncurses++w.a
-        ${NCURSES_LIB_DIR}/libformw.a
-        ${NCURSES_LIB_DIR}/libmenuw.a
-        ${NCURSES_LIB_DIR}/libpanelw.a
-        ${NCURSES_LIB_DIR}/libncursesw.a
-
-        pthread
-        dl
-    )
-
-endif()
+    # Dependências de sistema (que o CEF usa)
+    "${GTK3_LIBRARIES}"
+    "${X11_LIBRARIES}"
+    Threads::Threads
+    dl
+    rt
+)
