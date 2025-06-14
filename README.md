@@ -545,7 +545,7 @@ ninja --version
 ```bash
 # 1. Clonar repositório
 git lfs install
-git clone <URL_REPOSITORIO> JogoDaForca
+git clone https://github.com/pedrohrigolin/Jogo-da-Forca.git JogoDaForca
 cd JogoDaForca
 git lfs pull
 
