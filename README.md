@@ -347,6 +347,32 @@ git clone https://github.com/microsoft/vcpkg C:\vcpkg
 C:\vcpkg\bootstrap-vcpkg.bat
 ```
 
+**Configurar variáveis de ambiente do sistema:**
+1. Pressione `Windows + R` → digite `sysdm.cpl` → Enter
+2. Clique em "Variáveis de Ambiente..."
+3. Na seção **"Variáveis do sistema"** (parte inferior):
+   - Clique em "Novo..."
+   - Nome da variável: `VCPKG_ROOT`
+   - Valor da variável: `C:\vcpkg`
+   - Clique em "OK"
+4. Ainda nas **"Variáveis do sistema"**, selecione `Path` → "Editar..."
+5. Clique em "Novo" → adicione: `C:\vcpkg`
+6. Clique em "OK" em todas as janelas
+
+**Instalar bibliotecas necessárias:**
+```cmd
+vcpkg install cryptopp
+vcpkg install nlohmann-json
+vcpkg install pcre2
+```
+
+*Se as variáveis de ambiente não estiverem configuradas, use:*
+```cmd
+C:\vcpkg\vcpkg.exe install cryptopp
+C:\vcpkg\vcpkg.exe install nlohmann-json
+C:\vcpkg\vcpkg.exe install pcre2
+```
+
 ##### 4. Ninja (Sistema de Build)
 
 **Método 1 - Winget (Recomendado):**
@@ -357,9 +383,13 @@ winget install Ninja-build.Ninja
 **Método 2 - Manual:**
 1. Baixe de: [https://github.com/ninja-build/ninja/releases](https://github.com/ninja-build/ninja/releases)
 2. Extraia `ninja.exe` para `C:\tools\ninja`
-3. Adicione `C:\tools\ninja` ao PATH do Windows:
-   - Windows + R → `sysdm.cpl` → Variáveis de Ambiente
-   - Editar variável `Path` → Novo → `C:\tools\ninja`
+3. **Adicionar às variáveis de ambiente do sistema:**
+   - Pressione `Windows + R` → digite `sysdm.cpl` → Enter
+   - Clique em "Variáveis de Ambiente..."
+   - Na seção **"Variáveis do sistema"** (parte inferior), selecione `Path` → "Editar..."
+   - Clique em "Novo" → adicione: `C:\tools\ninja`
+   - Clique em "OK" em todas as janelas
+   - **Importante:** Feche e reabra qualquer terminal para que a mudança tenha efeito
 
 #### Fase 2: Compilação
 

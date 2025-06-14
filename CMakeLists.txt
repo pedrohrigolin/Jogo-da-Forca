@@ -3,6 +3,14 @@ cmake_minimum_required(VERSION 3.20)
 # --- Definição do Projeto ---
 project(JogoDaForca LANGUAGES CXX C)
 
+# CORREÇÃO RUNTIME WINDOWS: Força a linkagem estática do runtime C++,
+# correspondendo ao triplet 'x64-windows-static' do vcpkg.
+# Isso deve ser definido ANTES do comando project().
+# Esta é a forma mais robusta de fazer isso.
+if(MSVC)
+  set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+endif()
+
 # Define os padrões C++ e C
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -11,6 +19,8 @@ set(CMAKE_C_STANDARD_REQUIRED ON)
 
 # --- Encontrando Dependências ---
 find_package(pcre2 CONFIG REQUIRED)
+find_package(cryptopp CONFIG REQUIRED)
+find_package(nlohmann_json CONFIG REQUIRED)
 
 # --- Configuração do Chromium Embedded Framework (CEF) ---
 if(UNIX AND NOT APPLE)
@@ -139,6 +149,8 @@ if(UNIX AND NOT APPLE)
 
         # Dependências não cíclicas
         PCRE2::8BIT PCRE2::16BIT PCRE2::32BIT PCRE2::POSIX
+        cryptopp::cryptopp
+        nlohmann_json::nlohmann_json
 
         # Inicia o grupo de linkagem para resolver dependências cíclicas
         -Wl,--start-group
@@ -162,10 +174,15 @@ if(UNIX AND NOT APPLE)
 elseif(WIN32)
 
     target_link_libraries(JogoDaForca PRIVATE
+    
+        PCRE2::8BIT PCRE2::16BIT PCRE2::32BIT PCRE2::POSIX
+        cryptopp::cryptopp
+        nlohmann_json::nlohmann_json
+
         cef_wrapper
         "${CEF_ROOT}/Release/libcef.lib" 
         ${CEF_LIBRARIES} # No Windows, esta variável já inclui libcef.lib e as libs de sistema (user32, gdi32, etc)
-        PCRE2::8BIT PCRE2::16BIT PCRE2::32BIT PCRE2::POSIX
+
     )
 
 endif()

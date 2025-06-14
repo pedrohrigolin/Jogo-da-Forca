@@ -64,7 +64,7 @@
 */
 
 /**
- * @file main.cpp
+ * @file forca.cpp
  * @author Pedro 
  * @brief Aplicação de estudo avançada do CEF para Linux.
  * @version 3.0 - Para CEF v137+
@@ -78,6 +78,43 @@
  * 4.  Comunicação bidirecional C++/JS com aparência de API nativa (window.meuApp.funcao()).
  * 5.  Desativação do menu de contexto para uma aparência de aplicação nativa.
  */
+
+
+#include <cryptopp/sha.h>         // Crypto++ SHA256
+#include <cryptopp/hex.h>         // Crypto++ Hex encoder
+#include <cryptopp/filters.h>     // Crypto++ StringSource e StreamTransformationFilter
+
+#include <nlohmann/json.hpp>      // nlohmann-json
+
+// Função de teste do Crypto++
+void TestCryptoPP() {
+    using namespace CryptoPP;
+
+    std::string input = "texto para hash";
+    std::string hash;
+
+    SHA256 hashFunc;
+    StringSource ss(input, true,
+        new HashFilter(hashFunc,
+            new HexEncoder(
+                new StringSink(hash)
+            )
+        )
+    );
+
+    std::cout << "[Crypto++] SHA-256(\"" << input << "\") = " << hash << std::endl;
+}
+
+// Função de teste do nlohmann-json
+void TestNlohmannJson() {
+    nlohmann::json j;
+    j["nome"] = "Pedro";
+    j["idade"] = 30;
+    j["habilidades"] = { "C++", "CEF", "JSON" };
+
+    std::string dump = j.dump(4); // Pretty print com indentação 4
+    std::cout << "[nlohmann-json] JSON gerado:\n" << dump << std::endl;
+}
 
 // --- Includes Padrão e do C++ Moderno ---
 #include <iostream>
@@ -409,6 +446,10 @@ private:
 
 // --- Ponto de Entrada Principal ---
 int main(int argc, char* argv[]) {
+
+    // Testes do Crypto++ (cryptopp) e nlohman-json
+    TestCryptoPP();
+    TestNlohmannJson();
 
     // Cria os argumentos principais da aplicação de forma específica para cada plataforma
     #if defined(OS_WIN)

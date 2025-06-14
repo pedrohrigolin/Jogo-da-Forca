@@ -2,6 +2,8 @@
   "name": "jogo-da-forca",
   "version-string": "1.0.0",
   "dependencies": [
-    "pcre2"
+    "pcre2",
+    "cryptopp",
+    "nlohmann-json"
   ]
 }
