@@ -220,7 +220,7 @@ Para outras distribuições, consulte as [instruções oficiais](https://git-lfs
 
 ```bash
 git lfs install
-git clone <URL_DO_SEU_REPOSITORIO_NO_GITHUB> JogoDaForca
+git clone https://github.com/pedrohrigolin/Jogo-da-Forca.git JogoDaForca
 cd JogoDaForca
 git lfs pull
 ```
@@ -337,9 +337,9 @@ c1a2ed8585 * vendor/cef/win/Release/vulkan-1.dll
 ##### 2. Visual Studio Build Tools 2022
 - **Download:** [https://aka.ms/vs/17/release/vs_BuildTools.exe](https://aka.ms/vs/17/release/vs_BuildTools.exe)
 - **Instalação:**
-  1. Execute o `vs_BuildTools.exe`
-  2. Na tela "Cargas de Trabalho", marque **apenas**: "Desenvolvimento para desktop com C++"
-  3. Clique em "Instalar"
+  **1.** Execute o `vs_BuildTools.exe`
+  **2.** Na tela "Cargas de Trabalho", marque **apenas**: "Desenvolvimento para desktop com C++"
+  **3.** Clique em "Instalar"
 
 ##### 3. vcpkg (Gerenciador de Dependências)
 ```cmd
