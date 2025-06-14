@@ -168,55 +168,365 @@ graph TD
     J --> E
 ```
 
-## 🛠️ Compilação e Execução
+# 📋 Guia de Instalação - Jogo da Forca
 
-### 📋 Pré-requisitos
+Este guia completo permite configurar o ambiente de desenvolvimento do zero e compilar o projeto "Jogo da Forca" tanto no Windows quanto no Linux.
 
-- **Compilador C++17** (GCC 7+ ou equivalente)
-- **CMake 3.15+**
-- **Bibliotecas**:
-  - `pdcurses` (Windows) ou `ncurses` (Unix-like)
-  - `pcre2` para expressões regulares
+## 📦 Git LFS (Large File Storage)
 
-### ⚙️ Processo de Build
+Este repositório utiliza **Git LFS** para armazenar arquivos grandes, como bibliotecas `.lib`, `.dll`, `.exe`, `.bin`, `.a` e recursos do CEF que ultrapassam o limite padrão do GitHub (100 MB).
 
-#### 1️⃣ Preparar Ambiente
+> ⚠️ **IMPORTANTE**: Sem o Git LFS instalado, os arquivos grandes NÃO serão baixados corretamente. Você verá apenas arquivos de ponteiro e o projeto não funcionará.
+
+### 🧠 Por que usar o Git LFS?
+
+O GitHub permite arquivos de até **100 MB** por padrão. Acima disso:
+
+- O push é **bloqueado** com erro
+- Mesmo arquivos entre 50 MB e 100 MB geram **avisos**
+- Você perde controle de versionamento de dependências grandes (ex: libs do CEF)
+
+O Git LFS resolve isso:
+- Ele **rastreia arquivos grandes separadamente**
+- Substitui os arquivos reais no Git por pequenos "ponteiros"
+- Os arquivos verdadeiros são armazenados em um **repositório LFS** à parte
+
+### Instalação do Git LFS
+
+#### 🪟 Windows
+
+1. **Baixar o instalador:**
+   - Acesse: [https://git-lfs.github.com/](https://git-lfs.github.com/)
+   - Baixe e execute o instalador
+
+2. **Configurar no terminal:**
+   ```bash
+   git lfs install
+   ```
+
+#### 🐧 Linux (Ubuntu/Debian)
+
 ```bash
-mkdir build
-cd build
+sudo apt update
+sudo apt install git-lfs
+git lfs install
 ```
 
-#### 2️⃣ Configurar com CMake
-```bash
-# Para MinGW (Windows)
-cmake .. -G "MinGW Makefiles"
+Para outras distribuições, consulte as [instruções oficiais](https://git-lfs.github.com/).
 
-# Para Make (Linux/macOS)
-cmake .. -G "Unix Makefiles"
+### Clonando o Repositório
+
+#### 🔰 Método Recomendado (Garantido)
+
+```bash
+git lfs install
+git clone <URL_DO_SEU_REPOSITORIO_NO_GITHUB> JogoDaForca
+cd JogoDaForca
+git lfs pull
 ```
 
-#### 3️⃣ Compilar
+> 💡 **Nota:** Mesmo com o Git LFS instalado, rodar `git lfs pull` após o clone garante que *todos* os arquivos grandes sejam baixados corretamente, evitando erros.
+
+#### Se você já clonou antes de instalar o Git LFS
+
 ```bash
-cmake --build .
+cd JogoDaForca
+git lfs install
+git lfs pull
 ```
 
-#### 4️⃣ Executar
-```bash
-# Windows
-.\bin\forca.exe
+### Atualizando o Repositório
 
-# Linux/macOS
-./bin/forca
+Quando for atualizar seu repositório local:
+
+```bash
+git pull
+git lfs pull
 ```
 
-### 🧹 Limpeza de Build
-```bash
-# Windows (PowerShell)
-Remove-Item -Recurse -Force CMakeCache.txt, CMakeFiles
+> ⚠️ Isso garante que os arquivos grandes sejam baixados corretamente em qualquer sistema, mesmo que o Git LFS não esteja 100% configurado localmente.
 
-# Linux/macOS
-rm -rf CMakeCache.txt CMakeFiles
+### Fazendo Commits com Arquivos Grandes
+
+Sempre que fizer commits que incluam arquivos `.lib`, `.dll`, `.exe`, `.bin`, `.a`, use esta sequência para garantir que sejam versionados corretamente:
+
+#### 🔢 Procedimento para Todo Commit
+
+```bash
+# 1. Adiciona todos os arquivos normalmente
+git add .
+
+# 2. Força o Git a reindexar os arquivos grandes com suporte ao Git LFS
+
+# Linux / Git Bash
+find . \( -path ./build -o -path ./bin \) -prune -o -type f \( -iname "*.lib" -o -iname "*.dll" -o -iname "*.exe" -o -iname "*.bin" -o -iname "*.a" \) -exec git add --force {} +
+
+# PowerShell
+Get-ChildItem -Recurse -Include *.lib,*.dll,*.exe,*.bin,*.a -File | Where-Object { $_.FullName -notmatch '\\build\\|\\bin\\' } | ForEach-Object { git add --force $_.FullName }
+
+# 3. Commita normalmente
+git commit -m "Sua mensagem de commit"
+
+# 4. Realiza o push
+git push
 ```
+
+### Arquivos Rastreados pelo Git LFS
+
+Este projeto já está configurado para rastrear automaticamente estes tipos de arquivo:
+
+```text
+*.lib
+*.dll
+*.exe
+*.bin
+*.a
+```
+
+Isso está definido no arquivo `.gitattributes`:
+
+```text
+*.lib filter=lfs diff=lfs merge=lfs -text
+*.dll filter=lfs diff=lfs merge=lfs -text
+*.exe filter=lfs diff=lfs merge=lfs -text
+*.bin filter=lfs diff=lfs merge=lfs -text
+*.a   filter=lfs diff=lfs merge=lfs -text
+```
+
+### Verificando se está Funcionando
+
+Para ver se os arquivos foram adicionados com Git LFS corretamente:
+
+```bash
+git lfs ls-files
+```
+
+---
+
+## 🛠️ Configuração do Ambiente de Desenvolvimento
+
+### 🪟 Windows
+
+#### Fase 1: Preparação do Ambiente
+
+##### 1. Git para Windows
+- **Download:** [https://git-scm.com/download/win](https://git-scm.com/download/win)
+- **Instalação:** Execute o instalador mantendo as opções padrão
+
+##### 2. Visual Studio Build Tools 2022
+- **Download:** [https://aka.ms/vs/17/release/vs_BuildTools.exe](https://aka.ms/vs/17/release/vs_BuildTools.exe)
+- **Instalação:**
+  1. Execute o `vs_BuildTools.exe`
+  2. Na tela "Cargas de Trabalho", marque **apenas**: "Desenvolvimento para desktop com C++"
+  3. Clique em "Instalar"
+
+##### 3. vcpkg (Gerenciador de Dependências)
+```cmd
+git clone https://github.com/microsoft/vcpkg C:\vcpkg
+C:\vcpkg\bootstrap-vcpkg.bat
+```
+
+##### 4. Ninja (Sistema de Build)
+
+**Método 1 - Winget (Recomendado):**
+```powershell
+winget install Ninja-build.Ninja
+```
+
+**Método 2 - Manual:**
+1. Baixe de: [https://github.com/ninja-build/ninja/releases](https://github.com/ninja-build/ninja/releases)
+2. Extraia `ninja.exe` para `C:\tools\ninja`
+3. Adicione `C:\tools\ninja` ao PATH do Windows:
+   - Windows + R → `sysdm.cpl` → Variáveis de Ambiente
+   - Editar variável `Path` → Novo → `C:\tools\ninja`
+
+#### Fase 2: Compilação
+
+1. **Abrir terminal correto:**
+   - Menu Iniciar → "x64 Native Tools Command Prompt for VS 2022"
+
+2. **Navegar para o projeto:**
+   ```cmd
+   cd JogoDaForca
+   ```
+
+3. **Configurar com CMake:**
+   ```cmd
+   cmake -G "Ninja" -D CMAKE_TOOLCHAIN_FILE="C:/vcpkg/scripts/buildsystems/vcpkg.cmake" -D VCPKG_TARGET_TRIPLET="x64-windows-static" -D CMAKE_BUILD_TYPE="Release" -S . -B build
+   ```
+
+4. **Compilar:**
+   ```cmd
+   cmake --build build
+   ```
+
+5. **Executar:**
+   ```cmd
+   .\bin\JogoDaForca.exe
+   ```
+
+---
+
+### 🐧 Linux (Ubuntu/Debian)
+
+#### Fase 1: Preparação do Ambiente
+
+##### 1. Ferramentas Essenciais
+```bash
+sudo apt update
+sudo apt install build-essential git
+```
+
+##### 2. CMake
+```bash
+sudo apt install cmake
+```
+
+##### 3. Ninja
+```bash
+sudo apt install ninja-build
+```
+
+##### 4. vcpkg
+```bash
+cd ~
+git clone https://github.com/microsoft/vcpkg.git
+./vcpkg/bootstrap-vcpkg.sh
+```
+
+##### 5. Dependências do CEF (GTK3)
+```bash
+sudo apt install libgtk-3-dev
+```
+
+#### Fase 2: Compilação
+
+1. **Navegar para o projeto:**
+   ```bash
+   cd JogoDaForca
+   ```
+
+2. **Configurar com CMake:**
+   ```bash
+   cmake -G "Ninja" -D CMAKE_C_COMPILER=gcc -D CMAKE_CXX_COMPILER=g++ -D CMAKE_TOOLCHAIN_FILE="$HOME/vcpkg/scripts/buildsystems/vcpkg.cmake" -D VCPKG_TARGET_TRIPLET="x64-linux" -D CMAKE_BUILD_TYPE="Release" -S . -B build
+   ```
+
+3. **Compilar:**
+   ```bash
+   cmake --build build
+   ```
+
+4. **Executar:**
+   ```bash
+   ./bin/JogoDaForca
+   ```
+
+---
+
+## 🔍 Troubleshooting
+
+### Problemas Comuns
+
+#### "Arquivos grandes não foram baixados"
+- **Causa:** Git LFS não estava instalado no momento do clone
+- **Solução:** 
+  ```bash
+  git lfs install
+  git lfs pull
+  ```
+
+#### "Arquivos grandes não foram enviados no push"
+- **Causa:** Arquivos grandes não foram reindexados corretamente
+- **Solução:** Use `git add --force` nos arquivos grandes antes do commit
+
+#### "ninja: command not found" (Linux)
+- **Solução:** 
+  ```bash
+  sudo apt install ninja-build
+  ```
+
+#### "MSVC not found" (Windows)
+- **Causa:** Terminal errado ou Build Tools não instalados
+- **Solução:** Use o "x64 Native Tools Command Prompt for VS 2022"
+
+#### Problemas com vcpkg
+- **Verifique o caminho:** Certifique-se que o vcpkg está em `C:\vcpkg` (Windows) ou `~/vcpkg` (Linux)
+- **Recompile o vcpkg:** Execute novamente o bootstrap
+
+### Verificação da Instalação
+
+**Verificar Git LFS:**
+```bash
+git lfs version
+git lfs ls-files  # Lista arquivos rastreados pelo LFS
+```
+
+**Verificar ferramentas (Linux):**
+```bash
+gcc --version
+cmake --version
+ninja --version
+```
+
+**Verificar ferramentas (Windows):**
+```cmd
+cl
+cmake --version
+ninja --version
+```
+
+---
+
+## 📝 Notas Importantes
+
+- **Primeira vez:** A configuração do ambiente precisa ser feita apenas uma vez por máquina
+- **Compilação Debug:** Para versão de debug, substitua `Release` por `Debug` no comando CMake
+- **Localização do executável:** O jogo compilado estará sempre na pasta `bin/` na raiz do projeto
+- **Git LFS:** Sempre instale o Git LFS **antes** de clonar repositórios que o utilizam
+- **Push de arquivos grandes:** Use sempre `git add --force` para arquivos grandes antes do commit
+- **Pull completo:** Sempre execute `git lfs pull` após `git pull` para garantir download dos arquivos grandes
+
+---
+
+## 🎯 Resumo dos Comandos
+
+### Workflow Completo (Git + Git LFS)
+```bash
+# 1. Clonar repositório
+git lfs install
+git clone <URL_REPOSITORIO> JogoDaForca
+cd JogoDaForca
+git lfs pull
+
+# 2. Fazer alterações no código
+# ... suas modificações ...
+
+# 3. Commit com suporte a arquivos grandes
+git add .
+# Reindexar arquivos grandes (Linux/Git Bash)
+find . -type f \( -iname "*.lib" -o -iname "*.dll" -o -iname "*.exe" -o -iname "*.bin" -o -iname "*.a" \) -exec git add --force {} +
+git commit -m "Sua mensagem"
+git push
+
+# 4. Atualizar repositório
+git pull
+git lfs pull
+```
+
+### Compilação (sempre que necessário)
+```bash
+# Configurar
+cmake -G "Ninja" [opções específicas do SO] -S . -B build
+
+# Compilar
+cmake --build build
+
+# Executar
+./bin/JogoDaForca  # Linux
+.\bin\JogoDaForca.exe  # Windows
+```
+
+---
 
 ## 📚 Documentação Técnica
 

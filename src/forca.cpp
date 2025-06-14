@@ -372,7 +372,7 @@ public:
         CEF_REQUIRE_UI_THREAD();
         
         // Carrega o HTML e cria o Data URL
-        std::string html_path = "/media/pedro/HD_EXFAT/Programacao/C++/IFSP/Projeto_forca/files/teste.html"; // <-- MUDE ESTE CAMINHO
+        std::string html_path = "../files/teste.html"; // <-- MUDE ESTE CAMINHO
         std::string html_content = ReadFileToString(html_path);
         if(html_content.empty()) html_content = "<html><body><h1>Erro ao ler arquivo UI.</h1></body></html>";
         std::string b64 = base64_encode(reinterpret_cast<const unsigned char*>(html_content.c_str()), html_content.length());
@@ -409,7 +409,19 @@ private:
 
 // --- Ponto de Entrada Principal ---
 int main(int argc, char* argv[]) {
-    CefMainArgs main_args(argc, argv);
+
+    // Cria os argumentos principais da aplicação de forma específica para cada plataforma
+    #if defined(OS_WIN)
+        // No Windows, pegamos o HINSTANCE manualmente para o CefMainArgs
+        CefMainArgs main_args(GetModuleHandle(NULL));
+    #else
+        // No Linux, usamos os argumentos da linha de comando
+        CefMainArgs main_args(argc, argv);
+    #endif
+
+
+
+
     CefRefPtr<EstudoCefApp> app(new EstudoCefApp());
     int exit_code = CefExecuteProcess(main_args, app, nullptr);
     if (exit_code >= 0) return exit_code;

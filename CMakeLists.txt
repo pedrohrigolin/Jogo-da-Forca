@@ -36,8 +36,28 @@ if(UNIX AND NOT APPLE)
     target_compile_definitions(cef_wrapper PRIVATE "WRAPPING_CEF_SHARED")
     
 elseif(WIN32)
-    # --- Configuração para Windows (A ser adicionada depois) ---
-    message(STATUS "Configuração do CEF para Windows ainda não implementada.")
+
+    # --- Configuração para Windows ---
+    set(CEF_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/vendor/cef/win")
+
+    # No Windows, o FindCEF.cmake cuida da maioria das dependências do sistema
+    include(${CEF_ROOT}/cmake/FindCEF.cmake)
+
+    # Compila a libcef_dll_wrapper como uma biblioteca ESTÁTICA
+    file(GLOB_RECURSE CEF_WRAPPER_SOURCES "${CEF_ROOT}/libcef_dll/*.cc")
+    
+    add_library(cef_wrapper STATIC ${CEF_WRAPPER_SOURCES})
+
+    target_include_directories(cef_wrapper PRIVATE ${CEF_ROOT})
+
+    # Definições necessárias para compilar o wrapper no Windows
+    target_compile_definitions(cef_wrapper PRIVATE 
+        "WRAPPING_CEF_SHARED" "WIN32" "_WINDOWS" "UNICODE" "_UNICODE" "NOMINMAX"
+    )
+
+    # Adiciona a flag de exceção /EHsc
+    target_compile_options(cef_wrapper PRIVATE /EHsc)
+
 endif()
 
 # --- Estrutura do Projeto ---
@@ -51,6 +71,7 @@ add_dependencies(JogoDaForca cef_wrapper)
 
 # CORREÇÃO DE EXECUÇÃO: Copia os recursos do CEF para a pasta de saída
 if(UNIX AND NOT APPLE)
+
     add_custom_command(TARGET JogoDaForca POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_directory
                 "${CEF_ROOT}/Release"
@@ -60,6 +81,19 @@ if(UNIX AND NOT APPLE)
                 "$<TARGET_FILE_DIR:JogoDaForca>"
         COMMENT "Copiando recursos do CEF para o diretório bin/"
     )
+
+elseif(WIN32)
+
+    add_custom_command(TARGET JogoDaForca POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_directory 
+            "${CEF_ROOT}/Release" 
+            "$<TARGET_FILE_DIR:JogoDaForca>"
+        COMMAND ${CMAKE_COMMAND} -E copy_directory 
+            "${CEF_ROOT}/Resources" 
+            "$<TARGET_FILE_DIR:JogoDaForca>"
+        COMMENT "Copiando recursos do CEF (Windows) para o diretório bin/"
+    )
+
 endif()
 
 set_target_properties(JogoDaForca PROPERTIES
@@ -68,40 +102,70 @@ set_target_properties(JogoDaForca PROPERTIES
     LIBRARY_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/lib"
 )
 
-# --- Configuração de Includes ---
-target_include_directories(JogoDaForca PRIVATE
-    # Prioridade mais alta para includes do sistema/dependências
-    "${GTK3_INCLUDE_DIRS}"
-    "${CEF_INCLUDE_DIRS}"
-    "${CEF_ROOT}"
-    # Includes do nosso projeto
-    "${CMAKE_CURRENT_SOURCE_DIR}/include"
-)
+if(UNIX AND NOT APPLE)
 
-# Adiciona as flags de compilação do GTK (essencial)
-target_compile_options(JogoDaForca PRIVATE "${GTK3_CFLAGS_OTHER}")
+    # --- Configuração de Includes ---
+    target_include_directories(JogoDaForca PRIVATE
+        # Prioridade mais alta para includes do sistema/dependências
+        "${GTK3_INCLUDE_DIRS}"
+        "${CEF_INCLUDE_DIRS}"
+        "${CEF_ROOT}"
+        # Includes do nosso projeto
+        "${CMAKE_CURRENT_SOURCE_DIR}/include"
+    )
+
+    # Adiciona as flags de compilação do GTK (essencial)
+    target_compile_options(JogoDaForca PRIVATE "${GTK3_CFLAGS_OTHER}")
+
+elseif(WIN32)
+
+    target_include_directories(JogoDaForca PRIVATE
+        "${CEF_INCLUDE_DIRS}" "${CEF_ROOT}"
+        "${CMAKE_CURRENT_SOURCE_DIR}/include"
+    )
+
+    # CORREÇÃO WINDOWS: Adiciona as flags necessárias também ao executável
+    target_compile_definitions(JogoDaForca PRIVATE NOMINMAX)
+    target_compile_options(JogoDaForca PRIVATE /EHsc)
+
+endif()
 
 # --- Linkagem das Bibliotecas ---
 
 # VERSÃO FINAL COM GRUPOS DE LINKAGEM
-target_link_libraries(JogoDaForca PRIVATE
-    # Dependências não cíclicas
-    PCRE2::8BIT PCRE2::16BIT PCRE2::32BIT PCRE2::POSIX
+if(UNIX AND NOT APPLE)
 
-    # Inicia o grupo de linkagem para resolver dependências cíclicas
-    -Wl,--start-group
-    
-    # Bibliotecas que dependem uma da outra
-    "${CEF_ROOT}/Release/libcef.so" 
-    cef_wrapper
+    target_link_libraries(JogoDaForca PRIVATE
 
-    # Finaliza o grupo de linkagem
-    -Wl,--end-group
+        # Dependências não cíclicas
+        PCRE2::8BIT PCRE2::16BIT PCRE2::32BIT PCRE2::POSIX
 
-    # Dependências de sistema (que o CEF usa)
-    "${GTK3_LIBRARIES}"
-    "${X11_LIBRARIES}"
-    Threads::Threads
-    dl
-    rt
-)
+        # Inicia o grupo de linkagem para resolver dependências cíclicas
+        -Wl,--start-group
+        
+        # Bibliotecas que dependem uma da outra
+        "${CEF_ROOT}/Release/libcef.so" 
+        cef_wrapper
+
+        # Finaliza o grupo de linkagem
+        -Wl,--end-group
+
+        # Dependências de sistema (que o CEF usa)
+        "${GTK3_LIBRARIES}"
+        "${X11_LIBRARIES}"
+        Threads::Threads
+        dl
+        rt
+
+    )
+
+elseif(WIN32)
+
+    target_link_libraries(JogoDaForca PRIVATE
+        cef_wrapper
+        "${CEF_ROOT}/Release/libcef.lib" 
+        ${CEF_LIBRARIES} # No Windows, esta variável já inclui libcef.lib e as libs de sistema (user32, gdi32, etc)
+        PCRE2::8BIT PCRE2::16BIT PCRE2::32BIT PCRE2::POSIX
+    )
+
+endif()
