@@ -301,6 +301,27 @@ Para ver se os arquivos foram adicionados com Git LFS corretamente:
 git lfs ls-files
 ```
 
+**Exemplo de saída esperada:**
+```
+0e09844f1b * vendor/cef/linux/Release/v8_context_snapshot.bin
+039fce4b94 * vendor/cef/win/Debug/cef_sandbox.lib
+eb3d384ba0 * vendor/cef/win/Release/cef_sandbox.lib
+9709105d9e * vendor/cef/win/Release/cefclient.exe
+2212160032 * vendor/cef/win/Release/chrome_elf.dll
+7120a30bf9 * vendor/cef/win/Release/d3dcompiler_47.dll
+b903485489 * vendor/cef/win/Release/dxcompiler.dll
+473f5e8531 * vendor/cef/win/Release/dxil.dll
+f280591dbd * vendor/cef/win/Release/libEGL.dll
+77e9d8f6ae * vendor/cef/win/Release/libGLESv2.dll
+fb91cfb039 * vendor/cef/win/Release/libcef.dll
+1b3f10db0e * vendor/cef/win/Release/libcef.lib
+366b320a55 * vendor/cef/win/Release/v8_context_snapshot.bin
+1e72dd05e9 * vendor/cef/win/Release/vk_swiftshader.dll
+c1a2ed8585 * vendor/cef/win/Release/vulkan-1.dll
+```
+
+> 💡 Se você vir uma lista como essa, significa que o Git LFS está funcionando corretamente e rastreando todos os arquivos grandes do projeto CEF.
+
 ---
 
 ## 🛠️ Configuração do Ambiente de Desenvolvimento
