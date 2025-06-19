@@ -304,16 +304,15 @@ namespace forcaRegex {
      * @throws  std::invalid_argument         Se o padrão regex estiver malformado
      * @throws  std::runtime_error           Se houver erro na compilação do padrão
      */
-    forcaRegex::RegexResult preg_match_all( const std::string& pattern, const std::string& subject, PCRE2_SIZE offset ) {
+    forcaRegex::RegexResult preg_match_all( const std::string& pattern, const std::string& subject, PCRE2_SIZE offset, std::size_t limit ) {
 
         forcaRegex::RegexResult finalResult;
 
         finalResult.match = false;
 
-        if (offset >= subject.length()) return finalResult;
+        if (offset >= subject.length() || limit == 0) return finalResult;
 
-        // CORREÇÃO: Pega a posse do padrão compilado de forma segura
-        auto finalPattern_ptr = createPattern(pattern);
+        std::unique_ptr<forcaRegex::RegexPattern> finalPattern_ptr = createPattern(pattern);
 
         RegexMatchData regex_data;
 
@@ -326,7 +325,13 @@ namespace forcaRegex {
 
         bool foundAny = false;
 
+        std::size_t count = 0;
+
         while (offset < subject_length) {
+            
+            if (limit == 0 || count >= limit) {
+                break;
+            }
 
             int regex_result = pcre2_match(
                 finalPattern_ptr->compiled.code,
@@ -406,6 +411,8 @@ namespace forcaRegex {
             if (new_offset <= offset) offset++; // evita loop infinito com zero-width matches
             else offset = new_offset;
 
+            count++;
+
         }
 
         if( mcontext != nullptr ) pcre2_match_context_free(mcontext);
@@ -431,9 +438,19 @@ namespace forcaRegex {
      * @throws  std::invalid_argument           Se o padrão regex estiver malformado
      * @throws  std::runtime_error             Se houver erro na compilação do padrão
      */
-    std::string preg_replace( const std::string& pattern, const std::string& subject, const std::string& replacement, PCRE2_SIZE offset ) {
+    std::string preg_replace( const std::string& pattern, const std::string& subject, const std::string& replacement, PCRE2_SIZE offset, std::size_t limit ) {
 
-        RegexResult result = preg_match_all(pattern, subject, offset);
+        if(limit == 0) return subject;
+
+        RegexResult result;
+
+        // Otimização para quando limit for igual a 1, usando o preg_match que é mais rápido.
+        if(limit == 1){
+            result = preg_match(pattern, subject, offset);
+        }
+        else{
+            result = preg_match_all(pattern, subject, offset, limit);
+        }
 
         if (!result.match) return subject;
 
@@ -444,7 +461,13 @@ namespace forcaRegex {
 
         if (!full_matches) return subject;
 
+        std::size_t count = 0;
+
         for (const auto& match_data : *full_matches) {
+
+            if (limit == 0 || count >= limit) {
+                break;
+            }
 
             // Adiciona parte do subject entre o último match e o início do atual
             output += subject.substr(last_pos, match_data.start - last_pos);
@@ -494,6 +517,7 @@ namespace forcaRegex {
 
             output += replaced;
             last_pos = match_data.end;
+            count++;
 
         }
 

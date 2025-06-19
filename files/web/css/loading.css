@@ -1,0 +1,40 @@
+body {
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    height: 100vh;
+    background: #1a1e24; /* Cor de fundo dark (azul-escuro acinzentado) */
+    font-family: Arial, sans-serif;
+    color: #e0e0e0; /* Texto claro */
+}
+
+.spinner {
+    border: 8px solid rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    border-top: 8px solid #4d8ee6; /* Azul mais vibrante */
+    width: 60px;
+    height: 60px;
+    animation: spin 1s linear infinite;
+    margin-bottom: 20px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.static-text {
+    font-size: 24px;
+    margin-bottom: 10px;
+    color: #ffffff; /* Branco puro para destaque */
+    text-shadow: 0 0 8px rgba(77, 142, 230, 0.5); /* Sutil glow azul */
+}
+
+.dynamic-text {
+    font-size: 18px;
+    color: #a0a0a0; /* Cinza claro */
+    min-height: 24px;
+}

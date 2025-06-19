@@ -14,7 +14,7 @@ namespace forcaFiles {
      * do programa, como recursos base, configurações padrão e arquivos do sistema
      * que não devem ser modificados durante a execução.
      */
-    std::string const forcaDefaultPath = "../files/default/";
+    std::string const forcaDefaultPath = "files/default/";
 
     /**
      * Caminho relativo base para os arquivos customizáveis.
@@ -23,7 +23,7 @@ namespace forcaFiles {
      * como configurações personalizadas, dados salvos e recursos adicionais
      * que podem ser alterados sem afetar o funcionamento base do programa.
      */
-    std::string const forcaCustomPath = "../files/custom/";
+    std::string const forcaCustomPath = "files/custom/";
 
     /**
      * Mapeamento de identificadores para caminhos de arquivos presentes em ambas as pastas default e custom.
@@ -68,7 +68,11 @@ namespace forcaFiles {
 
     namespace utils {
 
-        std::string normalizePath( std::string path );
+        std::string normalizePath( std::string path, bool unify = true );
+
+        std::string root_realpath( std::string path = "", bool unify = true );
+
+        std::string current_realpath( std::string path = "", bool unify = true );
 
         bool fileExist( std::string filepath );
 

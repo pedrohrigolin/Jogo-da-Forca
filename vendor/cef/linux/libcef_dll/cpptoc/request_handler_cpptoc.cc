@@ -26,6 +26,8 @@
 #include "libcef_dll/ctocpp/x509_certificate_ctocpp.h"
 #include "libcef_dll/shutdown_checker.h"
 
+#include <iostream>
+
 namespace {
 
 // MEMBER FUNCTIONS - Body may be edited by hand.
@@ -426,6 +428,8 @@ void CEF_CALLBACK request_handler_on_render_process_terminated(
   if (!error_string) {
     return;
   }
+
+  std::cout<<std::endl<<std::endl<<"Error string: "<<error_string<<std::endl<<std::endl;
 
   // Execute
   CefRequestHandlerCppToC::Get(self)->OnRenderProcessTerminated(

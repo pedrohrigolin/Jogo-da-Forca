@@ -8,6 +8,7 @@
 #include <map>
 #include <algorithm> // Para usar o std::find
 #include <memory>  // Para gerenciamento de memória com unique_ptr
+#include <limits>
 
 namespace forcaRegex {
 
@@ -111,9 +112,9 @@ namespace forcaRegex {
 
         private:
 
-            std::vector<std::vector<forcaRegex::RegexStructData>> numberGroups;
+            std::vector< std::vector< forcaRegex::RegexStructData > > numberGroups;
 
-            std::map<std::string, std::vector<forcaRegex::RegexStructData>> namedGroups;
+            std::map< std::string, std::vector< forcaRegex::RegexStructData > > namedGroups;
 
             std::string trim( const std::string& string ){
 
@@ -149,7 +150,7 @@ namespace forcaRegex {
 
                 std::string newKey = forcaRegex::RegexResult::trim(key);
 
-                std::map<std::string, std::vector<forcaRegex::RegexStructData>>::iterator pos = forcaRegex::RegexResult::namedGroups.find(newKey);
+                std::map< std::string, std::vector< forcaRegex::RegexStructData > >::iterator pos = forcaRegex::RegexResult::namedGroups.find(newKey);
 
                 return pos != forcaRegex::RegexResult::namedGroups.end();
 
@@ -157,7 +158,7 @@ namespace forcaRegex {
 
             bool key_exist( int key ){
 
-                return key >= 0 && key < static_cast<int>(numberGroups.size());
+                return key >= 0 && key < static_cast<int>( numberGroups.size() );
 
             };
 
@@ -172,7 +173,7 @@ namespace forcaRegex {
                 }
                 else{
 
-                    std::vector<forcaRegex::RegexStructData> newPush;
+                    std::vector< forcaRegex::RegexStructData > newPush;
 
                     newPush.push_back(data);
 
@@ -197,7 +198,7 @@ namespace forcaRegex {
                 }
                 else{
 
-                    std::vector<forcaRegex::RegexStructData> newPush;
+                    std::vector< forcaRegex::RegexStructData > newPush;
 
                     newPush.push_back(data);
 
@@ -210,13 +211,19 @@ namespace forcaRegex {
             };
 
             std::vector<RegexStructData>* get(int key) {
+
                 return forcaRegex::RegexResult::key_exist(key) ? &forcaRegex::RegexResult::numberGroups[key] : nullptr;
+
             };
 
             std::vector<RegexStructData>* get(const std::string& key) {
+
                 std::string newKey = forcaRegex::RegexResult::trim(key);
-                std::map<std::string, std::vector<forcaRegex::RegexStructData>>::iterator item = forcaRegex::RegexResult::namedGroups.find(newKey);
+                
+                std::map< std::string, std::vector< forcaRegex::RegexStructData > >::iterator item = forcaRegex::RegexResult::namedGroups.find(newKey);
+                
                 return item != forcaRegex::RegexResult::namedGroups.end() ? &item->second : nullptr;
+
             };
 
     };
@@ -226,9 +233,9 @@ namespace forcaRegex {
 
     forcaRegex::RegexResult preg_match( const std::string& pattern, const std::string& subject, PCRE2_SIZE offset = 0 );
 
-    forcaRegex::RegexResult preg_match_all( const std::string& pattern, const std::string& subject, PCRE2_SIZE offset = 0 );
+    forcaRegex::RegexResult preg_match_all( const std::string& pattern, const std::string& subject, PCRE2_SIZE offset = 0, std::size_t limit = std::numeric_limits<size_t>::max() );
 
-    std::string preg_replace( const std::string& pattern, const std::string& subject, const std::string& replacement, PCRE2_SIZE offset = 0 );
+    std::string preg_replace( const std::string& pattern, const std::string& subject, const std::string& replacement, PCRE2_SIZE offset = 0, std::size_t limit = std::numeric_limits<size_t>::max() );
 
 }
 

@@ -286,7 +286,7 @@ namespace forcaStrings {
      * @param   const std::string& text    String que terá as quebras de linha normalizadas
      * @return  std::string               String com quebras de linha normalizadas para \n
      */
-    std::string normalizeBreakLines( const std::string& text ) {
+    std::string normalizeLineBreaks( const std::string& text ) {
 
         return forcaRegex::preg_replace("/(?:\r\n|\v|\f|\n)/", text, "\n");
 
@@ -352,7 +352,9 @@ namespace forcaStrings {
      * @param   std::vector<std::string>* reference    Ponteiro para o vetor que armazenará os resultados
      * @return  void
      */
-    void explode( const std::string& string, std::string separator, std::vector<std::string>* reference ) {
+    void explode( const std::string& string, std::string separator, std::vector<std::string>* reference, std::size_t limit ) {
+
+        if(limit == 0 || reference->size() >= limit) return;
 
         /*         
             Cria uma cópia da string de entrada.
@@ -363,15 +365,19 @@ namespace forcaStrings {
 
         std::string::size_type pos = copy.find(separator);
 
-        if( pos != std::string::npos ){
+        std::string::size_type separatorLength = separator.length();
 
-            std::string substr = copy.substr(0, pos);
+        if(separatorLength == 0) separatorLength = 1;
+
+        if( pos != std::string::npos && (reference->size() + 1) < limit ){
+
+            std::string substr = copy.substr(0, pos + separatorLength);
 
             reference->push_back(substr);
 
-            copy = copy.erase( 0, pos + separator.length() );
+            copy = copy.erase( 0, pos + separatorLength );
 
-            explode(copy, separator, reference);
+            explode(copy, separator, reference, limit);
 
         }
         else{
@@ -389,11 +395,11 @@ namespace forcaStrings {
      * @param   std::vector<std::string>* reference    Ponteiro para o vetor que armazenará os resultados
      * @return  void
      */
-    void explode( char* string, std::string separator, std::vector<std::string>* reference ) {
+    void explode( char* string, std::string separator, std::vector<std::string>* reference, std::size_t limit ) {
 
         std::string copy = string;
 
-        explode(copy, separator, reference);
+        explode(copy, separator, reference, limit);
 
     }
 
@@ -406,11 +412,11 @@ namespace forcaStrings {
      * @param   std::vector<std::string>* reference    Ponteiro para o vetor que armazenará os resultados
      * @return  void
      */
-    void explode( const char* string, std::string separator, std::vector<std::string>* reference ) {
+    void explode( const char* string, std::string separator, std::vector<std::string>* reference, std::size_t limit ) {
 
         std::string copy = string;
 
-        explode(copy, separator, reference);
+        explode(copy, separator, reference, limit);
 
     }
 

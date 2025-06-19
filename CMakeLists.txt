@@ -11,6 +11,11 @@ if(MSVC)
   set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 endif()
 
+# Define as macros de Unicode para compilação no Windows
+if(WIN32)
+    add_compile_definitions(UNICODE _UNICODE)
+endif()
+
 # Define os padrões C++ e C
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -71,10 +76,20 @@ elseif(WIN32)
 endif()
 
 # --- Estrutura do Projeto ---
+
 file(GLOB SOURCES_CPP "src/*.cpp")
 file(GLOB SOURCES_C "src/*.c")
 
-add_executable(JogoDaForca ${SOURCES_CPP} ${SOURCES_C})
+if(UNIX AND NOT APPLE)
+
+    add_executable(JogoDaForca ${SOURCES_CPP} ${SOURCES_C})
+
+else()
+
+    file(GLOB RESOURCE "resources/resource.rc")
+    add_executable(JogoDaForca ${SOURCES_CPP} ${SOURCES_C} ${RESOURCE})
+
+endif()
 
 # CORREÇÃO FINAL: GARANTE QUE O WRAPPER SEJA COMPILADO ANTES DO EXECUTÁVEL
 add_dependencies(JogoDaForca cef_wrapper)
@@ -83,25 +98,52 @@ add_dependencies(JogoDaForca cef_wrapper)
 if(UNIX AND NOT APPLE)
 
     add_custom_command(TARGET JogoDaForca POST_BUILD
+
         COMMAND ${CMAKE_COMMAND} -E copy_directory
-                "${CEF_ROOT}/Release"
-                "$<TARGET_FILE_DIR:JogoDaForca>"
+            "${CEF_ROOT}/Release"
+            "$<TARGET_FILE_DIR:JogoDaForca>"
+
         COMMAND ${CMAKE_COMMAND} -E copy_directory
-                "${CEF_ROOT}/Resources"
-                "$<TARGET_FILE_DIR:JogoDaForca>"
+            "${CEF_ROOT}/Resources"
+            "$<TARGET_FILE_DIR:JogoDaForca>"
+
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+            "${CMAKE_CURRENT_SOURCE_DIR}/resources"
+            "$<TARGET_FILE_DIR:JogoDaForca>/resources"
+
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+            "${CMAKE_CURRENT_SOURCE_DIR}/files"
+            "$<TARGET_FILE_DIR:JogoDaForca>/files"
+
         COMMENT "Copiando recursos do CEF para o diretório bin/"
+
     )
 
 elseif(WIN32)
 
     add_custom_command(TARGET JogoDaForca POST_BUILD
+
         COMMAND ${CMAKE_COMMAND} -E copy_directory 
             "${CEF_ROOT}/Release" 
             "$<TARGET_FILE_DIR:JogoDaForca>"
+
         COMMAND ${CMAKE_COMMAND} -E copy_directory 
             "${CEF_ROOT}/Resources" 
             "$<TARGET_FILE_DIR:JogoDaForca>"
-        COMMENT "Copiando recursos do CEF (Windows) para o diretório bin/"
+
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+            "${CMAKE_CURRENT_SOURCE_DIR}/resources"
+            "$<TARGET_FILE_DIR:JogoDaForca>/resources"
+
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+            "${CMAKE_CURRENT_SOURCE_DIR}/files"
+            "$<TARGET_FILE_DIR:JogoDaForca>/files"
+
+        COMMAND ${CMAKE_COMMAND} -E copy
+            "${CMAKE_CURRENT_SOURCE_DIR}/resources/icon/forca_icon.ico"
+            "$<TARGET_FILE_DIR:JogoDaForca>"
+
+        COMMENT "Copiando recursos do CEF e ícone da aplicação para o diretório bin/"
     )
 
 endif()

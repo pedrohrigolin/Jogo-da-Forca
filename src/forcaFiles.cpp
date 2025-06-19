@@ -1,4 +1,5 @@
 #include <fstream>
+#include <filesystem>
 #include <cstdlib>
 #include <cstring>
 #include <string>
@@ -8,6 +9,18 @@
 #include "forcaStrings.h"
 #include "forcaUtils.h"
 #include "forcaFiles.h"
+
+// Include das libs para usar funções próprias do SO
+#if defined(OS_WIN)
+
+    #include <windows.h>
+
+#elif defined(OS_LINUX)
+
+    #include <unistd.h>
+    #include <limits.h>
+
+#endif
 
 namespace forcaFiles {
 
@@ -21,15 +34,16 @@ namespace forcaFiles {
 
         /**
          * Normaliza um caminho de arquivo, removendo espaços, convertendo todas as barras invertidas (\)
-         * para barras normais (/) e eliminando barras duplicadas. 
-         * 
-         * Essa função é útil para padronizar caminhos de arquivos, evitando problemas de compatibilidade
+         * para barras normais (/) e eliminando barras duplicadas, se desejado.
+         *
+         * Esta função é útil para padronizar caminhos de arquivos, evitando problemas de compatibilidade
          * entre sistemas operacionais e inconsistências causadas por múltiplas barras ou espaços.
          *
-         * @param   std::string path    Caminho do arquivo a ser normalizado.
-         * @return  std::string         Caminho normalizado, sem espaços, com barras '/' e sem duplicidade.
+         * @param path   Caminho do arquivo a ser normalizado.
+         * @param unify  (Opcional) Se true (padrão), remove barras '/' duplicadas. Se false, mantém múltiplas barras.
+         * @return       Caminho normalizado, sem espaços, com barras '/' e, se unify=true, sem duplicidade.
          */
-        std::string normalizePath( std::string path ) {
+        std::string normalizePath( std::string path, bool unify ) {
 
             path = forcaStrings::removeSpaces(path);
             
@@ -44,6 +58,8 @@ namespace forcaFiles {
 
             }
 
+            if( ! unify ) return path;
+
             pos = path.find("/");
 
             // Remove / sequenciais
@@ -57,6 +73,81 @@ namespace forcaFiles {
             }
 
             return path;
+
+        }
+
+        /**
+         * Retorna o caminho absoluto do diretório do executável ou de um caminho relativo a partir dele.
+         *
+         * Se nenhum parâmetro for informado, retorna o caminho absoluto do diretório onde está o executável.
+         * Caso um caminho relativo seja passado em `path`, retorna o caminho absoluto correspondente a partir do diretório do executável.
+         * O parâmetro `unify` permite controlar se barras duplicadas serão removidas na normalização do caminho.
+         *
+         * @param path  (Opcional) Caminho relativo a ser convertido em absoluto a partir do diretório do executável. Se vazio, retorna apenas o diretório absoluto do executável.
+         * @param unify (Opcional) Se true (padrão), remove barras '/' duplicadas no caminho final. Se false, mantém múltiplas barras.
+         * @return      Caminho absoluto normalizado.
+         */
+        std::string root_realpath( std::string path, bool unify ) {
+            
+            static const std::filesystem::path current_dir = []() -> std::filesystem::path {
+
+                #if defined(OS_WIN)
+
+                    wchar_t path[MAX_PATH] = {0};
+
+                    GetModuleFileNameW(NULL, path, MAX_PATH);
+
+                    return std::filesystem::path(path).parent_path();
+
+                #elif defined(OS_LINUX)
+
+                    char result[PATH_MAX];
+
+                    ssize_t count = readlink("/proc/self/exe", result, PATH_MAX);
+
+                    return std::filesystem::path(std::string(result, (count > 0) ? count : 0)).parent_path();
+
+                #else
+
+                    // Fallback
+                    return std::filesystem::current_path();
+
+                #endif
+
+            }();
+
+            std::filesystem::path merge_path = current_dir / path;
+
+            merge_path = merge_path.lexically_normal();
+
+            std::string final_path = forcaFiles::utils::normalizePath( merge_path.string(), unify );
+
+            return final_path;
+
+        }
+
+        /**
+         * Retorna o caminho absoluto do diretório de execução atual ou de um caminho relativo a partir dele.
+         *
+         * Se nenhum parâmetro for informado, retorna o caminho absoluto do diretório de onde o programa foi executado.
+         * Caso um caminho relativo seja passado em `path`, retorna o caminho absoluto correspondente a partir do diretório de execução.
+         * O parâmetro `unify` permite controlar se barras duplicadas serão removidas na normalização do caminho.
+         *
+         * @param path  (Opcional) Caminho relativo a ser convertido em absoluto a partir do diretório de execução. Se vazio, retorna apenas o diretório absoluto de execução.
+         * @param unify (Opcional) Se true (padrão), remove barras '/' duplicadas no caminho final. Se false, mantém múltiplas barras.
+         * @return      Caminho absoluto normalizado.
+         */
+        std::string current_realpath( std::string path, bool unify ) {
+
+            std::filesystem::path current_dir = std::filesystem::current_path();
+
+            std::filesystem::path merge_path = current_dir / path;
+
+            merge_path = merge_path.lexically_normal();
+
+            std::string final_path = forcaFiles::utils::normalizePath( merge_path.string(), unify );
+
+            return final_path;
 
         }
 

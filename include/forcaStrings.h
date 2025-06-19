@@ -3,6 +3,7 @@
 
 #include <string>
 #include <vector>
+#include <limits>
 
 namespace forcaStrings {
 
@@ -22,23 +23,23 @@ namespace forcaStrings {
 
     std::string normalizeWord( const std::string& string );
 
-    std::string normalizeBreakLines( const std::string& text );
+    std::string normalizeLineBreaks( const std::string& text );
 
     std::string removeExtraLineBreaks( const std::string& text );
 
     bool checkAlphaCharacters( const std::string& word );
 
-    void explode( const std::string& string, std::string separator, std::vector<std::string>* reference );
+    void explode( const std::string& string, std::string separator, std::vector<std::string>* reference, std::size_t limit = std::numeric_limits<size_t>::max() );
 
-    void explode( char* string, std::string separator, std::vector<std::string>* reference );
+    void explode( char* string, std::string separator, std::vector<std::string>* reference, std::size_t limit = std::numeric_limits<size_t>::max() );
 
-    void explode( const char* string, std::string separator, std::vector<std::string>* reference );
+    void explode( const char* string, std::string separator, std::vector<std::string>* reference, std::size_t limit = std::numeric_limits<size_t>::max() );
 
-    std::string implode( const std::vector<std::string>& array, std::string delimeter );
+    std::string implode( const std::vector<std::string>& array, std::string delimeter = "" );
 
-    std::string implode( char* array[], int size, std::string delimiter );
+    std::string implode( char* array[], int size, std::string delimiter = "" );
 
-    std::string implode( const char* array[], int size, std::string delimiter );
+    std::string implode( const char* array[], int size, std::string delimiter = "" );
 
 }
 

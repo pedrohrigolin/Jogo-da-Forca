@@ -63,7 +63,7 @@
         Chamar 'salvarUsuario'
     </button>
 
-    <button onclick="window.meuApp.abrirDevTools()">
+    <button onclick="ForcaApp.abrirDevTools()">
         Abrir DevTools
     </button>
 
@@ -82,6 +82,9 @@
     </button>
 
     <script>
+
+        // Guarda o objeto window.ForcaApp em uma constante, uma vez que ele é bastante usado.
+        const ForcaApp = window.ForcaApp;
 
         /**
          * Objecto para fazer as chamadas de funções para o C++, tanto de forma 
@@ -104,16 +107,18 @@
 
                 }
 
-                if (window.meuApp && window.meuApp.salvarUsuario) {
+                // TODO: ISSO AQUI PODE SER MELHORADO, TALVEZ JÁ RETORNAR ERRO DA APLICAÇÃO LOGO QUANDO FOR DETECTADO 
+                // QUE O FORCAAPP NÃO FOI INICIADO NO WINDOWS.
+                if (ForcaApp && ForcaApp.salvarUsuario) {
 
-                    window.meuApp[functionName](...args);
+                    ForcaApp[functionName](...args);
                 
                     return true;
 
                 }
                 else{
 
-                    console.error( "Erro: a API C++ (window.meuApp." + functionName + ") não foi encontrada!" );
+                    console.error( "Erro: a API C++ (ForcaApp." + functionName + ") não foi encontrada!" );
 
                     return false;
 
@@ -131,8 +136,8 @@
 
                 }
 
-                if ( ! window.meuApp || typeof window.meuApp[functionName] !== 'function' ) {
-                    return Promise.reject(new Error(`API C++ (window.meuApp.${functionName}) não foi encontrada!`));
+                if ( ! ForcaApp || typeof ForcaApp[functionName] !== 'function' ) {
+                    return Promise.reject(new Error(`API C++ (ForcaApp.${functionName}) não foi encontrada!`));
                 }
 
                 return new Promise((resolve, reject) => {
@@ -144,7 +149,7 @@
                     try {
 
                         // Chama a função C++, passando os argumentos originais e o ID da promise por último.
-                        window.meuApp[functionName](...args, promiseId);
+                        ForcaApp[functionName](promiseId, ...args);
 
                     } catch (e) {
 
@@ -186,6 +191,38 @@
 
         };
 
+        // --- Funções (imutáveis) ---
+        Object.defineProperty(callUserFunc, 'sync', {
+            configurable: false,
+            enumerable: false,
+            writable: false
+        });
+
+        Object.defineProperty(callUserFunc, 'async', {
+            configurable: false,
+            enumerable: false,
+            writable: false
+        });
+
+        Object.defineProperty(callUserFunc, 'cefResolve', {
+            configurable: false,
+            enumerable: false,
+            writable: false
+        });
+
+        // --- Propriedades mutáveis (mas não deletáveis) ---
+        Object.defineProperty(callUserFunc, 'promiseCounter', {
+            configurable: false,
+            enumerable: false,
+            writable: true
+        });
+
+        Object.defineProperty(callUserFunc, 'pendingPromises', {
+            configurable: false,
+            enumerable: false,
+            writable: true
+        });
+
         /**
          * Esta função pode ser chamada pelo C++ para dar feedback à UI.
          */
@@ -208,7 +245,7 @@
         /**
          * Esta função é chamada pelo primeiro botão.
          * Ela invoca o método 'salvarUsuario' que foi exposto
-         * no objeto 'window.meuApp' pelo nosso código C++.
+         * no objeto 'ForcaApp' pelo nosso código C++.
          */
         function enviarDadosParaCpp() {
 
@@ -231,10 +268,10 @@
          * Esta função é chamada pelo botão. Ela apenas envia a solicitação para o C++.
          */
         function solicitarVersaoDoApp() {
-            if (window.meuApp && window.meuApp.getAppVersion) {
+            if (ForcaApp && ForcaApp.getAppVersion) {
                 atualizarMensagem("Solicitando versão do app ao C++...");
                 // Chama a função C++, mas não espera um retorno direto.
-                window.meuApp.getAppVersion();
+                ForcaApp.getAppVersion();
             } else {
                 alert("Erro: a função getAppVersion() não foi encontrada!");
             }
@@ -308,7 +345,7 @@
             }
         }
 
-        // A chamada para window.meuApp.abrirDevTools() é feita diretamente no atributo 'onclick' do botão.
+        // A chamada para ForcaApp.abrirDevTools() é feita diretamente no atributo 'onclick' do botão.
 
     </script>
 
