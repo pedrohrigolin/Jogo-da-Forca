@@ -33,7 +33,9 @@ namespace forcaStrings {
 
     std::string::size_type Length( const std::string& string );
 
-    std::string charAt( const std::string& string, std::string::size_type index );
+    std::string charAt( const std::string& string, std::string::size_type index = 0 );
+
+    std::string repeat( const std::string& string, std::string::size_type count = 0 );
 
     std::string substring( const std::string& string, std::size_t pos = std::numeric_limits<size_t>::max(), std::size_t len = std::numeric_limits<size_t>::max() );
 

@@ -1125,6 +1125,67 @@ NativeFunctionHandler::NativeFunctionHandler() {
         }
     );
 
+    router_->RegisterFunction("repeat",
+        [](const CefV8ValueList& args, CefRefPtr<CefV8Value>& retval, CefString& exception) -> bool {
+
+            try {
+                
+                std::size_t argsSize = args.size();
+
+                if(argsSize < 2){
+                    exception = "Quantidade insuficiente de parâmetros fornecidos para a função.";
+                    return true;
+                }
+                
+                if( ! args[1]->IsInt() && ! args[1]->IsDouble() && ! args[1]->IsUInt() ){
+                    exception = "O segundo parâmetro count deve ser do tipo inteiro e positivo!";
+                    return true;
+                }
+
+                std::string string = args[0]->GetStringValue();
+
+                if(string.empty()){
+                    retval = CefV8Value::CreateString("");
+                    return true;
+                }    
+                
+                double value = args[1]->GetDoubleValue();
+
+                if(value < 0){
+                    exception = "O segundo parâmetro count deve ser do tipo inteiro e positivo!";
+                    return true;
+                }
+
+                if(value == 0){
+                    retval = CefV8Value::CreateString("");
+                    return true;                    
+                }
+
+                std::string::size_type count = value;
+
+                std::string repeat = forcaStrings::repeat(string, count);
+
+                retval = CefV8Value::CreateString(repeat);
+
+                return true;
+
+            } catch (const std::exception& e) {
+
+                exception = ForcaInterface::exceptionText(e);
+
+                return true;
+
+            } catch (...) {
+
+                exception = "Erro ao executar função no backend! \n\nTipo de exceção: Desconhecido \n\nMensagem: Exceção desconhecida!\n";
+
+                return true;
+
+            }                 
+
+        }
+    );
+
     router_->RegisterFunction("slice",
         [](const CefV8ValueList& args, CefRefPtr<CefV8Value>& retval, CefString& exception) -> bool {
 
@@ -2461,6 +2522,8 @@ void ForcaCefApp::OnContextCreated(CefRefPtr<CefBrowser> browser, CefRefPtr<CefF
     ForcaAppObj->SetValue("endsWith", CefV8Value::CreateFunction("endsWith", nativeSyncHandler), V8_PROPERTY_ATTRIBUTE_NONE);
 
     ForcaAppObj->SetValue("charAt", CefV8Value::CreateFunction("charAt", nativeSyncHandler), V8_PROPERTY_ATTRIBUTE_NONE);
+
+    ForcaAppObj->SetValue("repeat", CefV8Value::CreateFunction("repeat", nativeSyncHandler), V8_PROPERTY_ATTRIBUTE_NONE);
 
     ForcaAppObj->SetValue("slice", CefV8Value::CreateFunction("slice", nativeSyncHandler), V8_PROPERTY_ATTRIBUTE_NONE);
 

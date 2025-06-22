@@ -523,6 +523,34 @@ namespace forcaStrings {
     }
 
     /**
+     * Repete uma string um número especificado de vezes.
+     *
+     * Esta função retorna uma nova string composta pela concatenação da string original repetida
+     * o número de vezes informado em count.
+     *
+     * Inspirada na função repeat do JavaScript.
+     *
+     * @param string String a ser repetida.
+     * @param count  Número de repetições.
+     * @return std::string String resultante da repetição.
+     */
+    std::string repeat( const std::string& string, std::string::size_type count ) {
+
+        if(string.empty() || count == 0) return "";
+
+        std::string repeat;
+
+        std::string::size_type i;
+
+        for(i=0; i<count; i++){
+            repeat += string;
+        }
+
+        return repeat;
+
+    }
+
+    /**
      * Extrai uma substring com base nos caracteres visíveis (graphemes/code points Unicode).
      *
      * Esta função retorna uma substring da string original, considerando corretamente os caracteres visuais

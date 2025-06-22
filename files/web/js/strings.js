@@ -104,6 +104,10 @@ String.prototype.charAt = function(index){
     return callUserFunc.sync("charAt", this.toString(), index);
 }
 
+String.prototype.repeat = function(count = 0){
+    return callUserFunc.sync("repeat", this.toString(), count);
+}
+
 String.prototype.slice = function(start, end){
     return callUserFunc.sync("slice", this.toString(), start, end);
 }
