@@ -11,10 +11,8 @@ if(MSVC)
   set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 endif()
 
-# Define as macros de Unicode para compilação no Windows
-if(WIN32)
-    add_compile_definitions(UNICODE _UNICODE)
-endif()
+# Define as macros de Unicode
+add_compile_definitions(UNICODE _UNICODE)
 
 # Define os padrões C++ e C
 set(CMAKE_CXX_STANDARD 17)
@@ -26,6 +24,7 @@ set(CMAKE_C_STANDARD_REQUIRED ON)
 find_package(pcre2 CONFIG REQUIRED)
 find_package(cryptopp CONFIG REQUIRED)
 find_package(nlohmann_json CONFIG REQUIRED)
+find_package(ICU REQUIRED COMPONENTS uc i18n io data)
 
 # --- Configuração do Chromium Embedded Framework (CEF) ---
 if(UNIX AND NOT APPLE)
@@ -193,6 +192,7 @@ if(UNIX AND NOT APPLE)
         PCRE2::8BIT PCRE2::16BIT PCRE2::32BIT PCRE2::POSIX
         cryptopp::cryptopp
         nlohmann_json::nlohmann_json
+        ICU::uc ICU::i18n ICU::io ICU::data
 
         # Inicia o grupo de linkagem para resolver dependências cíclicas
         -Wl,--start-group
@@ -220,6 +220,7 @@ elseif(WIN32)
         PCRE2::8BIT PCRE2::16BIT PCRE2::32BIT PCRE2::POSIX
         cryptopp::cryptopp
         nlohmann_json::nlohmann_json
+        ICU::uc ICU::i18n ICU::io ICU::data
 
         cef_wrapper
         "${CEF_ROOT}/Release/libcef.lib" 

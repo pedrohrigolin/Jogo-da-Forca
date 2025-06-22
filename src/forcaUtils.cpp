@@ -10,7 +10,7 @@
 namespace forcaUtils {
 
     /**
-     * @brief Limpa a tela do terminal de forma robusta para diferentes sistemas operacionais.
+     * Limpa a tela do terminal de forma robusta para diferentes sistemas operacionais.
      *
      * Esta função força a saída de qualquer conteúdo pendente no buffer de std::cout antes e depois do comando de limpeza.
      * Utiliza o comando "cls" para sistemas Windows e "clear" para sistemas Unix-like, escolhendo em tempo de compilação.
@@ -57,7 +57,7 @@ namespace forcaUtils {
      */
 
     /**
-     * @brief Valida e converte uma string para booleano.
+     * Valida e converte uma string para booleano.
      * 
      * Aceita valores como "TRUE", "1", "ON", "YES", "SIM" para true e "FALSE", "0", "OFF", "NO", "NAO" para false.
      * Se strict for true, lança std::invalid_argument para valores não reconhecidos.
@@ -98,7 +98,7 @@ namespace forcaUtils {
     }
 
     /**
-     * @brief Retorna o próprio valor booleano.
+     * Retorna o próprio valor booleano.
      * 
      * Esta função existe para manter a interface consistente com as outras sobrecargas.
      * 
@@ -109,7 +109,7 @@ namespace forcaUtils {
     bool filter_validate_bool( bool value, bool strict ){ return value; }
 
     /**
-     * @brief Valida e converte um inteiro para booleano.
+     * Valida e converte um inteiro para booleano.
      * 
      * Aceita 1 como true e 0 como false.
      * Se strict for true, lança std::invalid_argument para outros valores.
@@ -133,6 +133,12 @@ namespace forcaUtils {
         }
 
         return false;
+
+    }
+
+    void debug( const std::string& string ) {
+
+        std::cout<<std::endl<<std::endl<<string<<std::endl<<std::endl;
 
     }
 

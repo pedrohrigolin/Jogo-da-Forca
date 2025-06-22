@@ -1,8 +1,9 @@
 #ifndef FORCA_INTERFACE_H
 #define FORCA_INTERFACE_H
 
-#if defined(OS_WIN)
+#if defined(OS_WIN) || defined(_WIN32) || defined(_WIN64) || defined(__CYGWIN__)
 
+#define NOMINMAX
 #include <windows.h>
 
 #elif defined(OS_LINUX)
@@ -19,6 +20,8 @@
 #include <iostream>
 #include <fstream>
 #include <filesystem>
+#include <exception>
+#include <typeinfo>
 
 #include "include/cef_base.h"
 #include "include/cef_app.h"
@@ -197,7 +200,7 @@ public:
 // =================================================================================================
 
 /**
- * @brief Roteia chamadas de API do JavaScript para as funções C++ correspondentes.
+ * Roteia chamadas de API do JavaScript para as funções C++ correspondentes.
  * Este é o coração da nossa arquitetura "bonita", substituindo o bloco if/else.
  */
 class ApiRouter {
@@ -220,7 +223,7 @@ private:
 };
 
 /**
- * @brief Atua no Processo de Renderização. É um despachante genérico que pega qualquer
+ * Atua no Processo de Renderização. É um despachante genérico que pega qualquer
  * chamada de uma função exposta, empacota o nome e os argumentos, e envia para o
  * Processo do Navegador via IPC. Ele não precisa de nenhuma lógica específica.
  */
@@ -246,7 +249,7 @@ private:
 };
 
 /**
- * @brief Roteador para as funções V8 nativas e síncronas.
+ * Roteador para as funções V8 nativas e síncronas.
  */
 class NativeApiRouter {
 
@@ -265,7 +268,7 @@ private:
 };
 
 /**
- * @brief Handler para executar funções nativas no Renderer Process.
+ * Handler para executar funções nativas no Renderer Process.
  */
 class NativeFunctionHandler : public CefV8Handler {
 
@@ -295,7 +298,7 @@ private:
 // =================================================================================================
 
 /**
- * @brief Gerencia eventos do navegador e da janela. Contém nosso ApiRouter.
+ * Gerencia eventos do navegador e da janela. Contém nosso ApiRouter.
  */
 class ForcaCefClient : 
     public CefClient, 
@@ -357,7 +360,7 @@ private:
 };
 
 /**
- * @brief Delegate da janela para o framework CEF Views.
+ * Delegate da janela para o framework CEF Views.
  */
 class ForcaWindowDelegate : public CefWindowDelegate {
 
@@ -418,6 +421,10 @@ private:
 class ForcaInterface {
 
 public: 
+
+    static std::string demangle( const char* name );
+
+    static std::string exceptionText( const std::exception& e );
 
     static bool init( int argc, char* argv[] );
 

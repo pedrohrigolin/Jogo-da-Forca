@@ -12,7 +12,7 @@
 namespace forcaInitialize {
 
     /**
-     * @brief Lê os arquivos de palavras por nível e preenche a estrutura words do jogo.
+     * Lê os arquivos de palavras por nível e preenche a estrutura words do jogo.
      *
      * Esta função busca os arquivos de palavras para cada nível de dificuldade (easy, normal, hard),
      * lê o conteúdo de cada arquivo, separa as palavras por linha e armazena nos respectivos vetores

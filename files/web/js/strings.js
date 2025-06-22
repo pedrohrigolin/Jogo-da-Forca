@@ -64,8 +64,8 @@ String.prototype.normalizeLineBreaks = function(){
     return callUserFunc.sync("normalizeLineBreaks", this.toString());
 }
 
-String.prototype.removeExtraLineBreaks = function(){
-    return callUserFunc.sync("removeExtraLineBreaks", this.toString());
+String.prototype.removeExtraLineBreaks = function(normalize = true){
+    return callUserFunc.sync("removeExtraLineBreaks", this.toString(), normalize);
 }
 
 String.prototype.isAlpha = function(){
@@ -104,16 +104,26 @@ String.prototype.charAt = function(index){
     return callUserFunc.sync("charAt", this.toString(), index);
 }
 
-String.prototype.substring = function(start, end){
-    return callUserFunc.sync("substring", this.toString(), start, end);
-}
-
 String.prototype.slice = function(start, end){
     return callUserFunc.sync("slice", this.toString(), start, end);
 }
 
-String.prototype.substr = function(start, length){
-    return callUserFunc.sync("substr", this.toString(), start, length);
+String.prototype.substring = function(start, end){
+    return callUserFunc.sync("substring", this.toString(), start, end);
+}
+
+/**
+ * Método depreciado e que foi sobreescrito somente com a intenção de 
+ * ser um alias para String.prototype.substring. Para o uso igual era o método
+ * original, a alternativa continua sendo usar o String.prototype.slice
+ *
+ * @global
+ * @param	number	start 	
+ * @param	number	length	
+ * @return	string
+ */
+String.prototype.substr = function(start, end){
+    return callUserFunc.sync("substring", this.toString(), start, end);
 }
 
 String.prototype.explode = function(separator = "", limit){
@@ -134,4 +144,8 @@ String.prototype.replaceAll = function(search, replaceValue, offset = 0, limit){
 
 String.prototype.preg_replace = function(search, replaceValue, offset = 0, limit){
     return callUserFunc.sync("preg_replace", this.toString(), search, replaceValue, offset, limit);
+}
+
+String.prototype.preg_split = function(search, limit){
+    return callUserFunc.sync("preg_split", this.toString(), search, limit);
 }

@@ -4,6 +4,7 @@
   "dependencies": [
     "pcre2",
     "cryptopp",
-    "nlohmann-json"
+    "nlohmann-json",
+    "icu"
   ]
 }

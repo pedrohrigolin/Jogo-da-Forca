@@ -7,12 +7,24 @@
 #include <fstream>
 #include <sstream>
 #include <algorithm>
+#include <limits>
 #include <nlohmann/json.hpp>
+
+#include <exception>
+#include <typeinfo>
+
+#if defined(__GNUC__) || defined(__clang__)
+
+    #include <cxxabi.h>
+    #include <memory>
+
+#endif
 
 #include "forcaFiles.h"
 #include "forcaEncrypt.h"
 #include "forcaRegex.h"
 #include "forcaStrings.h"
+#include "forcaUtils.h"
 
 
 // =================================================================================================
@@ -374,13 +386,29 @@ NativeFunctionHandler::NativeFunctionHandler() {
     router_->RegisterFunction("toUpperCase",
         [](const CefV8ValueList& args, CefRefPtr<CefV8Value>& retval, CefString& exception) -> bool {
             
-            std::string string = args[0]->GetStringValue();
+            try {
 
-            string = forcaStrings::to_uppercase(string);
+                std::string string = args[0]->GetStringValue();
 
-            retval = CefV8Value::CreateString(string);
+                string = forcaStrings::to_uppercase(string);
 
-            return true;
+                retval = CefV8Value::CreateString(string);
+
+                return true;
+
+            } catch (const std::exception& e) {
+
+                exception = ForcaInterface::exceptionText(e);
+
+                return true;
+
+            } catch (...) {
+
+                exception = "Erro ao executar função no backend! \n\nTipo de exceção: Desconhecido \n\nMensagem: Exceção desconhecida!\n";
+
+                return true;
+
+            }                
 
         }
 
@@ -388,14 +416,30 @@ NativeFunctionHandler::NativeFunctionHandler() {
 
     router_->RegisterFunction("toLowerCase",
         [](const CefV8ValueList& args, CefRefPtr<CefV8Value>& retval, CefString& exception) -> bool {
-            
-            std::string string = args[0]->GetStringValue();
+           
+            try {
 
-            string = forcaStrings::to_lowercase(string);
+                std::string string = args[0]->GetStringValue();
 
-            retval = CefV8Value::CreateString(string);
+                string = forcaStrings::to_lowercase(string);
 
-            return true;
+                retval = CefV8Value::CreateString(string);
+
+                return true;
+
+            } catch (const std::exception& e) {
+
+                exception = ForcaInterface::exceptionText(e);
+
+                return true;
+
+            } catch (...) {
+
+                exception = "Erro ao executar função no backend! \n\nTipo de exceção: Desconhecido \n\nMensagem: Exceção desconhecida!\n";
+
+                return true;
+
+            }        
 
         }
 
@@ -404,13 +448,29 @@ NativeFunctionHandler::NativeFunctionHandler() {
     router_->RegisterFunction("removeAcentos",
         [](const CefV8ValueList& args, CefRefPtr<CefV8Value>& retval, CefString& exception) -> bool {
             
-            std::string string = args[0]->GetStringValue();
+            try {
 
-            string = forcaStrings::removeAcentos(string);
+                std::string string = args[0]->GetStringValue();
 
-            retval = CefV8Value::CreateString(string);
+                string = forcaStrings::removeAcentos(string);
 
-            return true;
+                retval = CefV8Value::CreateString(string);
+
+                return true;
+
+            } catch (const std::exception& e) {
+
+                exception = ForcaInterface::exceptionText(e);
+
+                return true;
+
+            } catch (...) {
+
+                exception = "Erro ao executar função no backend! \n\nTipo de exceção: Desconhecido \n\nMensagem: Exceção desconhecida!\n";
+
+                return true;
+
+            }        
 
         }
 
@@ -419,13 +479,29 @@ NativeFunctionHandler::NativeFunctionHandler() {
     router_->RegisterFunction("removeSpaces",
         [](const CefV8ValueList& args, CefRefPtr<CefV8Value>& retval, CefString& exception) -> bool {
             
-            std::string string = args[0]->GetStringValue();
+            try {
 
-            string = forcaStrings::removeSpaces(string);
+                std::string string = args[0]->GetStringValue();
 
-            retval = CefV8Value::CreateString(string);
+                string = forcaStrings::removeSpaces(string);
 
-            return true;
+                retval = CefV8Value::CreateString(string);
+
+                return true;
+
+            } catch (const std::exception& e) {
+
+                exception = ForcaInterface::exceptionText(e);
+
+                return true;
+
+            } catch (...) {
+
+                exception = "Erro ao executar função no backend! \n\nTipo de exceção: Desconhecido \n\nMensagem: Exceção desconhecida!\n";
+
+                return true;
+
+            }    
 
         }
 
@@ -434,13 +510,29 @@ NativeFunctionHandler::NativeFunctionHandler() {
     router_->RegisterFunction("trim",
         [](const CefV8ValueList& args, CefRefPtr<CefV8Value>& retval, CefString& exception) -> bool {
             
-            std::string string = args[0]->GetStringValue();
+            try {
 
-            string = forcaStrings::trim(string);
+                std::string string = args[0]->GetStringValue();
 
-            retval = CefV8Value::CreateString(string);
+                string = forcaStrings::trim(string);
 
-            return true;
+                retval = CefV8Value::CreateString(string);
+
+                return true;
+
+            } catch (const std::exception& e) {
+
+                exception = ForcaInterface::exceptionText(e);
+
+                return true;
+
+            } catch (...) {
+
+                exception = "Erro ao executar função no backend! \n\nTipo de exceção: Desconhecido \n\nMensagem: Exceção desconhecida!\n";
+
+                return true;
+
+            }    
 
         }
 
@@ -449,13 +541,29 @@ NativeFunctionHandler::NativeFunctionHandler() {
     router_->RegisterFunction("rtrim",
         [](const CefV8ValueList& args, CefRefPtr<CefV8Value>& retval, CefString& exception) -> bool {
             
-            std::string string = args[0]->GetStringValue();
+            try {
 
-            string = forcaStrings::rtrim(string);
+                std::string string = args[0]->GetStringValue();
 
-            retval = CefV8Value::CreateString(string);
+                string = forcaStrings::rtrim(string);
 
-            return true;
+                retval = CefV8Value::CreateString(string);
+
+                return true;
+
+            } catch (const std::exception& e) {
+
+                exception = ForcaInterface::exceptionText(e);
+
+                return true;
+
+            } catch (...) {
+
+                exception = "Erro ao executar função no backend! \n\nTipo de exceção: Desconhecido \n\nMensagem: Exceção desconhecida!\n";
+
+                return true;
+
+            }    
 
         }
 
@@ -464,13 +572,29 @@ NativeFunctionHandler::NativeFunctionHandler() {
     router_->RegisterFunction("ltrim",
         [](const CefV8ValueList& args, CefRefPtr<CefV8Value>& retval, CefString& exception) -> bool {
             
-            std::string string = args[0]->GetStringValue();
+            try {
 
-            string = forcaStrings::ltrim(string);
+                std::string string = args[0]->GetStringValue();
 
-            retval = CefV8Value::CreateString(string);
+                string = forcaStrings::ltrim(string);
 
-            return true;
+                retval = CefV8Value::CreateString(string);
+
+                return true;
+
+            } catch (const std::exception& e) {
+
+                exception = ForcaInterface::exceptionText(e);
+
+                return true;
+
+            } catch (...) {
+
+                exception = "Erro ao executar função no backend! \n\nTipo de exceção: Desconhecido \n\nMensagem: Exceção desconhecida!\n";
+
+                return true;
+
+            }    
 
         }
 
@@ -479,13 +603,29 @@ NativeFunctionHandler::NativeFunctionHandler() {
     router_->RegisterFunction("normalizeWord",
         [](const CefV8ValueList& args, CefRefPtr<CefV8Value>& retval, CefString& exception) -> bool {
             
-            std::string string = args[0]->GetStringValue();
+            try {
 
-            string = forcaStrings::normalizeWord(string);
+                std::string string = args[0]->GetStringValue();
 
-            retval = CefV8Value::CreateString(string);
+                string = forcaStrings::normalizeWord(string);
 
-            return true;
+                retval = CefV8Value::CreateString(string);
+
+                return true;
+
+            } catch (const std::exception& e) {
+
+                exception = ForcaInterface::exceptionText(e);
+
+                return true;
+
+            } catch (...) {
+
+                exception = "Erro ao executar função no backend! \n\nTipo de exceção: Desconhecido \n\nMensagem: Exceção desconhecida!\n";
+
+                return true;
+
+            }    
 
         }
 
@@ -494,13 +634,29 @@ NativeFunctionHandler::NativeFunctionHandler() {
     router_->RegisterFunction("normalizeLineBreaks",
         [](const CefV8ValueList& args, CefRefPtr<CefV8Value>& retval, CefString& exception) -> bool {
             
-            std::string string = args[0]->GetStringValue();
+            try {
 
-            string = forcaStrings::normalizeLineBreaks(string);
+                std::string string = args[0]->GetStringValue();
 
-            retval = CefV8Value::CreateString(string);
+                string = forcaStrings::normalizeLineBreaks(string);
 
-            return true;
+                retval = CefV8Value::CreateString(string);
+
+                return true;
+
+            } catch (const std::exception& e) {
+
+                exception = ForcaInterface::exceptionText(e);
+
+                return true;
+
+            } catch (...) {
+
+                exception = "Erro ao executar função no backend! \n\nTipo de exceção: Desconhecido \n\nMensagem: Exceção desconhecida!\n";
+
+                return true;
+
+            }    
 
         }
 
@@ -509,13 +665,42 @@ NativeFunctionHandler::NativeFunctionHandler() {
     router_->RegisterFunction("removeExtraLineBreaks",
         [](const CefV8ValueList& args, CefRefPtr<CefV8Value>& retval, CefString& exception) -> bool {
             
-            std::string string = args[0]->GetStringValue();
+            try {
 
-            string = forcaStrings::removeExtraLineBreaks(string);
+                std::string string = args[0]->GetStringValue();
 
-            retval = CefV8Value::CreateString(string);
+                bool normalize = true;
 
-            return true;
+                if(args.size() > 1){
+
+                    if( ! args[1]->IsBool() ){
+                        exception = "O parâmetro normalize deve ser do tipo boolean!";
+                        return true;
+                    }
+
+                    normalize = args[1]->GetBoolValue();
+
+                }                
+
+                string = forcaStrings::removeExtraLineBreaks(string, normalize);
+
+                retval = CefV8Value::CreateString(string);
+
+                return true;
+
+            } catch (const std::exception& e) {
+
+                exception = ForcaInterface::exceptionText(e);
+
+                return true;
+
+            } catch (...) {
+
+                exception = "Erro ao executar função no backend! \n\nTipo de exceção: Desconhecido \n\nMensagem: Exceção desconhecida!\n";
+
+                return true;
+
+            }    
 
         }
 
@@ -524,13 +709,29 @@ NativeFunctionHandler::NativeFunctionHandler() {
     router_->RegisterFunction("checkAlphaCharacters",
         [](const CefV8ValueList& args, CefRefPtr<CefV8Value>& retval, CefString& exception) -> bool {
             
-            std::string string = args[0]->GetStringValue();
+            try {
 
-            bool isAlpha = forcaStrings::checkAlphaCharacters(string);
+                std::string string = args[0]->GetStringValue();
 
-            retval = CefV8Value::CreateBool(isAlpha);
+                bool isAlpha = forcaStrings::checkAlphaCharacters(string);
 
-            return true;
+                retval = CefV8Value::CreateBool(isAlpha);
+
+                return true;
+
+            } catch (const std::exception& e) {
+
+                exception = ForcaInterface::exceptionText(e);
+
+                return true;
+
+            } catch (...) {
+
+                exception = "Erro ao executar função no backend! \n\nTipo de exceção: Desconhecido \n\nMensagem: Exceção desconhecida!\n";
+
+                return true;
+
+            }    
 
         }
 
@@ -539,31 +740,47 @@ NativeFunctionHandler::NativeFunctionHandler() {
     router_->RegisterFunction("concat",
         [](const CefV8ValueList& args, CefRefPtr<CefV8Value>& retval, CefString& exception) -> bool {
             
-            std::size_t argsSize = args.size();
+            try {
 
-            if(argsSize < 2){
-                exception = "Quantidade insuficiente de parâmetros fornecidos para a função.";
-                return true;
-            }
+                std::size_t argsSize = args.size();
 
-            std::size_t i;
-
-            std::string string = args[0]->GetStringValue();
-
-            for(i=1; i<argsSize; i++){
-
-                if( ! args[i]->IsString() ){
-                    exception = "Só é permitido concatenar strings com outras strings.";
-                    return true;                    
+                if(argsSize < 2){
+                    exception = "Quantidade insuficiente de parâmetros fornecidos para a função.";
+                    return true;
                 }
 
-                string += args[i]->GetStringValue();
+                std::size_t i;
 
-            }
+                std::string string = args[0]->GetStringValue();
 
-            retval = CefV8Value::CreateString(string);
+                for(i=1; i<argsSize; i++){
 
-            return true;
+                    if( ! args[i]->IsString() ){
+                        exception = "Só é permitido concatenar strings com outras strings.";
+                        return true;                    
+                    }
+
+                    string += args[i]->GetStringValue();
+
+                }
+
+                retval = CefV8Value::CreateString(string);
+
+                return true;
+
+            } catch (const std::exception& e) {
+
+                exception = ForcaInterface::exceptionText(e);
+
+                return true;
+
+            } catch (...) {
+
+                exception = "Erro ao executar função no backend! \n\nTipo de exceção: Desconhecido \n\nMensagem: Exceção desconhecida!\n";
+
+                return true;
+
+            }    
 
         }
 
@@ -572,36 +789,52 @@ NativeFunctionHandler::NativeFunctionHandler() {
     router_->RegisterFunction("includes",
         [](const CefV8ValueList& args, CefRefPtr<CefV8Value>& retval, CefString& exception) -> bool {
 
-            std::size_t argsSize = args.size();
+            try {
 
-            if(argsSize < 2){
-                exception = "Quantidade insuficiente de parâmetros fornecidos para a função.";
+                std::size_t argsSize = args.size();
+
+                if(argsSize < 2){
+                    exception = "Quantidade insuficiente de parâmetros fornecidos para a função.";
+                    return true;
+                }
+
+                if( ! args[1]->IsString() ){
+                    exception = "O primeiro parâmetro separator deve ser do tipo String!";
+                    return true;
+                }
+
+                std::string string = args[0]->GetStringValue();
+
+                std::string find = args[1]->GetStringValue();
+
+                std::string::size_type pos = string.find(find);
+
+                CefRefPtr<CefV8Value> includes;
+
+                if( pos == std::string::npos ){
+                    includes = CefV8Value::CreateBool(false);
+                }
+                else{
+                    includes = CefV8Value::CreateBool(true);
+                }
+
+                retval = includes;
+
                 return true;
-            }
 
-            if( ! args[1]->IsString() ){
-                exception = "O primeiro parâmetro separator deve ser do tipo String!";
+            } catch (const std::exception& e) {
+
+                exception = ForcaInterface::exceptionText(e);
+
                 return true;
-            }
 
-            std::string string = args[0]->GetStringValue();
+            } catch (...) {
 
-            std::string find = args[1]->GetStringValue();
+                exception = "Erro ao executar função no backend! \n\nTipo de exceção: Desconhecido \n\nMensagem: Exceção desconhecida!\n";
 
-            std::string::size_type pos = string.find(find);
+                return true;
 
-            CefRefPtr<CefV8Value> includes;
-
-            if( pos == std::string::npos ){
-                includes = CefV8Value::CreateBool(false);
-            }
-            else{
-                includes = CefV8Value::CreateBool(true);
-            }
-
-            retval = includes;
-
-            return true;
+            }    
 
         }
     );
@@ -609,36 +842,52 @@ NativeFunctionHandler::NativeFunctionHandler() {
     router_->RegisterFunction("firstIndexOf",
         [](const CefV8ValueList& args, CefRefPtr<CefV8Value>& retval, CefString& exception) -> bool {
 
-            std::size_t argsSize = args.size();
+            try {
 
-            if(argsSize < 2){
-                exception = "Quantidade insuficiente de parâmetros fornecidos para a função.";
+                std::size_t argsSize = args.size();
+
+                if(argsSize < 2){
+                    exception = "Quantidade insuficiente de parâmetros fornecidos para a função.";
+                    return true;
+                }
+
+                if( ! args[1]->IsString() ){
+                    exception = "O primeiro parâmetro separator deve ser do tipo String!";
+                    return true;
+                }
+
+                std::string string = args[0]->GetStringValue();
+
+                std::string find = args[1]->GetStringValue();
+
+                std::string::size_type pos = forcaStrings::firstIndexOf(string, find);
+
+                CefRefPtr<CefV8Value> index;
+
+                if( pos == std::string::npos ){
+                    index = CefV8Value::CreateInt(-1);
+                }
+                else{
+                    index = CefV8Value::CreateInt(pos);
+                }
+
+                retval = index;
+
                 return true;
-            }
 
-            if( ! args[1]->IsString() ){
-                exception = "O primeiro parâmetro separator deve ser do tipo String!";
+            } catch (const std::exception& e) {
+
+                exception = ForcaInterface::exceptionText(e);
+
                 return true;
-            }
 
-            std::string string = args[0]->GetStringValue();
+            } catch (...) {
 
-            std::string find = args[1]->GetStringValue();
+                exception = "Erro ao executar função no backend! \n\nTipo de exceção: Desconhecido \n\nMensagem: Exceção desconhecida!\n";
 
-            std::string::size_type pos = string.find_first_of(find);
+                return true;
 
-            CefRefPtr<CefV8Value> index;
-
-            if( pos == std::string::npos ){
-                index = CefV8Value::CreateInt(-1);
-            }
-            else{
-                index = CefV8Value::CreateInt(pos);
-            }
-
-            retval = index;
-
-            return true;
+            }    
 
         }
     );
@@ -646,36 +895,52 @@ NativeFunctionHandler::NativeFunctionHandler() {
     router_->RegisterFunction("lastIndexOf",
         [](const CefV8ValueList& args, CefRefPtr<CefV8Value>& retval, CefString& exception) -> bool {
 
-            std::size_t argsSize = args.size();
+            try {
 
-            if(argsSize < 2){
-                exception = "Quantidade insuficiente de parâmetros fornecidos para a função.";
+                std::size_t argsSize = args.size();
+
+                if(argsSize < 2){
+                    exception = "Quantidade insuficiente de parâmetros fornecidos para a função.";
+                    return true;
+                }
+
+                if( ! args[1]->IsString() ){
+                    exception = "O primeiro parâmetro separator deve ser do tipo String!";
+                    return true;
+                }
+
+                std::string string = args[0]->GetStringValue();
+
+                std::string find = args[1]->GetStringValue();
+
+                std::string::size_type pos = forcaStrings::lastIndexOf(string, find);
+
+                CefRefPtr<CefV8Value> index;
+
+                if( pos == std::string::npos ){
+                    index = CefV8Value::CreateInt(-1);
+                }
+                else{
+                    index = CefV8Value::CreateInt(pos);
+                }
+
+                retval = index;
+
                 return true;
-            }
 
-            if( ! args[1]->IsString() ){
-                exception = "O primeiro parâmetro separator deve ser do tipo String!";
+            } catch (const std::exception& e) {
+
+                exception = ForcaInterface::exceptionText(e);
+
                 return true;
-            }
 
-            std::string string = args[0]->GetStringValue();
+            } catch (...) {
 
-            std::string find = args[1]->GetStringValue();
+                exception = "Erro ao executar função no backend! \n\nTipo de exceção: Desconhecido \n\nMensagem: Exceção desconhecida!\n";
 
-            std::string::size_type pos = string.find_last_of(find);
+                return true;
 
-            CefRefPtr<CefV8Value> index;
-
-            if( pos == std::string::npos ){
-                index = CefV8Value::CreateInt(-1);
-            }
-            else{
-                index = CefV8Value::CreateInt(pos);
-            }
-
-            retval = index;
-
-            return true;
+            }    
 
         }
     );   
@@ -683,36 +948,52 @@ NativeFunctionHandler::NativeFunctionHandler() {
     router_->RegisterFunction("startsWith",
         [](const CefV8ValueList& args, CefRefPtr<CefV8Value>& retval, CefString& exception) -> bool {
 
-            std::size_t argsSize = args.size();
+            try {
 
-            if(argsSize < 2){
-                exception = "Quantidade insuficiente de parâmetros fornecidos para a função.";
+                std::size_t argsSize = args.size();
+
+                if(argsSize < 2){
+                    exception = "Quantidade insuficiente de parâmetros fornecidos para a função.";
+                    return true;
+                }
+
+                if( ! args[1]->IsString() ){
+                    exception = "O primeiro parâmetro separator deve ser do tipo String!";
+                    return true;
+                }
+
+                std::string string = args[0]->GetStringValue();
+
+                std::string find = args[1]->GetStringValue();
+
+                std::string::size_type pos = string.find(find);
+
+                CefRefPtr<CefV8Value> result;
+
+                if( pos == std::string::npos || pos != 0 ){
+                    result = CefV8Value::CreateBool(false);
+                }
+                else{
+                    result = CefV8Value::CreateBool(true);
+                }
+
+                retval = result;
+
                 return true;
-            }
 
-            if( ! args[1]->IsString() ){
-                exception = "O primeiro parâmetro separator deve ser do tipo String!";
+            } catch (const std::exception& e) {
+
+                exception = ForcaInterface::exceptionText(e);
+
                 return true;
-            }
 
-            std::string string = args[0]->GetStringValue();
+            } catch (...) {
 
-            std::string find = args[1]->GetStringValue();
+                exception = "Erro ao executar função no backend! \n\nTipo de exceção: Desconhecido \n\nMensagem: Exceção desconhecida!\n";
 
-            std::string::size_type pos = string.find_first_of(find);
+                return true;
 
-            CefRefPtr<CefV8Value> result;
-
-            if( pos == std::string::npos || pos != 0 ){
-                result = CefV8Value::CreateBool(false);
-            }
-            else{
-                result = CefV8Value::CreateBool(true);
-            }
-
-            retval = result;
-
-            return true;
+            }    
 
         }
     );     
@@ -720,36 +1001,52 @@ NativeFunctionHandler::NativeFunctionHandler() {
     router_->RegisterFunction("endsWith",
         [](const CefV8ValueList& args, CefRefPtr<CefV8Value>& retval, CefString& exception) -> bool {
 
-            std::size_t argsSize = args.size();
+            try {
 
-            if(argsSize < 2){
-                exception = "Quantidade insuficiente de parâmetros fornecidos para a função.";
+                std::size_t argsSize = args.size();
+
+                if(argsSize < 2){
+                    exception = "Quantidade insuficiente de parâmetros fornecidos para a função.";
+                    return true;
+                }
+
+                if( ! args[1]->IsString() ){
+                    exception = "O primeiro parâmetro separator deve ser do tipo String!";
+                    return true;
+                }
+
+                std::string string = args[0]->GetStringValue();
+
+                std::string find = args[1]->GetStringValue();
+
+                std::string::size_type pos = string.rfind(find);
+
+                CefRefPtr<CefV8Value> result;
+
+                if( pos == std::string::npos || pos != (string.length() - find.length()) ){
+                    result = CefV8Value::CreateBool(false);
+                }
+                else{
+                    result = CefV8Value::CreateBool(true);
+                }
+
+                retval = result;
+
                 return true;
-            }
 
-            if( ! args[1]->IsString() ){
-                exception = "O primeiro parâmetro separator deve ser do tipo String!";
+            } catch (const std::exception& e) {
+
+                exception = ForcaInterface::exceptionText(e);
+
                 return true;
-            }
 
-            std::string string = args[0]->GetStringValue();
+            } catch (...) {
 
-            std::string find = args[1]->GetStringValue();
+                exception = "Erro ao executar função no backend! \n\nTipo de exceção: Desconhecido \n\nMensagem: Exceção desconhecida!\n";
 
-            std::string::size_type pos = string.find_last_of(find);
+                return true;
 
-            CefRefPtr<CefV8Value> result;
-
-            if( pos == std::string::npos || pos != (string.length() - 1) ){
-                result = CefV8Value::CreateBool(false);
-            }
-            else{
-                result = CefV8Value::CreateBool(true);
-            }
-
-            retval = result;
-
-            return true;
+            }    
 
         }
     );         
@@ -757,133 +1054,400 @@ NativeFunctionHandler::NativeFunctionHandler() {
     router_->RegisterFunction("charAt",
         [](const CefV8ValueList& args, CefRefPtr<CefV8Value>& retval, CefString& exception) -> bool {
 
-            std::size_t argsSize = args.size();
+            try {
 
-            if(argsSize < 2){
-                exception = "Quantidade insuficiente de parâmetros fornecidos para a função.";
-                return true;
-            }
-            
-            if( ! args[1]->IsInt() && ! args[1]->IsDouble() && ! args[1]->IsUInt() && ! args[1]->IsUndefined() ){
-                exception = "O segundo parâmetro limit deve ser do tipo inteiro e positivo!";
-                return true;
-            }
+                std::size_t argsSize = args.size();
 
-            std::string string = args[0]->GetStringValue();
-
-            std::string::size_type length = string.length();
-
-            std::string::size_type charAt;
-
-            if( ! args[1]->IsUndefined() ){
-
-                double value = args[1]->GetDoubleValue();
-
-                if( value > (length - 1) ){
-                    
-                    retval = CefV8Value::CreateString("");
-
-                    return true;
-
-                }
-                else if(value < 0){
-                    exception = "O parâmetro index deve ser igual ou maior que 0!";
+                if(argsSize < 2){
+                    exception = "Quantidade insuficiente de parâmetros fornecidos para a função.";
                     return true;
                 }
-
-                charAt = value;
-
-            }
-            else{
-                charAt = 0;
-            }
-
-            std::string charString (1, string.at(charAt));
-
-            retval = CefV8Value::CreateString(charString);
-
-            return true;
-            
-        }
-    );
-
-    // router_->RegisterFunction("charAt",
-    //     [](const CefV8ValueList& args, CefRefPtr<CefV8Value>& retval, CefString& exception) -> bool {
-
-
-
-    //     }
-    // );
-
-
-    router_->RegisterFunction("explode",
-        [](const CefV8ValueList& args, CefRefPtr<CefV8Value>& retval, CefString& exception) -> bool {
-
-            std::size_t argsSize = args.size();
-
-            if(argsSize < 2){
-                exception = "Quantidade insuficiente de parâmetros fornecidos para a função.";
-                return true;
-            }
-
-            if( ! args[1]->IsString() ){
-                exception = "O primeiro parâmetro separator deve ser do tipo String!";
-                return true;
-            }
-
-            std::string string = args[0]->GetStringValue();
-
-            std::string separator = args[1]->GetStringValue();
-
-            std::string::size_type length = string.length();
-
-            std::size_t limit = length;
-
-            if( argsSize > 2 ){
-
-                if( ! args[2]->IsInt() && ! args[2]->IsDouble() && ! args[2]->IsUInt() && ! args[2]->IsUndefined() ){
+                
+                if( ! args[1]->IsInt() && ! args[1]->IsDouble() && ! args[1]->IsUInt() ){
                     exception = "O segundo parâmetro limit deve ser do tipo inteiro e positivo!";
                     return true;
                 }
 
-                // Como o parâmetro é opcional, o tipo undefined é permitido, já que ele representa que o parâmetro 
-                // não foi passado na função JS, porém, não tem nenhuma ação aqui.
-                if( ! args[2]->IsUndefined() ){
+                std::string string = args[0]->GetStringValue();
 
-                    // Como o JS tem limites maiores para number, uso o double aqui, ainda que não vai chegar no limite,
-                    // é mais correto usar assim.
-                    double value = args[2]->GetDoubleValue();
-    
-                    if(value < 0){
-                        exception = "O segundo parâmetro limit deve ser do tipo inteiro e positivo!";
+                if(string.empty()){
+                    retval = CefV8Value::CreateString("");
+                    return true;
+                }
+
+                std::size_t length = forcaStrings::Length(string);
+
+                std::string::size_type charAt;
+
+                if( ! args[1]->IsUndefined() ){
+
+                    double value = args[1]->GetDoubleValue();
+
+                    if( value > (length - 1) ){
+                        
+                        retval = CefV8Value::CreateString("");
+
+                        return true;
+
+                    }
+                    else if(value < 0){
+                        exception = "O parâmetro index deve ser igual ou maior que 0!";
                         return true;
                     }
 
-                    if(value < length){
-                        limit = value;
+                    charAt = value;
+
+                }
+                else{
+                    charAt = 0;
+                }
+
+                std::string charString = forcaStrings::charAt(string, charAt);
+
+                retval = CefV8Value::CreateString(charString);
+
+                return true;
+
+            } catch (const std::exception& e) {
+
+                exception = ForcaInterface::exceptionText(e);
+
+                return true;
+
+            } catch (...) {
+
+                exception = "Erro ao executar função no backend! \n\nTipo de exceção: Desconhecido \n\nMensagem: Exceção desconhecida!\n";
+
+                return true;
+
+            }    
+            
+        }
+    );
+
+    router_->RegisterFunction("slice",
+        [](const CefV8ValueList& args, CefRefPtr<CefV8Value>& retval, CefString& exception) -> bool {
+
+            try {
+
+                std::size_t argsSize = args.size();
+
+                if(argsSize < 2){
+                    exception = "Quantidade insuficiente de parâmetros fornecidos para a função.";
+                    return true;
+                }
+                
+                if( ! args[1]->IsInt() && ! args[1]->IsDouble() && ! args[1]->IsUInt() ){
+                    exception = "O primeiro parâmetro start deve ser do tipo inteiro!";
+                    return true;
+                }
+
+                std::string string = args[0]->GetStringValue();
+
+                std::string::size_type stringLength = forcaStrings::Length(string);
+
+                double startValue = args[1]->GetDoubleValue();
+
+                if(startValue < 0){
+
+                    startValue = stringLength + startValue;
+
+                    if(startValue < 0) startValue = 0;
+
+                }
+
+                if(startValue >= stringLength){
+                    retval = CefV8Value::CreateString("");
+                    return true;
+                }
+
+                std::string::size_type endValue = stringLength;
+
+                if( argsSize > 2 ){
+
+                    if( ! args[2]->IsInt() && ! args[2]->IsDouble() && ! args[2]->IsUInt() && ! args[2]->IsUndefined() ){
+                        exception = "O segundo parâmetro end deve ser do tipo inteiro!";
+                        return true;
+                    }
+
+                    if( ! args[2]->IsUndefined() ){
+
+                        double end = args[2]->GetDoubleValue();
+
+                        if(end < 0){
+
+                            end = stringLength + end;
+
+                            if(end < 0) end = 0;
+
+                        }
+
+                        if(end <= startValue){
+                            exception = "O segundo parâmetro end, deve ser maior que o primeiro parâmetro start!";
+                            return true;
+                        }
+
+                        if(end < endValue){
+                            endValue = end;
+                        }
+
+                    }
+
+                }
+                
+                std::string substring = forcaStrings::substring( string, startValue, (endValue - startValue) );
+
+                retval = CefV8Value::CreateString(substring);
+
+                return true;
+
+            } catch (const std::exception& e) {
+
+                exception = ForcaInterface::exceptionText(e);
+
+                return true;
+
+            } catch (...) {
+
+                exception = "Erro ao executar função no backend! \n\nTipo de exceção: Desconhecido \n\nMensagem: Exceção desconhecida!\n";
+
+                return true;
+
+            }    
+
+        }
+    );
+
+    router_->RegisterFunction("substring",
+        [](const CefV8ValueList& args, CefRefPtr<CefV8Value>& retval, CefString& exception) -> bool {
+
+            try {
+
+                std::size_t argsSize = args.size();
+
+                if(argsSize < 2){
+                    exception = "Quantidade insuficiente de parâmetros fornecidos para a função.";
+                    return true;
+                }
+                
+                if( ! args[1]->IsInt() && ! args[1]->IsDouble() && ! args[1]->IsUInt() ){
+                    exception = "O primeiro parâmetro start deve ser do tipo inteiro e positivo!";
+                    return true;
+                }
+
+                std::string string = args[0]->GetStringValue();
+
+                std::string::size_type stringLength = forcaStrings::Length(string);
+
+                double startValue = args[1]->GetDoubleValue();
+
+                if(startValue < 0){
+                    exception = "O primeiro parâmetro start deve ser maior ou igual a 0!";
+                    return true;
+                }
+
+                if(startValue >= stringLength){
+                    retval = CefV8Value::CreateString("");
+                    return true;
+                }
+
+                std::string::size_type endValue = stringLength;
+
+                if( argsSize > 2 ){
+
+                    if( ! args[2]->IsInt() && ! args[2]->IsDouble() && ! args[2]->IsUInt() && ! args[2]->IsUndefined() ){
+                        exception = "O segundo parâmetro end deve ser do tipo inteiro e positivo!";
+                        return true;
+                    }
+
+                    if( ! args[2]->IsUndefined() ){
+
+                        double end = args[2]->GetDoubleValue();
+
+                        if(end <= startValue){
+                            exception = "O segundo parâmetro end, deve ser maior que o primeiro parâmetro start!";
+                            return true;
+                        }
+
+                        if(end < endValue){
+                            endValue = end;
+                        }
+
                     }
 
                 }
 
+                std::string substring = forcaStrings::substring( string, startValue, (endValue - startValue) );
+
+                retval = CefV8Value::CreateString(substring);
+
+                return true;
+
+            } catch (const std::exception& e) {
+
+                exception = ForcaInterface::exceptionText(e);
+
+                return true;
+
+            } catch (...) {
+
+                exception = "Erro ao executar função no backend! \n\nTipo de exceção: Desconhecido \n\nMensagem: Exceção desconhecida!\n";
+
+                return true;
+
+            }    
+
+        }
+    );
+
+    router_->RegisterFunction("explode",
+        [=](const CefV8ValueList& args, CefRefPtr<CefV8Value>& retval, CefString& exception) -> bool {
+
+            try {
+
+                std::size_t argsSize = args.size();
+
+                if(argsSize < 2){
+                    exception = "Quantidade insuficiente de parâmetros fornecidos para a função.";
+                    return true;
+                }
+
+                std::string string = args[0]->GetStringValue();
+
+                CefRefPtr<CefV8Value> search = args[1];
+
+                std::string searchValue;
+
+                if( ! search->IsObject() && ! search->IsString() ){
+                    exception = "O primeiro parâmetro search deve ser do tipo string ou uma expressão regular!";
+                    return true;
+                }
+
+                bool isRegex = false;
+                
+                if( search->IsObject() && jsStringObj && jsStringObj->IsFunction() ) {
+
+                    CefV8ValueList argsString;
+                    argsString.push_back(search);
+
+                    // Executa String(value)
+                    CefRefPtr<CefV8Value> result = jsStringObj->ExecuteFunction(nullptr, argsString);
+
+                    if (result && result->IsString()) {
+                    
+                        searchValue = result->GetStringValue().ToString();
+
+                        if(searchValue.length() < 3){
+                            exception = "Expressão regular mal formada no primeiro parâmetro search!";
+                            return true;
+                        }
+
+                        if(searchValue[0] != '/' && searchValue[0] != '#'){
+                            exception = "Expressão regular mal formada no primeiro parâmetro search!";
+                            return true;
+                        }
+
+                        std::string::size_type pos = searchValue.find_last_of(searchValue[0]);
+
+                        if( pos != std::string::npos && pos < 2 ){
+                            exception = "Expressão regular mal formada no primeiro parâmetro search!";
+                            return true;
+                        }
+
+                        isRegex = true;
+
+                    }
+                    else{
+                        exception = "O primeiro parâmetro search deve ser do tipo string ou uma expressão regular!";
+                        return true;
+                    }
+                    
+                }
+                else if( search->IsString() ){
+                    searchValue = search->GetStringValue();
+                }
+                else{
+                    exception = "O primeiro parâmetro search deve ser do tipo string ou uma expressão regular!";
+                    return true;
+                }
+                
+                std::size_t limit = std::numeric_limits<size_t>::max();
+
+                if( argsSize > 2 ){
+
+                    if( ! args[2]->IsInt() && ! args[2]->IsDouble() && ! args[2]->IsUInt() && ! args[2]->IsUndefined() ){
+                        exception = "O segundo parâmetro limit deve ser do tipo inteiro e positivo!";
+                        return true;
+                    }
+
+                    // Como o parâmetro é opcional, o tipo undefined é permitido, já que ele representa que o parâmetro 
+                    // não foi passado na função JS, porém, não tem nenhuma ação aqui.
+                    if( ! args[2]->IsUndefined() ){
+
+                        // Como o JS tem limites maiores para number, uso o double aqui, ainda que não vai chegar no limite,
+                        // é mais correto usar assim.
+                        double value = args[2]->GetDoubleValue();
+        
+                        if(value < 0){
+                            exception = "O segundo parâmetro limit deve ser do tipo inteiro e positivo!";
+                            return true;
+                        }
+
+                        if(limit == 0){
+
+                            CefRefPtr<CefV8Value> array = CefV8Value::CreateArray(1);
+
+                            array->SetValue( 0, CefV8Value::CreateString(string) );
+
+                            retval = array;
+
+                            return true;
+
+                        }
+                        else{
+                            limit = value;
+                        }
+
+                    }
+
+                }
+                
+                std::vector<std::string> explode;
+
+                if(isRegex){
+                    explode = forcaRegex::preg_split(searchValue, string, limit);
+                }
+                else{
+                    forcaStrings::explode(string, searchValue, &explode, limit);
+                }
+
+                std::size_t i, explodeSize = explode.size();
+
+                CefRefPtr<CefV8Value> array = CefV8Value::CreateArray(explodeSize);
+
+                for(i=0; i<explodeSize; i++){
+
+                    array->SetValue(i, CefV8Value::CreateString(explode[i]));
+
+                }
+
+                retval = array;
+
+                return true;
+
+            } catch (const std::exception& e) {
+
+                exception = ForcaInterface::exceptionText(e);
+
+                return true;
+
+            } catch (...) {
+
+                exception = "Erro ao executar função no backend! \n\nTipo de exceção: Desconhecido \n\nMensagem: Exceção desconhecida!\n";
+
+                return true;
+
             }
-
-            std::vector<std::string> explode;
-
-            forcaStrings::explode(string, separator, &explode, limit);
-
-            std::size_t i, explodeSize = explode.size();
-
-            CefRefPtr<CefV8Value> array = CefV8Value::CreateArray(explodeSize);
-
-            for(i=0; i<explodeSize; i++){
-
-                array->SetValue(i, CefV8Value::CreateString(explode[i]));
-
-            }
-
-            retval = array;
-
-            return true;
       
         }
     );
@@ -891,69 +1455,85 @@ NativeFunctionHandler::NativeFunctionHandler() {
     router_->RegisterFunction("implode",
         [=](const CefV8ValueList& args, CefRefPtr<CefV8Value>& retval, CefString& exception) -> bool {
             
-            std::size_t argsSize = args.size();
+            try {
 
-            if(argsSize < 2){
-                exception = "Quantidade insuficiente de parâmetros fornecidos para a função.";
-                return true;
-            }
+                std::size_t argsSize = args.size();
 
-            if( ! args[1]->IsString() && ! args[1]->IsUndefined() ){
-                exception = "O primeiro parâmetro separator deve ser do tipo String!";
-                return true;
-            }
+                if(argsSize < 2){
+                    exception = "Quantidade insuficiente de parâmetros fornecidos para a função.";
+                    return true;
+                }
 
-            std::string separator;
+                if( ! args[1]->IsString() && ! args[1]->IsUndefined() ){
+                    exception = "O primeiro parâmetro separator deve ser do tipo String!";
+                    return true;
+                }
 
-            if( args[1]->IsUndefined() ) {
-                separator = ",";
-            }
-            else {
-                separator = args[1]->GetStringValue();
-            }
+                std::string separator;
 
-            std::vector<std::string> destiny;
+                if( args[1]->IsUndefined() ) {
+                    separator = ",";
+                }
+                else {
+                    separator = args[1]->GetStringValue();
+                }
 
-            CefRefPtr<CefV8Value> array = args[0];
+                std::vector<std::string> destiny;
 
-            std::size_t i, arraySize = array->GetArrayLength();
+                CefRefPtr<CefV8Value> array = args[0];
 
-            for(i=0; i<arraySize; i++){
+                std::size_t i, arraySize = array->GetArrayLength();
 
-                /**
-                 * Solução para converter qualquer tipo de variavel JS em string C++
-                 * Pega o objeto String JS e executa a função nativa String.toString do JS
-                 */
-                if( ! array->GetValue(i)->IsString() ){
+                for(i=0; i<arraySize; i++){
 
-                    if (jsStringObj && jsStringObj->IsFunction()) {
+                    /**
+                     * Solução para converter qualquer tipo de variavel JS em string C++
+                     * Pega o objeto String JS e executa a função nativa String.toString do JS
+                     */
+                    if( ! array->GetValue(i)->IsString() ){
 
-                        CefV8ValueList argsString;
-                        argsString.push_back(array->GetValue(i));
+                        if (jsStringObj && jsStringObj->IsFunction()) {
 
-                        // Executa String(value)
-                        CefRefPtr<CefV8Value> result = jsStringObj->ExecuteFunction(nullptr, argsString);
+                            CefV8ValueList argsString;
+                            argsString.push_back(array->GetValue(i));
 
-                        if (result && result->IsString()) {
-                            destiny.push_back( result->GetStringValue().ToString() );
+                            // Executa String(value)
+                            CefRefPtr<CefV8Value> result = jsStringObj->ExecuteFunction(nullptr, argsString);
+
+                            if (result && result->IsString()) {
+                                destiny.push_back( result->GetStringValue().ToString() );
+                            }
+                            
                         }
-                        
+
+                    }
+                    else{
+
+                        destiny.push_back(array->GetValue(i)->GetStringValue());
+
                     }
 
                 }
-                else{
 
-                    destiny.push_back(array->GetValue(i)->GetStringValue());
+                std::string implode = forcaStrings::implode(destiny, separator);
 
-                }
+                retval = CefV8Value::CreateString(implode);
+
+                return true;
+
+            } catch (const std::exception& e) {
+
+                exception = ForcaInterface::exceptionText(e);
+
+                return true;
+
+            } catch (...) {
+
+                exception = "Erro ao executar função no backend! \n\nTipo de exceção: Desconhecido \n\nMensagem: Exceção desconhecida!\n";
+
+                return true;
 
             }
-
-            std::string implode = forcaStrings::implode(destiny, separator);
-
-            retval = CefV8Value::CreateString(implode);
-
-            return true;
 
         }
 
@@ -962,158 +1542,174 @@ NativeFunctionHandler::NativeFunctionHandler() {
     router_->RegisterFunction("str_replace",
         [=](const CefV8ValueList& args, CefRefPtr<CefV8Value>& retval, CefString& exception) -> bool {
 
-            std::size_t argsSize = args.size();
+            try {
 
-            if(argsSize < 3){
-                exception = "Quantidade insuficiente de parâmetros fornecidos para a função.";
-                return true;
-            }
+                std::size_t argsSize = args.size();
 
-            std::string string = args[0]->GetStringValue();
+                if(argsSize < 3){
+                    exception = "Quantidade insuficiente de parâmetros fornecidos para a função.";
+                    return true;
+                }
 
-            CefRefPtr<CefV8Value> search = args[1];
+                std::string string = args[0]->GetStringValue();
 
-            std::string searchValue;
+                CefRefPtr<CefV8Value> search = args[1];
 
-            bool isRegex = false;
+                std::string searchValue;
 
-            /* 
-                O porâmetro search pode ser tanto uma string como uma expressão regular RegExp, que é um objeto JS.
-                Com isso essa parte se encarrega de converter esse objeto para string e verificar se ele é uma expressão
-                regular válida. Usa a função nativa ToString para isso, e para verificar a estrutura usa a mesma lógica
-                usada no arquivo forcaRegex na função createPattern.
-            */
-            if( search->IsObject() ){
-                
-                if ( jsStringObj && jsStringObj->IsFunction() ) {
+                bool isRegex = false;
 
-                    CefV8ValueList argsString;
-                    argsString.push_back(search);
-
-                    // Executa String(value)
-                    CefRefPtr<CefV8Value> result = jsStringObj->ExecuteFunction(nullptr, argsString);
-
-                    if (result && result->IsString()) {
+                /* 
+                    O porâmetro search pode ser tanto uma string como uma expressão regular RegExp, que é um objeto JS.
+                    Com isso essa parte se encarrega de converter esse objeto para string e verificar se ele é uma expressão
+                    regular válida. Usa a função nativa ToString para isso, e para verificar a estrutura usa a mesma lógica
+                    usada no arquivo forcaRegex na função createPattern.
+                */
+                if( search->IsObject() ){
                     
-                        std::string resultString = result->GetStringValue().ToString();
+                    if ( jsStringObj && jsStringObj->IsFunction() ) {
 
-                        std::string::size_type resultLength = resultString.length();
+                        CefV8ValueList argsString;
+                        argsString.push_back(search);
 
-                        if(resultLength < 3){
+                        // Executa String(value)
+                        CefRefPtr<CefV8Value> result = jsStringObj->ExecuteFunction(nullptr, argsString);
+
+                        if (result && result->IsString()) {
+                        
+                            std::string resultString = result->GetStringValue().ToString();
+
+                            std::string::size_type resultLength = resultString.length();
+
+                            if(resultLength < 3){
+                                exception = "O primeiro parâmetro search deve ser do tipo string ou uma expressão regular!";
+                                return true;
+                            }
+
+                            if(resultString[0] != '/'){
+                                exception = "O primeiro parâmetro search deve ser do tipo string ou uma expressão regular!";
+                                return true;
+                            }
+
+                            std::string::size_type pos = resultString.find_last_of('/');
+
+                            if( pos != std::string::npos && pos < 2 ){
+                                exception = "O primeiro parâmetro search deve ser do tipo string ou uma expressão regular!";
+                                return true;
+                            }
+
+                            searchValue = resultString;
+                        
+                            isRegex = true;
+
+                        }
+                        else{
                             exception = "O primeiro parâmetro search deve ser do tipo string ou uma expressão regular!";
                             return true;
                         }
-
-                        if(resultString[0] != '/'){
-                            exception = "O primeiro parâmetro search deve ser do tipo string ou uma expressão regular!";
-                            return true;
-                        }
-
-                        std::string::size_type pos = resultString.find_last_of('/');
-
-                        if( pos != std::string::npos && pos < 2 ){
-                            exception = "O primeiro parâmetro search deve ser do tipo string ou uma expressão regular!";
-                            return true;
-                        }
-
-                        searchValue = resultString;
-                    
-                        isRegex = true;
-
+                        
                     }
                     else{
                         exception = "O primeiro parâmetro search deve ser do tipo string ou uma expressão regular!";
                         return true;
                     }
-                    
+
                 }
-                else{
+                else if( search->IsString() ){
+                    searchValue = search->GetStringValue();
+                }
+                else{                
                     exception = "O primeiro parâmetro search deve ser do tipo string ou uma expressão regular!";
                     return true;
                 }
 
-            }
-            else if( search->IsString() ){
-                searchValue = search->GetStringValue();
-            }
-            else{                
-                exception = "O primeiro parâmetro search deve ser do tipo string ou uma expressão regular!";
-                return true;
-            }
-
-            if( ! args[2]->IsString() ){
-                exception = "O segundo parâmetro replaceValue deve ser do tipo string!";
-                return true;
-            }
-
-            std::string replaceValue = args[2]->GetStringValue();
-
-            std::size_t offset = 0;
-
-            if( argsSize > 3 ){
-
-                if( ! args[3]->IsInt() && ! args[3]->IsDouble() && ! args[3]->IsUInt() && ! args[3]->IsUndefined() ){
-                    exception = "O terceiro parâmetro offset deve ser do tipo inteiro e positivo!";
+                if( ! args[2]->IsString() ){
+                    exception = "O segundo parâmetro replaceValue deve ser do tipo string!";
                     return true;
                 }
 
-                // Como o parâmetro é opcional, o tipo undefined é permitido, já que ele representa que o parâmetro 
-                // não foi passado na função JS, porém, não tem nenhuma ação aqui.
-                if( ! args[3]->IsUndefined() ){
+                std::string replaceValue = args[2]->GetStringValue();
 
-                    // Como o JS tem limites maiores para number, uso o double aqui, ainda que não vai chegar no limite,
-                    // é mais correto usar assim.
-                    double value = args[3]->GetDoubleValue();
-    
-                    if(value < 0){
+                std::size_t offset = 0;
+
+                if( argsSize > 3 ){
+
+                    if( ! args[3]->IsInt() && ! args[3]->IsDouble() && ! args[3]->IsUInt() && ! args[3]->IsUndefined() ){
                         exception = "O terceiro parâmetro offset deve ser do tipo inteiro e positivo!";
                         return true;
                     }
 
-                    if(value >= string.length()){
+                    // Como o parâmetro é opcional, o tipo undefined é permitido, já que ele representa que o parâmetro 
+                    // não foi passado na função JS, porém, não tem nenhuma ação aqui.
+                    if( ! args[3]->IsUndefined() ){
 
-                        retval = CefV8Value::CreateString(string);
+                        // Como o JS tem limites maiores para number, uso o double aqui, ainda que não vai chegar no limite,
+                        // é mais correto usar assim.
+                        double value = args[3]->GetDoubleValue();
+        
+                        if(value < 0){
+                            exception = "O terceiro parâmetro offset deve ser do tipo inteiro e positivo!";
+                            return true;
+                        }
 
-                        return true;
+                        if(value >= string.length()){
 
-                    }
-                    else{
-                        offset = value;
+                            retval = CefV8Value::CreateString(string);
+
+                            return true;
+
+                        }
+                        else{
+                            offset = value;
+                        }
+
                     }
 
                 }
 
-            }
+                // Faz a substituição baseada em regex
+                if(isRegex){
 
-            // Faz a substituição baseada em regex
-            if(isRegex){
+                    string = forcaRegex::preg_replace(searchValue, string, replaceValue, offset, 1);
+                    
+                    retval = CefV8Value::CreateString(string);
 
-                string = forcaRegex::preg_replace(searchValue, string, replaceValue, offset, 1);
-                
-                retval = CefV8Value::CreateString(string);
+                    return true;
 
-                return true;
+                }
+                else{   // Faz a substituição baseado em string
 
-            }
-            else{   // Faz a substituição baseado em string
+                    std::string::size_type searchPos = string.find(searchValue, offset);
 
-                std::string::size_type searchPos = string.find(searchValue, offset);
+                    if(searchPos != std::string::npos){
 
-                if(searchPos != std::string::npos){
+                        std::string::size_type searchLenght = searchValue.length();
 
-                    std::string::size_type searchLenght = searchValue.length();
+                        string.replace(searchPos, searchLenght, replaceValue);
 
-                    string.replace(searchPos, searchLenght, replaceValue);
+                    }
+
+                    retval = CefV8Value::CreateString(string);
+
+                    return true;
 
                 }
 
-                retval = CefV8Value::CreateString(string);
+                return true;
+
+            } catch (const std::exception& e) {
+
+                exception = ForcaInterface::exceptionText(e);
+
+                return true;
+
+            } catch (...) {
+
+                exception = "Erro ao executar função no backend! \n\nTipo de exceção: Desconhecido \n\nMensagem: Exceção desconhecida!\n";
 
                 return true;
 
             }
-
-            return true;
 
         }
     );
@@ -1121,30 +1717,247 @@ NativeFunctionHandler::NativeFunctionHandler() {
     router_->RegisterFunction("str_replace_all",
         [=](const CefV8ValueList& args, CefRefPtr<CefV8Value>& retval, CefString& exception) -> bool {
 
-            std::size_t argsSize = args.size();
+            try {
 
-            if(argsSize < 3){
-                exception = "Quantidade insuficiente de parâmetros fornecidos para a função.";
+                std::size_t argsSize = args.size();
+
+                if(argsSize < 3){
+                    exception = "Quantidade insuficiente de parâmetros fornecidos para a função.";
+                    return true;
+                }
+
+                std::string string = args[0]->GetStringValue();
+
+                CefRefPtr<CefV8Value> search = args[1];
+
+                std::string searchValue;
+
+                bool isRegex = false;
+
+                /* 
+                    O porâmetro search pode ser tanto uma string como uma expressão regular RegExp, que é um objeto JS.
+                    Com isso essa parte se encarrega de converter esse objeto para string e verificar se ele é uma expressão
+                    regular válida. Usa a função nativa ToString para isso, e para verificar a estrutura usa a mesma lógica
+                    usada no arquivo forcaRegex na função createPattern.
+                */
+                if( search->IsObject() ){
+                    
+                    if ( jsStringObj && jsStringObj->IsFunction() ) {
+
+                        CefV8ValueList argsString;
+                        argsString.push_back(search);
+
+                        // Executa String(value)
+                        CefRefPtr<CefV8Value> result = jsStringObj->ExecuteFunction(nullptr, argsString);
+
+                        if (result && result->IsString()) {
+                        
+                            std::string resultString = result->GetStringValue().ToString();
+
+                            std::string::size_type resultLength = resultString.length();
+
+                            if(resultLength < 3){
+                                exception = "O primeiro parâmetro search deve ser do tipo string ou uma expressão regular!";
+                                return true;
+                            }
+
+                            if(resultString[0] != '/'){
+                                exception = "O primeiro parâmetro search deve ser do tipo string ou uma expressão regular!";
+                                return true;
+                            }
+
+                            std::string::size_type pos = resultString.find_last_of('/');
+
+                            if( pos != std::string::npos && pos < 2 ){
+                                exception = "O primeiro parâmetro search deve ser do tipo string ou uma expressão regular!";
+                                return true;
+                            }
+
+                            searchValue = resultString;
+                        
+                            isRegex = true;
+
+                        }
+                        else{
+                            exception = "O primeiro parâmetro search deve ser do tipo string ou uma expressão regular!";
+                            return true;
+                        }
+                        
+                    }
+                    else{
+                        exception = "O primeiro parâmetro search deve ser do tipo string ou uma expressão regular!";
+                        return true;
+                    }
+
+                }
+                else if( search->IsString() ){
+                    searchValue = search->GetStringValue();
+                }
+                else{                
+                    exception = "O primeiro parâmetro search deve ser do tipo string ou uma expressão regular!";
+                    return true;
+                }
+
+                if( ! args[2]->IsString() ){
+                    exception = "O segundo parâmetro replaceValue deve ser do tipo string!";
+                    return true;
+                }
+
+                std::string replaceValue = args[2]->GetStringValue();
+
+                std::size_t offset = 0;
+
+                if( argsSize > 3 ){
+
+                    if( ! args[3]->IsInt() && ! args[3]->IsDouble() && ! args[3]->IsUInt() && ! args[3]->IsUndefined() ){
+                        exception = "O terceiro parâmetro offset deve ser do tipo inteiro e positivo!";
+                        return true;
+                    }
+
+                    // Como o parâmetro é opcional, o tipo undefined é permitido, já que ele representa que o parâmetro 
+                    // não foi passado na função JS, porém, não tem nenhuma ação aqui.
+                    if( ! args[3]->IsUndefined() ){
+
+                        // Como o JS tem limites maiores para number, uso o double aqui, ainda que não vai chegar no limite,
+                        // é mais correto usar assim.
+                        double value = args[3]->GetDoubleValue();
+        
+                        if(value < 0){
+                            exception = "O terceiro parâmetro offset deve ser do tipo inteiro e positivo!";
+                            return true;
+                        }
+
+                        if(value >= string.length()){
+
+                            retval = CefV8Value::CreateString(string);
+
+                            return true;
+
+                        }
+                        else{
+                            offset = value;
+                        }
+
+                    }
+
+                }
+
+                std::size_t limit = std::numeric_limits<size_t>::max();
+
+                if( argsSize > 4 ){
+
+                    if( ! args[4]->IsInt() && ! args[4]->IsDouble() && ! args[4]->IsUInt() && ! args[4]->IsUndefined() ){
+                        exception = "O quarto parâmetro limit deve ser do tipo inteiro e positivo!";
+                        return true;
+                    }
+
+                    // Como o parâmetro é opcional, o tipo undefined é permitido, já que ele representa que o parâmetro 
+                    // não foi passado na função JS, porém, não tem nenhuma ação aqui.
+                    if( ! args[4]->IsUndefined() ){
+
+                        // Como o JS tem limites maiores para number, uso o double aqui, ainda que não vai chegar no limite,
+                        // é mais correto usar assim.
+                        double value = args[4]->GetDoubleValue();
+        
+                        if(value < 0){
+                            exception = "O quarto parâmetro limit deve ser do tipo inteiro e positivo!";
+                            return true;
+                        }
+
+                        if(limit == 0){
+
+                            retval = CefV8Value::CreateString(string);
+
+                            return true;
+
+                        }
+                        else{
+                            limit = value;
+                        }
+
+                    }
+
+                }
+
+                // Faz a substituição baseada em regex
+                if(isRegex){
+
+                    string = forcaRegex::preg_replace(searchValue, string, replaceValue, offset, limit);
+                    
+                    retval = CefV8Value::CreateString(string);
+
+                    return true;
+
+                }
+                else{   // Faz a substituição baseado em string
+
+                    std::string::size_type searchPos = string.find(searchValue, offset);
+
+                    std::size_t count = 0;
+
+                    std::string::size_type replaceLength = replaceValue.length();
+
+                    while(searchPos != std::string::npos && count < limit){
+
+                        std::string::size_type searchLenght = searchValue.length();
+
+                        string.replace(searchPos, searchLenght, replaceValue);
+
+                        searchPos = string.find( searchValue, (searchPos + replaceLength) );
+
+                        count++;
+
+                    }
+
+                    retval = CefV8Value::CreateString(string);
+
+                    return true;
+
+                }
+
                 return true;
+
+            } catch (const std::exception& e) {
+
+                exception = ForcaInterface::exceptionText(e);
+
+                return true;
+
+            } catch (...) {
+
+                exception = "Erro ao executar função no backend! \n\nTipo de exceção: Desconhecido \n\nMensagem: Exceção desconhecida!\n";
+
+                return true;
+
             }
 
-            std::string string = args[0]->GetStringValue();
+        }
+    );
 
-            CefRefPtr<CefV8Value> search = args[1];
+    router_->RegisterFunction("preg_replace",
+        [=](const CefV8ValueList& args, CefRefPtr<CefV8Value>& retval, CefString& exception) -> bool {
 
-            std::string searchValue;
+            try {
 
-            bool isRegex = false;
+                std::size_t argsSize = args.size();
 
-            /* 
-                O porâmetro search pode ser tanto uma string como uma expressão regular RegExp, que é um objeto JS.
-                Com isso essa parte se encarrega de converter esse objeto para string e verificar se ele é uma expressão
-                regular válida. Usa a função nativa ToString para isso, e para verificar a estrutura usa a mesma lógica
-                usada no arquivo forcaRegex na função createPattern.
-            */
-            if( search->IsObject() ){
+                if(argsSize < 3){
+                    exception = "Quantidade insuficiente de parâmetros fornecidos para a função.";
+                    return true;
+                }
+
+                std::string string = args[0]->GetStringValue();
+
+                CefRefPtr<CefV8Value> search = args[1];
+
+                std::string searchValue;
+
+                if( ! search->IsObject() && ! search->IsString() ){
+                    exception = "O primeiro parâmetro search deve ser do tipo string ou uma expressão regular!";
+                    return true;
+                }
                 
-                if ( jsStringObj && jsStringObj->IsFunction() ) {
+                if( search->IsObject() && jsStringObj && jsStringObj->IsFunction() ) {
 
                     CefV8ValueList argsString;
                     argsString.push_back(search);
@@ -1154,30 +1967,7 @@ NativeFunctionHandler::NativeFunctionHandler() {
 
                     if (result && result->IsString()) {
                     
-                        std::string resultString = result->GetStringValue().ToString();
-
-                        std::string::size_type resultLength = resultString.length();
-
-                        if(resultLength < 3){
-                            exception = "O primeiro parâmetro search deve ser do tipo string ou uma expressão regular!";
-                            return true;
-                        }
-
-                        if(resultString[0] != '/'){
-                            exception = "O primeiro parâmetro search deve ser do tipo string ou uma expressão regular!";
-                            return true;
-                        }
-
-                        std::string::size_type pos = resultString.find_last_of('/');
-
-                        if( pos != std::string::npos && pos < 2 ){
-                            exception = "O primeiro parâmetro search deve ser do tipo string ou uma expressão regular!";
-                            return true;
-                        }
-
-                        searchValue = resultString;
-                    
-                        isRegex = true;
+                        searchValue = result->GetStringValue().ToString();
 
                     }
                     else{
@@ -1186,298 +1976,279 @@ NativeFunctionHandler::NativeFunctionHandler() {
                     }
                     
                 }
+                else if( search->IsString() ){
+                    searchValue = forcaStrings::trim( search->GetStringValue() );
+                }
                 else{
                     exception = "O primeiro parâmetro search deve ser do tipo string ou uma expressão regular!";
                     return true;
                 }
+                
+                std::string::size_type resultLength = searchValue.length();
 
-            }
-            else if( search->IsString() ){
-                searchValue = search->GetStringValue();
-            }
-            else{                
-                exception = "O primeiro parâmetro search deve ser do tipo string ou uma expressão regular!";
-                return true;
-            }
-
-            if( ! args[2]->IsString() ){
-                exception = "O segundo parâmetro replaceValue deve ser do tipo string!";
-                return true;
-            }
-
-            std::string replaceValue = args[2]->GetStringValue();
-
-            std::size_t offset = 0;
-
-            if( argsSize > 3 ){
-
-                if( ! args[3]->IsInt() && ! args[3]->IsDouble() && ! args[3]->IsUInt() && ! args[3]->IsUndefined() ){
-                    exception = "O terceiro parâmetro offset deve ser do tipo inteiro e positivo!";
+                if(resultLength < 3){
+                    exception = "Expressão regular mal formada no primeiro parâmetro search!";
                     return true;
                 }
 
-                // Como o parâmetro é opcional, o tipo undefined é permitido, já que ele representa que o parâmetro 
-                // não foi passado na função JS, porém, não tem nenhuma ação aqui.
-                if( ! args[3]->IsUndefined() ){
+                if(searchValue[0] != '/' && searchValue[0] != '#'){
+                    exception = "Expressão regular mal formada no primeiro parâmetro search!";
+                    return true;
+                }
 
-                    // Como o JS tem limites maiores para number, uso o double aqui, ainda que não vai chegar no limite,
-                    // é mais correto usar assim.
-                    double value = args[3]->GetDoubleValue();
-    
-                    if(value < 0){
+                std::string::size_type pos = searchValue.find_last_of(searchValue[0]);
+
+                if( pos != std::string::npos && pos < 2 ){
+                    exception = "Expressão regular mal formada no primeiro parâmetro search!";
+                    return true;
+                }
+
+                if( ! args[2]->IsString() ){
+                    exception = "O segundo parâmetro replaceValue deve ser do tipo string!";
+                    return true;
+                }
+
+                std::string replaceValue = args[2]->GetStringValue();
+
+                std::size_t offset = 0;
+
+                if( argsSize > 3 ){
+
+                    if( ! args[3]->IsInt() && ! args[3]->IsDouble() && ! args[3]->IsUInt() && ! args[3]->IsUndefined() ){
                         exception = "O terceiro parâmetro offset deve ser do tipo inteiro e positivo!";
                         return true;
                     }
 
-                    if(value >= string.length()){
+                    // Como o parâmetro é opcional, o tipo undefined é permitido, já que ele representa que o parâmetro 
+                    // não foi passado na função JS, porém, não tem nenhuma ação aqui.
+                    if( ! args[3]->IsUndefined() ){
 
-                        retval = CefV8Value::CreateString(string);
+                        // Como o JS tem limites maiores para number, uso o double aqui, ainda que não vai chegar no limite,
+                        // é mais correto usar assim.
+                        double value = args[3]->GetDoubleValue();
+        
+                        if(value < 0){
+                            exception = "O terceiro parâmetro offset deve ser do tipo inteiro e positivo!";
+                            return true;
+                        }
 
-                        return true;
+                        if(value >= string.length()){
 
-                    }
-                    else{
-                        offset = value;
+                            retval = CefV8Value::CreateString(string);
+
+                            return true;
+
+                        }
+                        else{
+                            offset = value;
+                        }
+
                     }
 
                 }
 
-            }
+                std::size_t limit = std::numeric_limits<size_t>::max();
 
-            std::size_t limit = std::numeric_limits<size_t>::max();
+                if( argsSize > 4 ){
 
-            if( argsSize > 4 ){
-
-                if( ! args[4]->IsInt() && ! args[4]->IsDouble() && ! args[4]->IsUInt() && ! args[4]->IsUndefined() ){
-                    exception = "O quarto parâmetro limit deve ser do tipo inteiro e positivo!";
-                    return true;
-                }
-
-                // Como o parâmetro é opcional, o tipo undefined é permitido, já que ele representa que o parâmetro 
-                // não foi passado na função JS, porém, não tem nenhuma ação aqui.
-                if( ! args[4]->IsUndefined() ){
-
-                    // Como o JS tem limites maiores para number, uso o double aqui, ainda que não vai chegar no limite,
-                    // é mais correto usar assim.
-                    double value = args[4]->GetDoubleValue();
-    
-                    if(value < 0){
+                    if( ! args[4]->IsInt() && ! args[4]->IsDouble() && ! args[4]->IsUInt() && ! args[4]->IsUndefined() ){
                         exception = "O quarto parâmetro limit deve ser do tipo inteiro e positivo!";
                         return true;
                     }
 
-                    if(limit == 0){
+                    // Como o parâmetro é opcional, o tipo undefined é permitido, já que ele representa que o parâmetro 
+                    // não foi passado na função JS, porém, não tem nenhuma ação aqui.
+                    if( ! args[4]->IsUndefined() ){
 
-                        retval = CefV8Value::CreateString(string);
+                        // Como o JS tem limites maiores para number, uso o double aqui, ainda que não vai chegar no limite,
+                        // é mais correto usar assim.
+                        double value = args[4]->GetDoubleValue();
+        
+                        if(value < 0){
+                            exception = "O quarto parâmetro limit deve ser do tipo inteiro e positivo!";
+                            return true;
+                        }
 
-                        return true;
+                        if(limit == 0){
 
-                    }
-                    else{
-                        limit = value;
+                            retval = CefV8Value::CreateString(string);
+
+                            return true;
+
+                        }
+                        else{
+                            limit = value;
+                        }
+
                     }
 
                 }
-
-            }
-
-            // Faz a substituição baseada em regex
-            if(isRegex){
-
+                
                 string = forcaRegex::preg_replace(searchValue, string, replaceValue, offset, limit);
                 
                 retval = CefV8Value::CreateString(string);
 
                 return true;
 
-            }
-            else{   // Faz a substituição baseado em string
+            } catch (const std::exception& e) {
 
-                std::string::size_type searchPos = string.find(searchValue, offset);
-
-                std::size_t count = 0;
-
-                std::string::size_type replaceLength = replaceValue.length();
-
-                while(searchPos != std::string::npos && count < limit){
-
-                    std::string::size_type searchLenght = searchValue.length();
-
-                    string.replace(searchPos, searchLenght, replaceValue);
-
-                    searchPos = string.find( searchValue, (searchPos + replaceLength) );
-
-                    count++;
-
-                }
-
-                retval = CefV8Value::CreateString(string);
+                exception = ForcaInterface::exceptionText(e);
 
                 return true;
 
-            }
+            } catch (...) {
 
-            return true;
+                exception = "Erro ao executar função no backend! \n\nTipo de exceção: Desconhecido \n\nMensagem: Exceção desconhecida!\n";
+
+                return true;
+
+            }                
 
         }
-    );
+    );    
 
-    router_->RegisterFunction("preg_replace",
+    router_->RegisterFunction("preg_split",
         [=](const CefV8ValueList& args, CefRefPtr<CefV8Value>& retval, CefString& exception) -> bool {
 
-            std::size_t argsSize = args.size();
+            try {
 
-            if(argsSize < 3){
-                exception = "Quantidade insuficiente de parâmetros fornecidos para a função.";
-                return true;
-            }
+                std::size_t argsSize = args.size();
 
-            std::string string = args[0]->GetStringValue();
+                if(argsSize < 2){
+                    exception = "Quantidade insuficiente de parâmetros fornecidos para a função.";
+                    return true;
+                }
 
-            CefRefPtr<CefV8Value> search = args[1];
+                std::string string = args[0]->GetStringValue();
 
-            std::string searchValue;
+                CefRefPtr<CefV8Value> search = args[1];
 
-            if( ! search->IsObject() && ! search->IsString() ){
-                exception = "O primeiro parâmetro search deve ser do tipo string ou uma expressão regular!";
-                return true;
-            }
-            
-            if( search->IsObject() && jsStringObj && jsStringObj->IsFunction() ) {
+                std::string searchValue;
 
-                CefV8ValueList argsString;
-                argsString.push_back(search);
-
-                // Executa String(value)
-                CefRefPtr<CefV8Value> result = jsStringObj->ExecuteFunction(nullptr, argsString);
-
-                if (result && result->IsString()) {
+                if( ! search->IsObject() && ! search->IsString() ){
+                    exception = "O primeiro parâmetro search deve ser do tipo string ou uma expressão regular!";
+                    return true;
+                }
                 
-                    searchValue = result->GetStringValue().ToString();
+                if( search->IsObject() && jsStringObj && jsStringObj->IsFunction() ) {
 
+                    CefV8ValueList argsString;
+                    argsString.push_back(search);
+
+                    // Executa String(value)
+                    CefRefPtr<CefV8Value> result = jsStringObj->ExecuteFunction(nullptr, argsString);
+
+                    if (result && result->IsString()) {
+                    
+                        searchValue = result->GetStringValue().ToString();
+
+                    }
+                    else{
+                        exception = "O primeiro parâmetro search deve ser do tipo string ou uma expressão regular!";
+                        return true;
+                    }
+                    
+                }
+                else if( search->IsString() ){
+                    searchValue = forcaStrings::trim( search->GetStringValue() );
                 }
                 else{
                     exception = "O primeiro parâmetro search deve ser do tipo string ou uma expressão regular!";
                     return true;
                 }
                 
-            }
-            else if( search->IsString() ){
-                searchValue = forcaStrings::removeSpaces( search->GetStringValue() );
-            }
-            else{
-                exception = "O primeiro parâmetro search deve ser do tipo string ou uma expressão regular!";
-                return true;
-            }
-            
-            std::string::size_type resultLength = searchValue.length();
+                std::string::size_type resultLength = searchValue.length();
 
-            if(resultLength < 3){
-                exception = "Expressão regular mal formada no primeiro parâmetro search!";
-                return true;
-            }
-
-            if(searchValue[0] != '/' && searchValue[0] != '#'){
-                exception = "Expressão regular mal formada no primeiro parâmetro search!";
-                return true;
-            }
-
-            std::string::size_type pos = searchValue.find_last_of(searchValue[0]);
-
-            if( pos != std::string::npos && pos < 2 ){
-                exception = "Expressão regular mal formada no primeiro parâmetro search!";
-                return true;
-            }
-
-            if( ! args[2]->IsString() ){
-                exception = "O segundo parâmetro replaceValue deve ser do tipo string!";
-                return true;
-            }
-
-            std::string replaceValue = args[2]->GetStringValue();
-
-            std::size_t offset = 0;
-
-            if( argsSize > 3 ){
-
-                if( ! args[3]->IsInt() && ! args[3]->IsDouble() && ! args[3]->IsUInt() && ! args[3]->IsUndefined() ){
-                    exception = "O terceiro parâmetro offset deve ser do tipo inteiro e positivo!";
+                if(resultLength < 3){
+                    exception = "Expressão regular mal formada no primeiro parâmetro search!";
                     return true;
                 }
 
-                // Como o parâmetro é opcional, o tipo undefined é permitido, já que ele representa que o parâmetro 
-                // não foi passado na função JS, porém, não tem nenhuma ação aqui.
-                if( ! args[3]->IsUndefined() ){
-
-                    // Como o JS tem limites maiores para number, uso o double aqui, ainda que não vai chegar no limite,
-                    // é mais correto usar assim.
-                    double value = args[3]->GetDoubleValue();
-    
-                    if(value < 0){
-                        exception = "O terceiro parâmetro offset deve ser do tipo inteiro e positivo!";
-                        return true;
-                    }
-
-                    if(value >= string.length()){
-
-                        retval = CefV8Value::CreateString(string);
-
-                        return true;
-
-                    }
-                    else{
-                        offset = value;
-                    }
-
-                }
-
-            }
-
-            std::size_t limit = std::numeric_limits<size_t>::max();
-
-            if( argsSize > 4 ){
-
-                if( ! args[4]->IsInt() && ! args[4]->IsDouble() && ! args[4]->IsUInt() && ! args[4]->IsUndefined() ){
-                    exception = "O quarto parâmetro limit deve ser do tipo inteiro e positivo!";
+                if(searchValue[0] != '/' && searchValue[0] != '#'){
+                    exception = "Expressão regular mal formada no primeiro parâmetro search!";
                     return true;
                 }
 
-                // Como o parâmetro é opcional, o tipo undefined é permitido, já que ele representa que o parâmetro 
-                // não foi passado na função JS, porém, não tem nenhuma ação aqui.
-                if( ! args[4]->IsUndefined() ){
+                std::string::size_type pos = searchValue.find_last_of(searchValue[0]);
 
-                    // Como o JS tem limites maiores para number, uso o double aqui, ainda que não vai chegar no limite,
-                    // é mais correto usar assim.
-                    double value = args[4]->GetDoubleValue();
-    
-                    if(value < 0){
-                        exception = "O quarto parâmetro limit deve ser do tipo inteiro e positivo!";
+                if( pos != std::string::npos && pos < 2 ){
+                    exception = "Expressão regular mal formada no primeiro parâmetro search!";
+                    return true;
+                }
+
+                std::size_t limit = std::numeric_limits<size_t>::max();
+
+                if( argsSize > 2 ){
+
+                    if( ! args[2]->IsInt() && ! args[2]->IsDouble() && ! args[2]->IsUInt() && ! args[2]->IsUndefined() ){
+                        exception = "O segundo parâmetro limit deve ser do tipo inteiro e positivo!";
                         return true;
                     }
 
-                    if(limit == 0){
+                    // Como o parâmetro é opcional, o tipo undefined é permitido, já que ele representa que o parâmetro 
+                    // não foi passado na função JS, porém, não tem nenhuma ação aqui.
+                    if( ! args[2]->IsUndefined() ){
 
-                        retval = CefV8Value::CreateString(string);
+                        // Como o JS tem limites maiores para number, uso o double aqui, ainda que não vai chegar no limite,
+                        // é mais correto usar assim.
+                        double value = args[2]->GetDoubleValue();
+        
+                        if(value < 0){
+                            exception = "O segundo parâmetro limit deve ser do tipo inteiro e positivo!";
+                            return true;
+                        }
 
-                        return true;
+                        if(limit == 0){
 
-                    }
-                    else{
-                        limit = value;
+                            CefRefPtr<CefV8Value> array = CefV8Value::CreateArray(1);
+
+                            array->SetValue( 0, CefV8Value::CreateString(string) );
+
+                            retval = array;
+
+                            return true;
+
+                        }
+                        else{
+                            limit = value;
+                        }
+
                     }
 
                 }
+                
+                std::vector<std::string> explode = forcaRegex::preg_split(searchValue, string, limit);
+                
+                std::size_t i, explodeSize = explode.size();
 
-            }
-            
-            string = forcaRegex::preg_replace(searchValue, string, replaceValue, offset, limit);
-            
-            retval = CefV8Value::CreateString(string);
+                CefRefPtr<CefV8Value> array = CefV8Value::CreateArray(explodeSize);
 
-            return true;
+                for(i=0; i<explodeSize; i++){
+
+                    array->SetValue(i, CefV8Value::CreateString(explode[i]));
+
+                }
+
+                retval = array;
+
+                return true;
+
+            } catch (const std::exception& e) {
+
+                exception = ForcaInterface::exceptionText(e);
+
+                return true;
+
+            } catch (...) {
+
+                exception = "Erro ao executar função no backend! \n\nTipo de exceção: Desconhecido \n\nMensagem: Exceção desconhecida!\n";
+
+                return true;
+
+            }                
 
         }
-    );    
+    );        
 
 }
 
@@ -1691,6 +2462,10 @@ void ForcaCefApp::OnContextCreated(CefRefPtr<CefBrowser> browser, CefRefPtr<CefF
 
     ForcaAppObj->SetValue("charAt", CefV8Value::CreateFunction("charAt", nativeSyncHandler), V8_PROPERTY_ATTRIBUTE_NONE);
 
+    ForcaAppObj->SetValue("slice", CefV8Value::CreateFunction("slice", nativeSyncHandler), V8_PROPERTY_ATTRIBUTE_NONE);
+
+    ForcaAppObj->SetValue("substring", CefV8Value::CreateFunction("substring", nativeSyncHandler), V8_PROPERTY_ATTRIBUTE_NONE);
+
     ForcaAppObj->SetValue("explode", CefV8Value::CreateFunction("explode", nativeSyncHandler), V8_PROPERTY_ATTRIBUTE_NONE);
 
     ForcaAppObj->SetValue("implode", CefV8Value::CreateFunction("implode", nativeSyncHandler), V8_PROPERTY_ATTRIBUTE_NONE);
@@ -1700,6 +2475,58 @@ void ForcaCefApp::OnContextCreated(CefRefPtr<CefBrowser> browser, CefRefPtr<CefF
     ForcaAppObj->SetValue("str_replace_all", CefV8Value::CreateFunction("str_replace_all", nativeSyncHandler), V8_PROPERTY_ATTRIBUTE_NONE);
 
     ForcaAppObj->SetValue("preg_replace", CefV8Value::CreateFunction("preg_replace", nativeSyncHandler), V8_PROPERTY_ATTRIBUTE_NONE);
+
+    ForcaAppObj->SetValue("preg_split", CefV8Value::CreateFunction("preg_split", nativeSyncHandler), V8_PROPERTY_ATTRIBUTE_NONE);
+
+}
+
+/**
+ * Tenta torna o texto da exceção mais legível, pois é comum que 
+ * dependendo do tipo do compilador o texto seja menos legível.
+ *
+ * @global
+ * @param	char*	name	
+ * @return	std::string
+ */
+std::string ForcaInterface::demangle( const char* name ) {
+
+    #if defined(__GNUC__) || defined(__clang__)
+
+        int status = -1;
+
+        std::unique_ptr<char, void(*)(void*)> res{
+
+            abi::__cxa_demangle(name, nullptr, nullptr, &status),
+            std::free
+
+        };
+
+        return (status == 0) ? res.get() : name;
+
+    #else
+
+        // MSVC geralmente já retorna nome legível
+        return name;
+
+    #endif
+
+}
+
+/**
+ * Retorna um texto mais legível com o tipo de exceção e com a mensagem,
+ * para retornar para o JavaScript.
+ *
+ * @global
+ * @param	mixed	:exception	
+ * @return	std::string
+ */
+std::string ForcaInterface::exceptionText( const std::exception& e ) {
+
+    std::string tipo = demangle( typeid(e).name() );
+
+    std::string text = "Erro ao executar função no backend! \n\nTipo de exceção: " + tipo + "\n\nMensagem: " + e.what() + "\n";
+
+    return text;
 
 }
 
