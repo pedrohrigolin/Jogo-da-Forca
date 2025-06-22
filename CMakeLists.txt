@@ -114,7 +114,11 @@ if(UNIX AND NOT APPLE)
             "${CMAKE_CURRENT_SOURCE_DIR}/files"
             "$<TARGET_FILE_DIR:JogoDaForca>/files"
 
-        COMMENT "Copiando recursos do CEF para o diretório bin/"
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+            "${CMAKE_CURRENT_SOURCE_DIR}/lib"
+            "$<TARGET_FILE_DIR:JogoDaForca>/lib"            
+
+        COMMENT "Copiando recursos essenciais para o diretório bin/"
 
     )
 
@@ -138,11 +142,15 @@ elseif(WIN32)
             "${CMAKE_CURRENT_SOURCE_DIR}/files"
             "$<TARGET_FILE_DIR:JogoDaForca>/files"
 
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+            "${CMAKE_CURRENT_SOURCE_DIR}/lib"
+            "$<TARGET_FILE_DIR:JogoDaForca>/lib"            
+
         COMMAND ${CMAKE_COMMAND} -E copy
             "${CMAKE_CURRENT_SOURCE_DIR}/resources/icon/forca_icon.ico"
             "$<TARGET_FILE_DIR:JogoDaForca>"
 
-        COMMENT "Copiando recursos do CEF e ícone da aplicação para o diretório bin/"
+        COMMENT "Copiando recursos essenciais para o diretório bin/"
     )
 
 endif()
