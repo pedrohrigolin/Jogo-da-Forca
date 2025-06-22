@@ -341,9 +341,6 @@ public:
 
 private:
 
-    // Função auxiliar para escapar strings para uso em JavaScript.
-    std::string EscapeJsString(const std::string& s);
-
     void ResolvePromise(CefRefPtr<CefFrame> frame, const CefString& promise_id, const CefString& data);
 
     void RejectPromise(CefRefPtr<CefFrame> frame, const CefString& promise_id, const CefString& error_message);

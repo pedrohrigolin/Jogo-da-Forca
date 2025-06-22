@@ -230,44 +230,11 @@ bool ForcaCefClient::OnProcessMessageReceived(CefRefPtr<CefBrowser> b, CefRefPtr
 
 }
 
-// Função auxiliar para escapar strings para uso em JavaScript.
-std::string ForcaCefClient::EscapeJsString(const std::string& s) {
-
-    std::ostringstream o;
-
-    for (auto c : s) {
-
-        switch (c) {
-
-            case '"': o << "\\\""; break;
-            case '\\': o << "\\\\"; break;
-            case '\b': o << "\\b"; break;
-            case '\f': o << "\\f"; break;
-            case '\n': o << "\\n"; break;
-            case '\r': o << "\\r"; break;
-            case '\t': o << "\\t"; break;
-            default:
-
-                if ('\x00' <= c && c <= '\x1f') {
-                    o << "\\u" << std::hex << std::setw(4) << std::setfill('0') << (int)c;
-                } 
-                else {
-                    o << c;
-                }
-
-        }
-
-    }
-
-    return o.str();
-
-}
-
 void ForcaCefClient::ResolvePromise(CefRefPtr<CefFrame> frame, const CefString& promise_id, const CefString& data) {
 
     if (frame && frame->IsValid()) {
 
-        std::string js_code = "callUserFunc.cefResolve('" + promise_id.ToString() + "', true, '" + EscapeJsString(data.ToString()) + "');";
+        std::string js_code = "callUserFunc.cefResolve('" + promise_id.ToString() + "', true, '" + data.ToString() + "');";
         
         frame->ExecuteJavaScript(js_code, frame->GetURL(), 0);
 
@@ -279,7 +246,7 @@ void ForcaCefClient::RejectPromise(CefRefPtr<CefFrame> frame, const CefString& p
 
     if (frame && frame->IsValid()) {
 
-        std::string js_code = "callUserFunc.cefResolve('" + promise_id.ToString() + "', false, '" + EscapeJsString(error_message.ToString()) + "');";
+        std::string js_code = "callUserFunc.cefResolve('" + promise_id.ToString() + "', false, '" + error_message.ToString() + "');";
         
         frame->ExecuteJavaScript(js_code, frame->GetURL(), 0);
 
@@ -362,9 +329,15 @@ void ForcaCefClient::RegisterApiFunctions() {
             // 3. Simula uma busca no banco de dados.
             if (userId == 123) {
 
-                // SUCESSO: Usuário encontrado! Prepara um JSON como resposta.
-                std::string userDataJson = "{\"id\": 123, \"nome\": \"Pedro Cef\", \"nivel\": 99}";
-                ResolvePromise(frame, promiseId, userDataJson);
+                nlohmann::json userDataJson;
+
+                userDataJson["id"] = 123;
+
+                userDataJson["nome"] = "Pedro Cef";
+
+                userDataJson["nivel"] = 99;
+
+                ResolvePromise(frame, promiseId, userDataJson.dump());
 
             } else {
 
