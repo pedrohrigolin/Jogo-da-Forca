@@ -1,21 +1,46 @@
 # Ignorar arquivos C e headers
 *.c linguist-detectable=false
+
 # Ignorar arquivos HTML
 *.html linguist-detectable=false
+
+# Ignorar arquivos CSS
+*.css linguist-detectable=false
+
+# Outras extensões "CSS" que não são usadas no projeto, mas vou colocar mesmo assim
+*.scss linguist-detectable=false
+*.sass linguist-detectable=false
+*.less linguist-detectable=false
+*.styl linguist-detectable=false
+*.pcss linguist-detectable=false
+*.module.css linguist-detectable=false
+*.module.scss linguist-detectable=false 
+
+# Ignorar arquivos "JS" que não são usadas no projeto, mas vou colocar mesmo assim
+*.mjs linguist-detectable=false
+*.cjs linguist-detectable=false
+*.jsx linguist-detectable=false
+*.ts linguist-detectable=false
+*.tsx linguist-detectable=false
+
 # Ignorar arquivos Roff (documentação manpage)
 *.roff linguist-detectable=false
 *.man linguist-detectable=false
 *.1 linguist-detectable=false
 *.3 linguist-detectable=false
+
 # Ignorar arquivos Ada
 *.adb linguist-detectable=false
 *.ads linguist-detectable=false
+
 # Ignorar scripts Shell
 *.sh linguist-detectable=false
 *.bash linguist-detectable=false
+
 # Ignorar Makefiles
 Makefile linguist-detectable=false
 *.mk linguist-detectable=false
+
 # Ignorar outros arquivos genéricos
 *.txt linguist-detectable=false
 *.md linguist-detectable=false
@@ -25,6 +50,7 @@ Makefile linguist-detectable=false
 *.yml linguist-detectable=false
 *.yaml linguist-detectable=false
 *.py linguist-detectable=false
+
 # Ignorar pastas comuns de libs e exemplos
 libs/** linguist-detectable=false
 vendor/** linguist-detectable=false

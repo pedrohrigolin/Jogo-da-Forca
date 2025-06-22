@@ -16,6 +16,7 @@
 /.vs/
 /build/**
 /bin/**
+/lib/**
 
 # Diretórios gerais
 /markdown_andamento/

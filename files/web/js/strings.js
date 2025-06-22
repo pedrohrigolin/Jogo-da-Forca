@@ -157,3 +157,29 @@ String.prototype.preg_replace = function(search, replaceValue, offset = 0, limit
 String.prototype.preg_split = function(search, limit){
     return callUserFunc.sync("preg_split", this.toString(), search, limit);
 }
+
+String.prototype.search = function(search){
+    return callUserFunc.sync("search", this.toString(), search);
+}
+
+/**
+ * Retorna os índices de todas as ocorrências do padrão informado na string.
+ *
+ * Esta função é uma versão estendida da função nativa search do JavaScript, permitindo encontrar
+ * todos os índices de matches do padrão especificado (string ou RegExp) na string original.
+ *
+ * O parâmetro opcional limit define o número máximo de matches que serão retornados.
+ * Se o padrão for uma string, ele será convertido automaticamente para uma expressão regular.
+ *
+ * @global
+ * @param {string|RegExp} search  Padrão a ser buscado (string ou expressão regular).
+ * @param {number} [limit]        (Opcional) Limite máximo de índices a retornar.
+ * @return {array}                Array com os índices de todas as ocorrências encontradas.
+ */
+String.prototype.searchAll = function(search, limit){
+    return callUserFunc.sync("searchAll", this.toString(), search, limit);
+}
+
+String.prototype.visibleLength = function(){
+    return callUserFunc.sync("VisibleLength", this.toString());
+}

@@ -1115,7 +1115,7 @@ NativeFunctionHandler::NativeFunctionHandler() {
                     return true;
                 }
 
-                std::size_t length = forcaStrings::Length(string);
+                std::size_t length = forcaStrings::VisibleLength(string);
 
                 std::string::size_type charAt;
 
@@ -1245,7 +1245,7 @@ NativeFunctionHandler::NativeFunctionHandler() {
 
                 std::string string = args[0]->GetStringValue();
 
-                std::string::size_type stringLength = forcaStrings::Length(string);
+                std::string::size_type stringLength = forcaStrings::VisibleLength(string);
 
                 double startValue = args[1]->GetDoubleValue();
 
@@ -1338,7 +1338,7 @@ NativeFunctionHandler::NativeFunctionHandler() {
 
                 std::string string = args[0]->GetStringValue();
 
-                std::string::size_type stringLength = forcaStrings::Length(string);
+                std::string::size_type stringLength = forcaStrings::VisibleLength(string);
 
                 double startValue = args[1]->GetDoubleValue();
 
@@ -1654,6 +1654,8 @@ NativeFunctionHandler::NativeFunctionHandler() {
 
                 std::string string = args[0]->GetStringValue();
 
+                std::string::size_type stringLength = forcaStrings::Length(string);
+
                 CefRefPtr<CefV8Value> search = args[1];
 
                 std::string searchValue;
@@ -1753,7 +1755,7 @@ NativeFunctionHandler::NativeFunctionHandler() {
                             return true;
                         }
 
-                        if(value >= string.length()){
+                        if(value >= stringLength){
 
                             retval = CefV8Value::CreateString(string);
 
@@ -1761,7 +1763,7 @@ NativeFunctionHandler::NativeFunctionHandler() {
 
                         }
                         else{
-                            offset = value;
+                            offset = forcaStrings::IndexUTF16_toUTF8( string, value );
                         }
 
                     }
@@ -1829,6 +1831,8 @@ NativeFunctionHandler::NativeFunctionHandler() {
 
                 std::string string = args[0]->GetStringValue();
 
+                std::string::size_type stringLength = forcaStrings::Length(string);
+
                 CefRefPtr<CefV8Value> search = args[1];
 
                 std::string searchValue;
@@ -1928,7 +1932,7 @@ NativeFunctionHandler::NativeFunctionHandler() {
                             return true;
                         }
 
-                        if(value >= string.length()){
+                        if(value >= stringLength){
 
                             retval = CefV8Value::CreateString(string);
 
@@ -1936,7 +1940,7 @@ NativeFunctionHandler::NativeFunctionHandler() {
 
                         }
                         else{
-                            offset = value;
+                            offset = forcaStrings::IndexUTF16_toUTF8( string, value );
                         }
 
                     }
@@ -2049,6 +2053,8 @@ NativeFunctionHandler::NativeFunctionHandler() {
 
                 std::string string = args[0]->GetStringValue();
 
+                std::string::size_type stringLength = forcaStrings::Length(string);
+
                 CefRefPtr<CefV8Value> search = args[1];
 
                 std::string searchValue;
@@ -2133,7 +2139,7 @@ NativeFunctionHandler::NativeFunctionHandler() {
                             return true;
                         }
 
-                        if(value >= string.length()){
+                        if(value >= stringLength){
 
                             retval = CefV8Value::CreateString(string);
 
@@ -2141,7 +2147,7 @@ NativeFunctionHandler::NativeFunctionHandler() {
 
                         }
                         else{
-                            offset = value;
+                            offset = forcaStrings::IndexUTF16_toUTF8( string, value );
                         }
 
                     }
@@ -2351,6 +2357,559 @@ NativeFunctionHandler::NativeFunctionHandler() {
         }
     );        
 
+    router_->RegisterFunction("search",
+        [=](const CefV8ValueList& args, CefRefPtr<CefV8Value>& retval, CefString& exception) -> bool {
+
+            try {
+
+                std::size_t argsSize = args.size();
+
+                if(argsSize < 2){
+                    exception = "Quantidade insuficiente de parâmetros fornecidos para a função.";
+                    return true;
+                }
+
+                std::string string = args[0]->GetStringValue();
+
+                CefRefPtr<CefV8Value> search = args[1];
+
+                std::string searchValue;
+
+                if( ! search->IsObject() && ! search->IsString() ){
+                    exception = "O primeiro parâmetro search deve ser do tipo string ou uma expressão regular!";
+                    return true;
+                }
+                
+                if( search->IsObject() && jsStringObj && jsStringObj->IsFunction() ) {
+
+                    CefV8ValueList argsString;
+                    argsString.push_back(search);
+
+                    // Executa String(value)
+                    CefRefPtr<CefV8Value> result = jsStringObj->ExecuteFunction(nullptr, argsString);
+
+                    if (result && result->IsString()) {
+                    
+                        searchValue = result->GetStringValue().ToString();
+
+                    }
+                    else{
+                        exception = "O primeiro parâmetro search deve ser do tipo string ou uma expressão regular!";
+                        return true;
+                    }
+                    
+                }
+                else if( search->IsString() ){
+                    searchValue = "/" + search->GetStringValue().ToString() + "/";
+                }
+                else{
+                    exception = "O primeiro parâmetro search deve ser do tipo string ou uma expressão regular!";
+                    return true;
+                }
+                
+                std::string::size_type resultLength = searchValue.length();
+
+                if(resultLength < 3){
+                    exception = "Expressão regular mal formada no primeiro parâmetro search!";
+                    return true;
+                }
+
+                if(searchValue[0] != '/' && searchValue[0] != '#'){
+                    exception = "Expressão regular mal formada no primeiro parâmetro search!";
+                    return true;
+                }
+
+                std::string::size_type pos = searchValue.find_last_of(searchValue[0]);
+
+                if( pos != std::string::npos && pos < 2 ){
+                    exception = "Expressão regular mal formada no primeiro parâmetro search!";
+                    return true;
+                }      
+                
+                std::string::size_type index = forcaStrings::search(string, searchValue);
+
+                if(index == std::string::npos){
+
+                    retval = CefV8Value::CreateDouble(-1);
+
+                    return true;
+
+                }
+                else{
+
+                    retval = CefV8Value::CreateDouble(index);
+
+                    return true;
+
+                }
+
+            } catch (const std::exception& e) {
+
+                exception = ForcaInterface::exceptionText(e);
+
+                return true;
+
+            } catch (...) {
+
+                exception = "Erro ao executar função no backend! \n\nTipo de exceção: Desconhecido \n\nMensagem: Exceção desconhecida!\n";
+
+                return true;
+
+            }                  
+
+        }
+    );
+
+    router_->RegisterFunction("searchAll",
+        [=](const CefV8ValueList& args, CefRefPtr<CefV8Value>& retval, CefString& exception) -> bool {
+
+            try {
+
+                std::size_t argsSize = args.size();
+
+                if(argsSize < 2){
+                    exception = "Quantidade insuficiente de parâmetros fornecidos para a função.";
+                    return true;
+                }
+
+                std::string string = args[0]->GetStringValue();
+
+                CefRefPtr<CefV8Value> search = args[1];
+
+                std::string searchValue;
+
+                if( ! search->IsObject() && ! search->IsString() ){
+                    exception = "O primeiro parâmetro search deve ser do tipo string ou uma expressão regular!";
+                    return true;
+                }
+                
+                if( search->IsObject() && jsStringObj && jsStringObj->IsFunction() ) {
+
+                    CefV8ValueList argsString;
+                    argsString.push_back(search);
+
+                    // Executa String(value)
+                    CefRefPtr<CefV8Value> result = jsStringObj->ExecuteFunction(nullptr, argsString);
+
+                    if (result && result->IsString()) {
+                    
+                        searchValue = result->GetStringValue().ToString();
+
+                    }
+                    else{
+                        exception = "O primeiro parâmetro search deve ser do tipo string ou uma expressão regular!";
+                        return true;
+                    }
+                    
+                }
+                else if( search->IsString() ){
+                    searchValue = "/" + search->GetStringValue().ToString() + "/";
+                }
+                else{
+                    exception = "O primeiro parâmetro search deve ser do tipo string ou uma expressão regular!";
+                    return true;
+                }
+                
+                std::string::size_type resultLength = searchValue.length();
+
+                if(resultLength < 3){
+                    exception = "Expressão regular mal formada no primeiro parâmetro search!";
+                    return true;
+                }
+
+                if(searchValue[0] != '/' && searchValue[0] != '#'){
+                    exception = "Expressão regular mal formada no primeiro parâmetro search!";
+                    return true;
+                }
+
+                std::string::size_type pos = searchValue.find_last_of(searchValue[0]);
+
+                if( pos != std::string::npos && pos < 2 ){
+                    exception = "Expressão regular mal formada no primeiro parâmetro search!";
+                    return true;
+                }      
+                
+                std::size_t limit = std::numeric_limits<size_t>::max();
+
+                if( argsSize > 2 ){
+
+                    if( ! args[2]->IsInt() && ! args[2]->IsDouble() && ! args[2]->IsUInt() && ! args[2]->IsUndefined() ){
+                        exception = "O segundo parâmetro limit deve ser do tipo inteiro e positivo!";
+                        return true;
+                    }
+
+                    // Como o parâmetro é opcional, o tipo undefined é permitido, já que ele representa que o parâmetro 
+                    // não foi passado na função JS, porém, não tem nenhuma ação aqui.
+                    if( ! args[2]->IsUndefined() ){
+
+                        // Como o JS tem limites maiores para number, uso o double aqui, ainda que não vai chegar no limite,
+                        // é mais correto usar assim.
+                        double value = args[2]->GetDoubleValue();
+        
+                        if(value < 0){
+                            exception = "O segundo parâmetro limit deve ser do tipo inteiro e positivo!";
+                            return true;
+                        }
+
+                        if(limit == 0){
+
+                            CefRefPtr<CefV8Value> array = CefV8Value::CreateArray(1);
+
+                            array->SetValue( 0, CefV8Value::CreateString(string) );
+
+                            retval = array;
+
+                            return true;
+
+                        }
+                        else{
+                            limit = value;
+                        }
+
+                    }
+
+                }
+
+                std::vector<std::string::size_type> all_index = forcaStrings::search_all(string, searchValue, limit);
+
+                if(all_index.empty()){
+
+                    retval = CefV8Value::CreateArray(0);
+
+                    return true;
+
+                }
+
+                std::size_t i, indexLength = all_index.size();
+
+                CefRefPtr<CefV8Value> array = CefV8Value::CreateArray(indexLength);
+
+                for(i=0; i<indexLength; i++){
+
+                    array->SetValue(i, CefV8Value::CreateDouble(all_index[i]));
+
+                }
+
+                retval = array;
+
+                return true;
+
+            } catch (const std::exception& e) {
+
+                exception = ForcaInterface::exceptionText(e);
+
+                return true;
+
+            } catch (...) {
+
+                exception = "Erro ao executar função no backend! \n\nTipo de exceção: Desconhecido \n\nMensagem: Exceção desconhecida!\n";
+
+                return true;
+
+            }                  
+
+        }
+    );    
+
+    router_->RegisterFunction("VisibleLength",
+        [=](const CefV8ValueList& args, CefRefPtr<CefV8Value>& retval, CefString& exception) -> bool {
+
+            try {
+
+                std::string string = args[0]->GetStringValue();
+
+                retval = CefV8Value::CreateDouble( forcaStrings::VisibleLength(string) );
+
+                return true;
+
+            } catch (const std::exception& e) {
+
+                exception = ForcaInterface::exceptionText(e);
+
+                return true;
+
+            } catch (...) {
+
+                exception = "Erro ao executar função no backend! \n\nTipo de exceção: Desconhecido \n\nMensagem: Exceção desconhecida!\n";
+
+                return true;
+
+            }                 
+
+        }
+    );
+
+    router_->RegisterFunction("filterValidateBoolean",
+        [=](const CefV8ValueList& args, CefRefPtr<CefV8Value>& retval, CefString& exception) -> bool {
+
+            try {
+
+                std::size_t argsSize = args.size();
+
+                if(argsSize == 0){
+                    exception = "Quantidade insuficiente de parâmetros fornecidos para a função.";
+                    return true;                    
+                }
+
+                if( ! args[0]->IsString() && ! args[0]->IsDouble() && ! args[0]->IsInt() && ! args[0]->IsUInt() && ! args[0]->IsBool() ){
+                    exception = "O primeiro parâmetro deve ser do tipo string, boolean ou inteiro!";
+                    return true;
+                }
+
+                bool strict = true;
+
+                if( argsSize > 1 ){
+
+                    if( ! args[1]->IsBool() ){
+                        exception = "O segundo parâmetro deve ser do tipo boolean!";
+                        return true;                    
+                    }
+
+                    strict = args[1]->GetBoolValue();
+
+                }
+
+                if( args[0]->IsString() ){
+                    retval = CefV8Value::CreateBool( forcaUtils::filter_validate_bool( args[0]->GetStringValue(), strict ) );
+                }
+                else if( args[0]->IsBool() ){
+                    retval = CefV8Value::CreateBool( args[0]->GetBoolValue() );
+                }
+                else{
+                    retval = CefV8Value::CreateBool( forcaUtils::filter_validate_bool( args[0]->GetIntValue(), strict ) );
+                }
+
+                return true;
+
+            } catch (const std::exception& e) {
+
+                exception = ForcaInterface::exceptionText(e);
+
+                return true;
+
+            } catch (...) {
+
+                exception = "Erro ao executar função no backend! \n\nTipo de exceção: Desconhecido \n\nMensagem: Exceção desconhecida!\n";
+
+                return true;
+
+            }                 
+
+        }
+    );
+
+    router_->RegisterFunction("getStringContent",
+        [=](const CefV8ValueList& args, CefRefPtr<CefV8Value>& retval, CefString& exception) -> bool {
+
+            try {
+
+                std::size_t argsSize = args.size();
+
+                if(argsSize == 0){
+                    exception = "Quantidade insuficiente de parâmetros fornecidos para a função.";
+                    return true;                    
+                }
+
+                if( ! args[0]->IsString() ){
+                    exception = "O primeiro parâmetro deve ser do tipo string!";
+                    return true;
+                }
+
+                bool escape = true;
+
+                if( argsSize > 1 ){
+
+                    if( ! args[1]->IsBool() ){
+                        exception = "O segundo parâmetro deve ser do tipo boolean!";
+                        return true;                    
+                    }
+
+                    escape = args[1]->GetBoolValue();
+
+                }
+
+                std::string filepath = forcaStrings::trim( args[0]->GetStringValue() );
+
+                if(escape){
+
+                    nlohmann::json content = forcaFiles::read::getContent(filepath);
+
+                    retval = CefV8Value::CreateString( content.dump() );
+
+                }
+                else{
+                    retval = CefV8Value::CreateString( forcaFiles::read::getContent(filepath) );
+                }
+
+                return true;
+
+            } catch (const std::exception& e) {
+
+                exception = ForcaInterface::exceptionText(e);
+
+                return true;
+
+            } catch (...) {
+
+                exception = "Erro ao executar função no backend! \n\nTipo de exceção: Desconhecido \n\nMensagem: Exceção desconhecida!\n";
+
+                return true;
+
+            }                 
+
+        }
+    );
+
+    router_->RegisterFunction("getJSONContent",
+        [=](const CefV8ValueList& args, CefRefPtr<CefV8Value>& retval, CefString& exception) -> bool {
+
+            try {
+
+                std::size_t argsSize = args.size();
+
+                if(argsSize == 0){
+                    exception = "Quantidade insuficiente de parâmetros fornecidos para a função.";
+                    return true;                    
+                }
+
+                if( ! args[0]->IsString() ){
+                    exception = "O primeiro parâmetro deve ser do tipo string!";
+                    return true;
+                }
+
+                std::string filepath = forcaStrings::trim( args[0]->GetStringValue() );
+                
+                std::string content = forcaFiles::read::getContent(filepath);
+                
+                nlohmann::json jscontent;
+
+                try {
+                    
+                    jscontent = nlohmann::json::parse(content);
+
+                } 
+                catch (const nlohmann::json::parse_error& e) {
+
+                    std::string what = e.what();
+
+                    exception = "Error ao fazer o parse do JSON: " + what;
+
+                    return true;
+
+                }
+
+                retval = CefV8Value::CreateString( jscontent.dump() );
+
+                return true;
+
+            } catch (const std::exception& e) {
+
+                exception = ForcaInterface::exceptionText(e);
+
+                return true;
+
+            } catch (...) {
+
+                exception = "Erro ao executar função no backend! \n\nTipo de exceção: Desconhecido \n\nMensagem: Exceção desconhecida!\n";
+
+                return true;
+
+            }                 
+
+        }
+    );
+
+    router_->RegisterFunction("getBase64Content",
+        [=](const CefV8ValueList& args, CefRefPtr<CefV8Value>& retval, CefString& exception) -> bool {
+
+            try {
+
+                std::size_t argsSize = args.size();
+
+                if(argsSize == 0){
+                    exception = "Quantidade insuficiente de parâmetros fornecidos para a função.";
+                    return true;                    
+                }
+
+                if( ! args[0]->IsString() ){
+                    exception = "O primeiro parâmetro deve ser do tipo string!";
+                    return true;
+                }
+
+                std::string filepath = forcaStrings::trim( args[0]->GetStringValue() );
+                
+                std::string content = forcaFiles::read::getContent(filepath);
+
+                std::string base64 = forcaEncrypt::base64_encode(content);
+
+                retval = CefV8Value::CreateString(base64);
+
+                return true;
+
+            } catch (const std::exception& e) {
+
+                exception = ForcaInterface::exceptionText(e);
+
+                return true;
+
+            } catch (...) {
+
+                exception = "Erro ao executar função no backend! \n\nTipo de exceção: Desconhecido \n\nMensagem: Exceção desconhecida!\n";
+
+                return true;
+
+            }                 
+
+        }
+    );    
+
+    router_->RegisterFunction("getBinaryContent",
+        [=](const CefV8ValueList& args, CefRefPtr<CefV8Value>& retval, CefString& exception) -> bool {
+
+            try {
+
+                std::size_t argsSize = args.size();
+
+                if(argsSize == 0){
+                    exception = "Quantidade insuficiente de parâmetros fornecidos para a função.";
+                    return true;                    
+                }
+
+                if( ! args[0]->IsString() ){
+                    exception = "O primeiro parâmetro deve ser do tipo string!";
+                    return true;
+                }
+
+                std::string filepath = forcaStrings::trim( args[0]->GetStringValue() );
+                
+                std::string content = forcaFiles::read::getContent(filepath);
+
+                CefRefPtr<CefV8Value> arrayBuffer = CefV8Value::CreateArrayBufferWithCopy(
+                    const_cast<void*>( static_cast<const void*>( content.data() ) ),
+                    content.size()
+                );
+
+                retval = arrayBuffer;
+
+                return true;
+
+            } catch (const std::exception& e) {
+
+                exception = ForcaInterface::exceptionText(e);
+
+                return true;
+
+            } catch (...) {
+
+                exception = "Erro ao executar função no backend! \n\nTipo de exceção: Desconhecido \n\nMensagem: Exceção desconhecida!\n";
+
+                return true;
+
+            }  
+
+        }
+    );
+
 }
 
 bool NativeFunctionHandler::Execute(const CefString& name, CefRefPtr<CefV8Value> object, const CefV8ValueList& arguments, CefRefPtr<CefV8Value>& retval, CefString& exception) {
@@ -2486,7 +3045,7 @@ void ForcaCefApp::OnContextInitialized() {
     CEF_REQUIRE_UI_THREAD();
 
     // Carrega o HTML
-    std::string url = "file:///" + forcaFiles::utils::root_realpath("files/web/html/game.html");
+    std::string url = "file:///" + forcaFiles::utils::root_realpath("../files/web/html/game.html");
 
     // Cria os handlers e a view do navegador
     CefRefPtr<ForcaCefClient> handler = new ForcaCefClient();
@@ -2582,6 +3141,22 @@ void ForcaCefApp::OnContextCreated(CefRefPtr<CefBrowser> browser, CefRefPtr<CefF
     ForcaAppObj->SetValue("preg_replace", CefV8Value::CreateFunction("preg_replace", nativeSyncHandler), V8_PROPERTY_ATTRIBUTE_NONE);
 
     ForcaAppObj->SetValue("preg_split", CefV8Value::CreateFunction("preg_split", nativeSyncHandler), V8_PROPERTY_ATTRIBUTE_NONE);
+
+    ForcaAppObj->SetValue("search", CefV8Value::CreateFunction("search", nativeSyncHandler), V8_PROPERTY_ATTRIBUTE_NONE);
+
+    ForcaAppObj->SetValue("searchAll", CefV8Value::CreateFunction("searchAll", nativeSyncHandler), V8_PROPERTY_ATTRIBUTE_NONE);
+
+    ForcaAppObj->SetValue("VisibleLength", CefV8Value::CreateFunction("VisibleLength", nativeSyncHandler), V8_PROPERTY_ATTRIBUTE_NONE);
+
+    ForcaAppObj->SetValue("filterValidateBoolean", CefV8Value::CreateFunction("filterValidateBoolean", nativeSyncHandler), V8_PROPERTY_ATTRIBUTE_NONE);
+
+    ForcaAppObj->SetValue("getStringContent", CefV8Value::CreateFunction("getStringContent", nativeSyncHandler), V8_PROPERTY_ATTRIBUTE_NONE);
+    
+    ForcaAppObj->SetValue("getJSONContent", CefV8Value::CreateFunction("getJSONContent", nativeSyncHandler), V8_PROPERTY_ATTRIBUTE_NONE);
+
+    ForcaAppObj->SetValue("getBase64Content", CefV8Value::CreateFunction("getBase64Content", nativeSyncHandler), V8_PROPERTY_ATTRIBUTE_NONE);
+
+    ForcaAppObj->SetValue("getBinaryContent", CefV8Value::CreateFunction("getBinaryContent", nativeSyncHandler), V8_PROPERTY_ATTRIBUTE_NONE);
 
 }
 
