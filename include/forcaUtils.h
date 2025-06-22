@@ -28,6 +28,8 @@ namespace forcaUtils {
 
     bool filter_validate_bool( int value, bool strict = false );
 
+    void debug( const std::string& string );
+
 }
 
 #endif

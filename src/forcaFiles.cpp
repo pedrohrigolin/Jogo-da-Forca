@@ -11,8 +11,9 @@
 #include "forcaFiles.h"
 
 // Include das libs para usar funções próprias do SO
-#if defined(OS_WIN)
+#if defined(OS_WIN) || defined(_WIN32) || defined(_WIN64) || defined(__CYGWIN__)
 
+    #define NOMINMAX
     #include <windows.h>
 
 #elif defined(OS_LINUX)
@@ -232,7 +233,7 @@ namespace forcaFiles {
         }
 
         /**
-         * @brief Retorna o caminho de um arquivo a partir de uma chave e do tipo (DEFAULT, CUSTOM ou ANY).
+         * Retorna o caminho de um arquivo a partir de uma chave e do tipo (DEFAULT, CUSTOM ou ANY).
          *
          * A função busca a chave primeiramente em forcaFileKeys, que representa arquivos presentes em ambas as pastas.
          * Se não encontrar, busca em forcaDefaultFiles (para DEFAULT) ou forcaCustomFiles (para CUSTOM).

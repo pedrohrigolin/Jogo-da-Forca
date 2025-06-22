@@ -11,6 +11,8 @@
 
 #include <iostream> // !! TIRAR DEPOIS DE CONCLUIR TODOS OS TESTES
 
+// TODO: SE DER TEMPO ADICIONAR UM CACHE DE REGEX COMPILADOS, IGUAL É FEITO NO PHP
+
 /**
  * Namespace que implementa funcionalidades de expressões regulares inspiradas no PHP.
  * Oferece uma interface familiar para usar regex no C++, seguindo o padrão do PHP.
@@ -44,10 +46,7 @@ namespace forcaRegex {
      * @throws  std::invalid_argument         Se o padrão regex estiver malformado
      * @throws  std::runtime_error           Se houver erro na compilação do padrão
      */
-    // CORREÇÃO: A função agora retorna um unique_ptr e gerencia a memória corretamente
     std::unique_ptr<forcaRegex::RegexPattern> createPattern( const std::string& pattern ) {
-
-        auto finalPattern = std::make_unique<forcaRegex::RegexPattern>();
 
         std::string cpypattern = pattern;
 
@@ -93,9 +92,11 @@ namespace forcaRegex {
 
         std::string::size_type lastDelimeter = cpypattern.find_last_of(cpypattern[0]);
 
-        // Verifica se o regex pattern tem delimitador de fechamento.
-        // A comparação para ver se o lastDelimeter é menor que 2, garante que o delimitador encontrado
-        // não é o de abertura e ainda garante novamente que a string tem ao menos 3 caracteres.
+        /*         
+            Verifica se o regex pattern tem delimitador de fechamento.
+            A comparação para ver se o lastDelimeter é menor que 2, garante que o delimitador encontrado
+            não é o de abertura e ainda garante novamente que a string tem ao menos 3 caracteres.
+         */
         if( lastDelimeter == std::string::npos || lastDelimeter < 2 ){
 
             throw std::invalid_argument(
@@ -146,7 +147,8 @@ namespace forcaRegex {
 
         }
 
-        // CORREÇÃO: Usa o operador '->' para acessar os membros do objeto no ponteiro inteligente
+        std::unique_ptr<forcaRegex::RegexPattern> finalPattern = std::make_unique<forcaRegex::RegexPattern>();
+
         finalPattern->expression = expression;
         finalPattern->pattern = reinterpret_cast<PCRE2_SPTR>( finalPattern->expression.c_str() );
         finalPattern->length = static_cast<PCRE2_SIZE>( expressionLength );
@@ -201,10 +203,9 @@ namespace forcaRegex {
 
         finalResult.match = false;
 
-        if( offset >= subject.length() ) return finalResult;
+        if( offset >= subject.length() || subject.empty() ) return finalResult;
 
-        // CORREÇÃO: Pega a posse do padrão compilado de forma segura
-        auto finalPattern_ptr = createPattern(pattern);
+        std::unique_ptr<forcaRegex::RegexPattern> finalPattern_ptr = createPattern(pattern);
 
         RegexMatchData regex_data;
 
@@ -295,14 +296,16 @@ namespace forcaRegex {
     /**
      * Executa uma busca por um padrão em uma string (todas ocorrências).
      * Similar à função preg_match_all() do PHP.
-     * * @param   const std::string& pattern    Padrão regex no formato /pattern/flags
-     * @param   const std::string& subject    String onde será feita a busca
-     * @param   PCRE2_SIZE offset            Posição onde iniciar a busca (default: 0)
-     * @return  RegexResult                   Estrutura contendo os resultados da busca
-     * - match: true se encontrou matches, false caso contrário
-     * - Grupos numéricos e nomeados acessíveis via get()
-     * @throws  std::invalid_argument         Se o padrão regex estiver malformado
-     * @throws  std::runtime_error           Se houver erro na compilação do padrão
+     *
+     * @param pattern  Padrão regex no formato /pattern/flags.
+     * @param subject  String onde será feita a busca.
+     * @param offset   (Opcional) Posição onde iniciar a busca (default: 0).
+     * @param limit    (Opcional) Limite máximo de matches a serem encontrados (default: ilimitado).
+     * @return RegexResult Estrutura contendo os resultados da busca:
+     *         - match: true se encontrou matches, false caso contrário.
+     *         - Grupos numéricos e nomeados acessíveis via get().
+     * @throws std::invalid_argument Se o padrão regex estiver malformado.
+     * @throws std::runtime_error Se houver erro na compilação do padrão.
      */
     forcaRegex::RegexResult preg_match_all( const std::string& pattern, const std::string& subject, PCRE2_SIZE offset, std::size_t limit ) {
 
@@ -310,7 +313,7 @@ namespace forcaRegex {
 
         finalResult.match = false;
 
-        if (offset >= subject.length() || limit == 0) return finalResult;
+        if ( offset >= subject.length() || limit == 0 || subject.empty() ) return finalResult;
 
         std::unique_ptr<forcaRegex::RegexPattern> finalPattern_ptr = createPattern(pattern);
 
@@ -426,21 +429,24 @@ namespace forcaRegex {
     /**
      * Realiza substituições em uma string baseadas em um padrão regex.
      * Similar à função preg_replace() do PHP.
-     * * Suporta referências para grupos capturados no texto de substituição:
+     *
+     * Suporta referências para grupos capturados no texto de substituição:
      * - $0: Match completo
      * - $1, $2, etc: Grupos numéricos
      * - $name: Grupos nomeados
-     * * @param   const std::string& pattern      Padrão regex no formato /pattern/flags
-     * @param   const std::string& subject      String onde serão feitas as substituições
-     * @param   const std::string& replacement  String de substituição (pode conter $0, $1, $name etc)
-     * @param   PCRE2_SIZE offset              Posição onde iniciar as substituições (default: 0)
-     * @return  std::string                     Nova string com as substituições realizadas
-     * @throws  std::invalid_argument           Se o padrão regex estiver malformado
-     * @throws  std::runtime_error             Se houver erro na compilação do padrão
+     *
+     * @param pattern      Padrão regex no formato /pattern/flags.
+     * @param subject      String onde serão feitas as substituições.
+     * @param replacement  String de substituição (pode conter $0, $1, $name etc).
+     * @param offset       (Opcional) Posição onde iniciar as substituições (default: 0).
+     * @param limit        (Opcional) Limite máximo de substituições a serem realizadas (default: ilimitado).
+     * @return std::string Nova string com as substituições realizadas.
+     * @throws std::invalid_argument Se o padrão regex estiver malformado.
+     * @throws std::runtime_error Se houver erro na compilação do padrão.
      */
     std::string preg_replace( const std::string& pattern, const std::string& subject, const std::string& replacement, PCRE2_SIZE offset, std::size_t limit ) {
 
-        if(limit == 0) return subject;
+        if(subject.empty() || limit == 0) return subject;
 
         RegexResult result;
 
@@ -459,7 +465,7 @@ namespace forcaRegex {
 
         std::vector<forcaRegex::RegexStructData>* full_matches = result.get(0);
 
-        if (!full_matches) return subject;
+        if ( full_matches == nullptr ) return subject;
 
         std::size_t count = 0;
 
@@ -524,6 +530,72 @@ namespace forcaRegex {
         // Adiciona o restante do subject após o último match
         output += subject.substr(last_pos);
         return output;
+
+    }
+
+    /**
+     * Divide uma string em substrings usando um padrão regex como delimitador.
+     * Similar à função preg_split() do PHP.
+     *
+     * @param pattern  Padrão regex usado como delimitador.
+     * @param subject  String a ser dividida.
+     * @param limit    (Opcional) Limite máximo de divisões (default: ilimitado).
+     * @return std::vector<std::string> Vetor contendo as substrings resultantes.
+     */
+    std::vector<std::string> preg_split( const std::string& pattern, const std::string& subject, std::size_t limit ) {
+
+        if(subject.empty() || limit == 0) return std::vector<std::string>{subject};
+
+        RegexResult result;
+
+        // Otimização para quando limit for igual a 1, usando o preg_match que é mais rápido.
+        if(limit == 1){
+            result = preg_match(pattern, subject, 0);
+        }
+        else{
+            result = preg_match_all(pattern, subject, 0, limit);
+        }
+
+        if (!result.match) return std::vector<std::string>{subject};
+
+        std::vector<RegexStructData>* complete_matches = result.get(0);
+
+        if( complete_matches == nullptr ) return std::vector<std::string>{subject};
+
+        std::size_t i, matchesLength = complete_matches->size();
+
+        std::vector<std::string> explode;
+
+        std::string copy = subject;
+
+        std::string::size_type offset = 0;
+
+        for(i=0; i<matchesLength; i++){
+
+            if(i >= limit || offset >= copy.length()) break;
+
+            if(i + 1 < limit){
+
+                std::string::size_type start = complete_matches->at(i).start;
+    
+                std::string::size_type end = complete_matches->at(i).end;
+
+                std::string substring = copy.substr( offset, (start - offset) );
+
+                explode.push_back(substring);
+
+                offset = end;
+
+            }
+            else{
+                explode.push_back( copy.substr(offset) );
+            }
+
+        }
+
+        if(explode.empty()) explode.push_back(copy);
+
+        return explode;
 
     }
 

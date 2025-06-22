@@ -2,8 +2,17 @@
 #include <string>
 #include <vector>
 #include <iostream>
+#include <memory>
+#include <stdexcept>
+#include <unicode/unistr.h>
+#include <unicode/brkiter.h>
+#include <unicode/ustream.h>
+#include <unicode/uchar.h>
+#include <unicode/locid.h>
+#include <unicode/normalizer2.h>
 #include "forcaStrings.h"
 #include "forcaRegex.h"
+#include "forcaUtils.h"
 
 namespace forcaStrings {
 
@@ -14,10 +23,7 @@ namespace forcaStrings {
     */
 
     /**
-     * Remove os espaçamentos da string obtida. Isso é util para normalizar a string
-     * e evitar erros no funcionamento do código, além de corrigir possíveis espaçamentos
-     * não intencionais feitos pelo usuário. Remove espaços em branco, tabs, quebras de linha
-     * e outros caracteres de espaçamento.
+     * Remove os espaçamentos da string obtida, considerendo caracteres unicode.
      *
      * @param   std::string text    String que terá seus espaços removidos
      * @return  std::string         String normalizada sem espaços
@@ -26,41 +32,102 @@ namespace forcaStrings {
 
         std::string text = string;
 
-        std::string::size_type spacePos = text.find_first_of(" \t\n\r\v\f");
+        icu::UnicodeString input(text.c_str(), "UTF-8");
 
-        while(spacePos != std::string::npos){
+        int32_t i = 0;
 
-            // Remove o espaço encontrado.
-            text.erase(spacePos, 1);
-            
-            /*          
-            |    Busca o proximo espaço a partir da posição do ultimo espaço encontrado.
-            |    Isso otimiza a busca pois o find não vai ficar percorrendo a string desde o
-            |    começo toda vez que for usado. 
-            */
-            spacePos = text.find_first_of(" \t\n\r\v\f", spacePos);
+        while (i < input.length()) {
+
+            UChar32 c = input.char32At(i);
+
+            if (u_isUWhiteSpace(c)) {
+
+                input.remove(i, U16_LENGTH(c));
+
+            } 
+            else {
+                i += U16_LENGTH(c);
+            }
 
         }
 
-        return text;
+        std::string response;
+
+        input.toUTF8String(response);
+
+        return response;
+
+    }
+
+    /**
+     * Normaliza uma string Unicode de acordo com a forma especificada.
+     *
+     * Esta função aplica a normalização Unicode na string de entrada, utilizando as formas NFC, NFD, NFKC ou NFKD,
+     * conforme especificado no parâmetro form. A normalização é útil para garantir que diferentes representações
+     * de caracteres Unicode equivalentes sejam convertidas para uma forma canônica comum.
+     *
+     * Inspirada na função normalize do JavaScript.
+     *
+     * @param string String a ser normalizada.
+     * @param form   Forma de normalização: "NFC", "NFD", "NFKC" ou "NFKD".
+     * @return std::string String normalizada conforme a forma especificada.
+     * @throws std::invalid_argument Se a forma de normalização for inválida.
+     * @throws std::runtime_error Em caso de erro na biblioteca ICU.
+     */
+    std::string normalize( const std::string& string, const std::string& form ) {
+
+        UErrorCode status = U_ZERO_ERROR;
+
+        const icu::Normalizer2* normalizer = nullptr;
+
+        if (form == "NFC") {
+            normalizer = icu::Normalizer2::getNFCInstance(status);
+        } 
+        else if (form == "NFD") {
+            normalizer = icu::Normalizer2::getNFDInstance(status);
+        } 
+        else if (form == "NFKC") {
+            normalizer = icu::Normalizer2::getNFKCInstance(status);
+        } 
+        else if (form == "NFKD") {
+            normalizer = icu::Normalizer2::getNFKDInstance(status);
+        } 
+        else {
+
+            // Essa é a mesma mensagem que aparece no JS, já que essa função é a cópia da função normalize do JS no C++
+            throw std::invalid_argument("Uncaught RangeError: The normalization form should be one of NFC, NFD, NFKC, NFKD.");
+
+        }
+
+        if (U_FAILURE(status)) {
+            throw std::runtime_error("Normalize Error: " + std::string(u_errorName(status)));
+        }
+
+        icu::UnicodeString input = icu::UnicodeString::fromUTF8(string);
+
+        icu::UnicodeString result = normalizer->normalize(input, status);
+
+        if (U_FAILURE(status)) {
+            throw std::runtime_error("Normalize Error: " + std::string(u_errorName(status)));
+        }
+
+        std::string response;
+
+        result.toUTF8String(response);
+        
+        return response;
 
     }
 
     /**
      * Remove acentos e caracteres especiais (ç) de uma string, substituindo-os 
      * por seus equivalentes sem acentuação. Por exemplo, 'á' é substituído por 'a',
-     * 'ç' por 'c', etc.
+     * 'ç' por 'c', etc. Focado em palavras pt-br.
      *
      * @param   std::string text    String que terá seus acentos removidos
      * @return  std::string         String normalizada sem acentos
      */
     std::string removeAcentos( const std::string& string ) {
-
-        std::string text = string;
-
-        int i;
-        std::string::size_type pos;
-        std::string::size_type stringSize;
 
         /**
          * Palavras acentuadas e ç. Serão usadas para comparação e depois
@@ -102,6 +169,12 @@ namespace forcaStrings {
         static const int _REMOVE_ACENTOS_MAP_SIZE_ =
             sizeof(_REMOVE_ACENTOS_ACENTUADAS_) / sizeof(_REMOVE_ACENTOS_ACENTUADAS_[0]);
 
+        std::string text = forcaStrings::normalize(string, "NFC");
+
+        int i;
+        std::string::size_type pos;
+        std::string::size_type stringSize;        
+
         for(i = 0; i < _REMOVE_ACENTOS_MAP_SIZE_; i++) {
 
             stringSize = _REMOVE_ACENTOS_ACENTUADAS_[i].size();
@@ -122,35 +195,30 @@ namespace forcaStrings {
 
     /**
      * Converte todos os caracteres de uma string para maiúsculos. A função lida 
-     * corretamente com caracteres ASCII estendido (>127) através de um cast para 
-     * unsigned char.
+     * corretamente com caracteres Unicode.
      *
      * @param   std::string text    String que será convertida para maiúsculo
      * @return  std::string         String com todos os caracteres em maiúsculo
      */
     std::string to_uppercase( const std::string& string ) {
-
+        
         std::string text = string;
 
-        std::string::size_type i, length;
+        icu::UnicodeString input(text.c_str(), "UTF-8");
 
-        length = text.size();
+        input.toUpper(icu::Locale::getDefault());
 
-        for (i = 0; i < length; i++) {
+        std::string response;
 
-            // Cast para unsigned char para evitar comportamento indefinido em caracteres >127
-            text[i] = static_cast<char>( std::toupper(static_cast<unsigned char>( text[i] ) ) );
+        input.toUTF8String(response);
 
-        }
-
-        return text;
+        return response;
 
     }
 
     /**
      * Converte todos os caracteres de uma string para minúsculos. A função lida 
-     * corretamente com caracteres ASCII estendido (>127) através de um cast para 
-     * unsigned char.
+     * corretamente com caracteres Unicode.
      *
      * @param   std::string text    String que será convertida para minúsculo
      * @return  std::string         String com todos os caracteres em minúsculo
@@ -159,18 +227,15 @@ namespace forcaStrings {
 
         std::string text = string;
 
-        std::string::size_type i, length;
+        icu::UnicodeString input(text.c_str(), "UTF-8");
 
-        length = text.size();
+        input.toLower(icu::Locale::getDefault());
 
-        for (i = 0; i < length; i++) {
+        std::string response;
 
-            // Cast para unsigned char para evitar comportamento indefinido em caracteres >127
-            text[i] = static_cast<char>( std::tolower(static_cast<unsigned char>( text[i] ) ) );
+        input.toUTF8String(response);
 
-        }
-
-        return text;
+        return response;
 
     }
 
@@ -187,19 +252,33 @@ namespace forcaStrings {
 
         std::string text = string;
 
-        while( isspace(text[0]) && text.length() != 0 ){
-        
-            text.erase(0, 1);
+        icu::UnicodeString input(text.c_str(), "UTF-8");
+
+        UChar32 c = input.char32At(0);
+
+        while( u_isUWhiteSpace(c) && input.length() != 0){
+
+            input.remove(0, U16_LENGTH(c));   
+            
+            c = input.char32At(0);
 
         }
 
-        while( isspace( text[ text.length() - 1 ] ) && text.length() > 0 ){
-        
-            text.erase( (text.length() - 1), 1 );
+        c = input.char32At(input.length() - 1);
+
+        while( u_isUWhiteSpace(c) && input.length() != 0){
+
+            input.remove( (input.length() - 1), U16_LENGTH(c) );
+
+            c = input.char32At(input.length() - 1);
 
         }
 
-        return text;
+        std::string response;
+
+        input.toUTF8String(response);
+
+        return response;
 
     }
 
@@ -217,13 +296,23 @@ namespace forcaStrings {
 
         std::string text = string;
 
-        while( isspace(text[0]) && text.length() != 0 ){
-        
-            text.erase(0, 1);
+        icu::UnicodeString input(text.c_str(), "UTF-8");
+
+        UChar32 c = input.char32At(0);
+
+        while( u_isUWhiteSpace(c) && input.length() != 0){
+
+            input.remove(0, U16_LENGTH(c));   
+            
+            c = input.char32At(0);
 
         }
 
-        return text;
+        std::string response;
+
+        input.toUTF8String(response);
+
+        return response;
 
     }
 
@@ -241,13 +330,23 @@ namespace forcaStrings {
 
         std::string text = string;
 
-        while( isspace( text[ text.length() - 1 ] ) && text.length() > 0 ){
-        
-            text.erase( (text.length() - 1), 1 );
+        icu::UnicodeString input(text.c_str(), "UTF-8");
+
+        UChar32 c = input.char32At( (input.length() - 1) );
+
+        while( u_isUWhiteSpace(c) && input.length() != 0){
+
+            input.remove( (input.length() - 1), U16_LENGTH(c) );
+
+            c = input.char32At(input.length() - 1);
 
         }
 
-        return text;
+        std::string response;
+
+        input.toUTF8String(response);
+
+        return response;
 
     }
 
@@ -288,7 +387,7 @@ namespace forcaStrings {
      */
     std::string normalizeLineBreaks( const std::string& text ) {
 
-        return forcaRegex::preg_replace("/(?:\r\n|\v|\f|\n)/", text, "\n");
+        return forcaRegex::preg_replace(R"(/(?:\r\n|\r|\n|\v|\f|\x85|\x0b|\p{Zl}|\p{Zp})/u)", text, "\n");
 
     }
 
@@ -301,9 +400,14 @@ namespace forcaStrings {
      * @param   const std::string& text    String que terá as quebras de linha extras removidas
      * @return  std::string               String com apenas quebras de linha simples
      */
-    std::string removeExtraLineBreaks( const std::string& text ) {
+    std::string removeExtraLineBreaks( const std::string& text, bool normalize ) {
 
-        return forcaRegex::preg_replace("/(?:\r\n|\v|\f|\n)+/", text, "\n");
+        if(normalize){
+            return forcaRegex::preg_replace(R"(/(?:\r\n|\r|\n|\v|\f|\x85|\x0b|\p{Zl}|\p{Zp})+/u)", text, "\n");
+        }
+        else{
+            return forcaRegex::preg_replace(R"(/((?:\r\n|\r|\n|\v|\f|\x85|\x0b|\p{Zl}|\p{Zp}))+/u)", text, "$1");
+        }
 
     }
 
@@ -339,6 +443,266 @@ namespace forcaStrings {
     }
 
     /**
+     * Quebra uma string em um vetor de caracteres/graphemes considerando code points (Unicode).
+     *
+     * Esta função utiliza ICU para dividir a string em graphemes, ou seja, em unidades de texto visíveis,
+     * respeitando os code points Unicode. Isso é útil para manipulação correta de strings Unicode,
+     * onde um "caractere" pode ser composto por múltiplos bytes ou combinações de símbolos.
+     *
+     * @param string String de entrada a ser quebrada em graphemes.
+     * @return std::vector<std::string> Vetor contendo cada grapheme (caractere visual) da string original.
+     * @throws std::runtime_error Em caso de erro na biblioteca ICU.
+     */
+    std::vector<std::string> explodeGraphemes( const std::string& string ) {
+
+        std::string input = string;
+
+        icu::UnicodeString inputUnicode(input.c_str(), "UTF-8");
+
+        UErrorCode status = U_ZERO_ERROR;
+
+        std::unique_ptr<icu::BreakIterator> it(
+            icu::BreakIterator::createCharacterInstance(icu::Locale::getDefault(), status)
+        );
+
+        if ( U_FAILURE(status) ) {
+
+            std::string error = u_errorName(status);
+
+            throw std::runtime_error("ICU Erro: " + error);
+
+        }
+
+        std::vector<std::string> explode;
+
+        it->setText(inputUnicode);
+
+        int32_t start = it->first();
+        int32_t end = it->next();
+
+        while( end != icu::BreakIterator::DONE ){
+
+            icu::UnicodeString grapheme = inputUnicode.tempSubStringBetween(start, end);
+            
+            std::string utf8;
+
+            grapheme.toUTF8String(utf8);
+
+            explode.push_back(utf8);
+
+            start = end;
+
+            end = it->next();
+
+        }
+
+        return explode;
+
+    }
+
+    /**
+     * Calcula o tamanho de uma string com base nos caracteres visíveis (graphemes/code points Unicode).
+     *
+     * Esta função retorna a quantidade de caracteres visuais presentes na string, considerando corretamente
+     * caracteres Unicode que podem ocupar múltiplos bytes. Diferente de std::string::size(), que retorna o
+     * número de bytes, esta função utiliza ICU para contar os graphemes/code points, fornecendo o tamanho real
+     * percebido pelo usuário.
+     *
+     * @param string String de entrada a ser analisada.
+     * @return std::string::size_type Quantidade de caracteres visíveis (graphemes) na string.
+     * @throws std::runtime_error Em caso de erro na biblioteca ICU.
+     */
+    std::string::size_type Length( const std::string& string ) {
+
+        std::string input = string;
+
+        icu::UnicodeString inputUnicode(input.c_str(), "UTF-8");
+
+        UErrorCode status = U_ZERO_ERROR;
+
+        std::unique_ptr<icu::BreakIterator> it(
+            icu::BreakIterator::createCharacterInstance(icu::Locale::getDefault(), status)
+        );
+
+        if ( U_FAILURE(status) ) {
+
+            std::string error = u_errorName(status);
+
+            throw std::runtime_error("ICU Erro: " + error);
+
+        }
+
+        it->setText(inputUnicode);
+
+        int32_t start = it->first();
+        int32_t end = it->next();
+
+        std::string::size_type length = 0;
+
+        while( end != icu::BreakIterator::DONE ){
+
+            length++;
+
+            start = end;
+
+            end = it->next();
+
+        }
+
+        return length;
+
+    }
+
+    /**
+     * Retorna o caractere visível (grapheme/code point Unicode) na posição informada da string.
+     *
+     * Esta função retorna o caractere visual (grapheme) na posição especificada, levando em consideração
+     * os code points Unicode, e não apenas bytes individuais. Assim, a posição é baseada no que o usuário
+     * percebe como "caracteres", mesmo que ocupem múltiplos bytes.
+     *
+     * Inspirada na função charAt do JavaScript, mas adaptada para suportar Unicode corretamente em C++.
+     *
+     * @param string String de entrada.
+     * @param index  Índice do caractere desejado (baseado em graphemes/code points Unicode).
+     * @return std::string Caractere visual na posição informada, ou string vazia se a string for vazia.
+     * @throws std::out_of_range Se o índice for maior ou igual ao número de caracteres visíveis.
+     */
+    std::string charAt( const std::string& string, std::string::size_type index ) {
+
+        if(string.empty()) return "";
+
+        std::string::size_type length = forcaStrings::Length(string);
+
+        if(index >= length) throw std::out_of_range("forcaStrings::charAt: index (which is " + std::to_string(index) + ") >= this->length() (which is " + std::to_string(length) + ")");
+
+        std::vector<std::string> explode = forcaStrings::explodeGraphemes(string);
+
+        std::string charString = explode.at(index);
+
+        return charString;
+
+    }
+
+    /**
+     * Repete uma string um número especificado de vezes.
+     *
+     * Esta função retorna uma nova string composta pela concatenação da string original repetida
+     * o número de vezes informado em count.
+     *
+     * Inspirada na função repeat do JavaScript.
+     *
+     * @param string String a ser repetida.
+     * @param count  Número de repetições.
+     * @return std::string String resultante da repetição.
+     */
+    std::string repeat( const std::string& string, std::string::size_type count ) {
+
+        if(string.empty() || count == 0) return "";
+
+        std::string repeat;
+
+        std::string::size_type i;
+
+        for(i=0; i<count; i++){
+            repeat += string;
+        }
+
+        return repeat;
+
+    }
+
+    /**
+     * Extrai uma substring com base nos caracteres visíveis (graphemes/code points Unicode).
+     *
+     * Esta função retorna uma substring da string original, considerando corretamente os caracteres visuais
+     * (graphemes/code points Unicode), e não apenas o número de bytes. Assim, a extração é feita de acordo
+     * com o que o usuário percebe como "caracteres", mesmo que eles ocupem múltiplos bytes.
+     *
+     * @param string String de entrada.
+     * @param pos    Posição inicial (baseada em graphemes/code points Unicode).
+     * @param len    Comprimento da substring (em graphemes/code points Unicode).
+     * @return std::string Substring extraída, respeitando os caracteres visíveis.
+     * @throws std::out_of_range Se a posição inicial for maior que o tamanho da string.
+     */
+    std::string substring( const std::string& string, std::size_t pos, std::size_t len ) {
+
+        std::string copy = string;
+
+        std::string::size_type length = forcaStrings::Length(copy);
+
+        if(pos > length) throw std::out_of_range("forcaStrings::substring: pos (which is " + std::to_string(pos) + ") > this->size() (which is " + std::to_string(length) + ")");
+
+        if(pos == length) return "";
+
+        if( len > (length - pos) ) len = length - pos;
+
+        std::vector<std::string> explode = forcaStrings::explodeGraphemes(copy);
+
+        std::vector<std::string> substr;
+
+        substr.assign( (explode.begin() + pos), ( explode.begin() + (pos + len) ) );
+
+        std::string substring = forcaStrings::implode(substr);
+
+        return substring;
+
+    }
+
+    /**
+     * Retorna o índice da primeira ocorrência de um caractere visível (grapheme/code point Unicode) em uma string.
+     *
+     * Esta função busca a primeira ocorrência exata do caractere (ou grapheme) informado, levando em consideração
+     * a divisão correta de caracteres Unicode (code points), e não apenas bytes. Assim, a busca é feita de acordo
+     * com o que o usuário percebe como "caracteres", mesmo que ocupem múltiplos bytes.
+     *
+     * @param string String onde será feita a busca.
+     * @param search Caractere/grapheme a ser procurado (pode ser um code point Unicode).
+     * @return std::string::size_type Índice da primeira ocorrência do caractere/grapheme, ou std::string::npos se não encontrado.
+     */
+    std::string::size_type firstIndexOf( const std::string& string, const std::string& search ) {
+
+        if(search.empty()) return std::string::npos;
+
+        std::vector<std::string> explode = forcaStrings::explodeGraphemes(string);
+
+        std::vector<std::string>::iterator index = std::find( explode.begin(), explode.end(), search);
+
+        if(index == explode.end()) return std::string::npos;
+
+        std::string::size_type pos = std::distance(explode.begin(), index);
+
+        return pos;
+
+    }
+
+    /**
+     * Retorna o índice da última ocorrência de um caractere visível (grapheme/code point Unicode) em uma string.
+     *
+     * Esta função busca a última ocorrência exata do caractere (ou grapheme) informado, levando em consideração
+     * a divisão correta de caracteres Unicode (code points), e não apenas bytes. Assim, a busca é feita de acordo
+     * com o que o usuário percebe como "caracteres", mesmo que ocupem múltiplos bytes.
+     *
+     * @param string String onde será feita a busca.
+     * @param search Caractere/grapheme a ser procurado (pode ser um code point Unicode).
+     * @return std::string::size_type Índice da última ocorrência do caractere/grapheme, ou std::string::npos se não encontrado.
+     */
+    std::string::size_type lastIndexOf( const std::string& string, const std::string& search ) {
+
+        if(search.empty()) return std::string::npos;
+
+        std::vector<std::string> explode = forcaStrings::explodeGraphemes(string);
+
+        auto index = std::find( explode.rbegin(), explode.rend(), search);
+
+        if(index == explode.rend()) return std::string::npos;
+
+        std::string::size_type pos = std::distance( explode.begin(), (index.base() - 1) );
+
+        return pos;
+
+    }
+
+    /**
      * Divide uma string em um vetor de strings usando um separador.
      * Esta versão trabalha com strings passadas por referência constante.
      * 
@@ -348,11 +712,11 @@ namespace forcaStrings {
      *       mas optei por esta abordagem recursiva com ponteiro para demonstrar conhecimento em manipulação de ponteiros e recursividade.
      * 
      * @param   const std::string& string    String a ser dividida
-     * @param   std::string separator        String usada como separador
+     * @param   const std::string& separator        String usada como separador
      * @param   std::vector<std::string>* reference    Ponteiro para o vetor que armazenará os resultados
      * @return  void
      */
-    void explode( const std::string& string, std::string separator, std::vector<std::string>* reference, std::size_t limit ) {
+    void explode( const std::string& string, const std::string& separator, std::vector<std::string>* reference, std::size_t limit ) {
 
         if(limit == 0 || reference->size() >= limit) return;
 
@@ -363,15 +727,50 @@ namespace forcaStrings {
         */
         std::string copy = string;
 
-        std::string::size_type pos = copy.find(separator);
-
         std::string::size_type separatorLength = separator.length();
 
-        if(separatorLength == 0) separatorLength = 1;
+        if(separatorLength == 0){
 
-        if( pos != std::string::npos && (reference->size() + 1) < limit ){
+            /* 
+                Quando o separador é uma string vazia (""), o objetivo é quebrar a string em um vetor de caracteres visuais (graphemes),
+                levando em consideração code points (Unicode). Isso é importante porque um "caractere" visual pode ser composto por múltiplos bytes,
+                e a divisão correta deve respeitar a representação visual e não apenas os bytes individuais. Para isso, utilizamos a função
+                explodeGraphemes, que trata corretamente os code points Unicode. Após obter os graphemes, o ajuste do limite é feito manualmente.
+            */
 
-            std::string substr = copy.substr(0, pos + separatorLength);
+            std::vector<std::string> explode = forcaStrings::explodeGraphemes(copy);
+
+            while( ( reference->size() + 1 ) < limit && !explode.empty() ){
+
+                reference->push_back(explode[0]);
+
+                explode.erase( explode.begin() );
+
+            }
+
+            if( !explode.empty() && limit != 0 ){
+
+                reference->push_back( forcaStrings::implode(explode) );
+
+            }
+
+            return;
+
+        }
+        
+        /*
+            Quando o separador possui tamanho maior que zero, a busca e quebra da string é feita normalmente usando find e substr,
+            pois a posição do separador na string não depende da quantidade de bytes de cada caractere, mas sim da posição lógica
+            onde o separador ocorre. Além disso, o código já considera corretamente o tamanho do separador (separatorLength), permitindo
+            separadores com múltiplos bytes ou múltiplos caracteres. Isso garante que a divisão será feita exatamente após o separador,
+            independentemente de seu tamanho ou conteúdo.
+        */
+
+        std::string::size_type pos = copy.find(separator);
+
+        if( separatorLength > 0 && pos != std::string::npos && ( reference->size() + 1 ) < limit ) {
+
+            std::string substr = copy.substr(0, pos);
 
             reference->push_back(substr);
 
@@ -390,16 +789,17 @@ namespace forcaStrings {
      * Divide uma string em um vetor de strings usando um separador.
      * Esta versão trabalha com strings mutáveis (char*).
      * 
+     * @note Por preferência pessoal, a implementação ideal seria retornar um std::vector<std::string> e utilizar um loop while,
+     *       mas optei por esta abordagem recursiva com ponteiro para demonstrar conhecimento em manipulação de ponteiros e recursividade.      
+     *
      * @param   char* string                 String a ser dividida
-     * @param   std::string separator        String usada como separador
+     * @param   const std::string& separator        String usada como separador
      * @param   std::vector<std::string>* reference    Ponteiro para o vetor que armazenará os resultados
      * @return  void
      */
-    void explode( char* string, std::string separator, std::vector<std::string>* reference, std::size_t limit ) {
+    void explode( char* string, const std::string& separator, std::vector<std::string>* reference, std::size_t limit ) {
 
-        std::string copy = string;
-
-        explode(copy, separator, reference, limit);
+        explode(string, separator, reference, limit);
 
     }
 
@@ -407,16 +807,17 @@ namespace forcaStrings {
      * Divide uma string em um vetor de strings usando um separador.
      * Esta versão trabalha com strings constantes (const char*).
      * 
+     * @note Por preferência pessoal, a implementação ideal seria retornar um std::vector<std::string> e utilizar um loop while,
+     *       mas optei por esta abordagem recursiva com ponteiro para demonstrar conhecimento em manipulação de ponteiros e recursividade.     
+     * 
      * @param   const char* string           String a ser dividida
-     * @param   std::string separator        String usada como separador
+     * @param   const std::string& separator        String usada como separador
      * @param   std::vector<std::string>* reference    Ponteiro para o vetor que armazenará os resultados
      * @return  void
      */
-    void explode( const char* string, std::string separator, std::vector<std::string>* reference, std::size_t limit ) {
+    void explode( const char* string, const std::string& separator, std::vector<std::string>* reference, std::size_t limit ) {
 
-        std::string copy = string;
-
-        explode(copy, separator, reference, limit);
+        explode(string, separator, reference, limit);
 
     }
 
@@ -427,10 +828,10 @@ namespace forcaStrings {
      * Essa função foi inspirada na função implode do PHP.
      * 
      * @param   const std::vector<std::string>& array    Vetor de strings a ser concatenado
-     * @param   std::string delimiter                    String usada como delimitador
+     * @param   const std::string& delimiter                    String usada como delimitador
      * @return  std::string                             String resultante da concatenação
      */
-    std::string implode( const std::vector<std::string>& array, std::string delimiter ) {
+    std::string implode( const std::vector<std::string>& array, const std::string& delimiter ) {
 
         if(array.empty()) return "";
 
@@ -455,10 +856,10 @@ namespace forcaStrings {
      * 
      * @param   char* array[]               Array de strings a ser concatenado
      * @param   int size                    Tamanho do array
-     * @param   std::string delimiter       String usada como delimitador
+     * @param   const std::string& delimiter       String usada como delimitador
      * @return  std::string                String resultante da concatenação
      */
-    std::string implode(char* array[], int size, std::string delimiter) {
+    std::string implode(char* array[], int size, const std::string& delimiter) {
 
         if (size <= 0 || array == nullptr) return "";
         
@@ -483,10 +884,10 @@ namespace forcaStrings {
      * 
      * @param   const char* array[]         Array de strings a ser concatenado
      * @param   int size                    Tamanho do array
-     * @param   std::string delimiter       String usada como delimitador
+     * @param   const std::string& delimiter       String usada como delimitador
      * @return  std::string                String resultante da concatenação
      */
-    std::string implode(const char* array[], int size, std::string delimiter) {
+    std::string implode(const char* array[], int size, const std::string& delimiter) {
 
         if (size <= 0 || array == nullptr) return "";
         
