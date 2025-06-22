@@ -32,6 +32,10 @@ String.prototype.removeSpaces = function(){
     return callUserFunc.sync("removeSpaces", this.toString());
 }
 
+String.prototype.normalize = function(form = "NFC"){
+    return callUserFunc.sync("normalize", this.toString(), form);
+}
+
 String.prototype.removeAcentos = function(){
     return callUserFunc.sync("removeAcentos", this.toString());
 }

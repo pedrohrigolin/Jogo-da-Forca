@@ -9,6 +9,8 @@ namespace forcaStrings {
 
     std::string removeSpaces( const std::string& string );
 
+    std::string normalize( const std::string& string, const std::string& form = "NFC" );
+
     std::string removeAcentos( const std::string& string );
 
     std::string to_uppercase( const std::string& string );

@@ -9,6 +9,7 @@
 #include <unicode/ustream.h>
 #include <unicode/uchar.h>
 #include <unicode/locid.h>
+#include <unicode/normalizer2.h>
 #include "forcaStrings.h"
 #include "forcaRegex.h"
 #include "forcaUtils.h"
@@ -59,6 +60,66 @@ namespace forcaStrings {
     }
 
     /**
+     * Normaliza uma string Unicode de acordo com a forma especificada.
+     *
+     * Esta função aplica a normalização Unicode na string de entrada, utilizando as formas NFC, NFD, NFKC ou NFKD,
+     * conforme especificado no parâmetro form. A normalização é útil para garantir que diferentes representações
+     * de caracteres Unicode equivalentes sejam convertidas para uma forma canônica comum.
+     *
+     * Inspirada na função normalize do JavaScript.
+     *
+     * @param string String a ser normalizada.
+     * @param form   Forma de normalização: "NFC", "NFD", "NFKC" ou "NFKD".
+     * @return std::string String normalizada conforme a forma especificada.
+     * @throws std::invalid_argument Se a forma de normalização for inválida.
+     * @throws std::runtime_error Em caso de erro na biblioteca ICU.
+     */
+    std::string normalize( const std::string& string, const std::string& form ) {
+
+        UErrorCode status = U_ZERO_ERROR;
+
+        const icu::Normalizer2* normalizer = nullptr;
+
+        if (form == "NFC") {
+            normalizer = icu::Normalizer2::getNFCInstance(status);
+        } 
+        else if (form == "NFD") {
+            normalizer = icu::Normalizer2::getNFDInstance(status);
+        } 
+        else if (form == "NFKC") {
+            normalizer = icu::Normalizer2::getNFKCInstance(status);
+        } 
+        else if (form == "NFKD") {
+            normalizer = icu::Normalizer2::getNFKDInstance(status);
+        } 
+        else {
+
+            // Essa é a mesma mensagem que aparece no JS, já que essa função é a cópia da função normalize do JS no C++
+            throw std::invalid_argument("Uncaught RangeError: The normalization form should be one of NFC, NFD, NFKC, NFKD.");
+
+        }
+
+        if (U_FAILURE(status)) {
+            throw std::runtime_error("Normalize Error: " + std::string(u_errorName(status)));
+        }
+
+        icu::UnicodeString input = icu::UnicodeString::fromUTF8(string);
+
+        icu::UnicodeString result = normalizer->normalize(input, status);
+
+        if (U_FAILURE(status)) {
+            throw std::runtime_error("Normalize Error: " + std::string(u_errorName(status)));
+        }
+
+        std::string response;
+
+        result.toUTF8String(response);
+        
+        return response;
+
+    }
+
+    /**
      * Remove acentos e caracteres especiais (ç) de uma string, substituindo-os 
      * por seus equivalentes sem acentuação. Por exemplo, 'á' é substituído por 'a',
      * 'ç' por 'c', etc. Focado em palavras pt-br.
@@ -67,12 +128,6 @@ namespace forcaStrings {
      * @return  std::string         String normalizada sem acentos
      */
     std::string removeAcentos( const std::string& string ) {
-
-        std::string text = string;
-
-        int i;
-        std::string::size_type pos;
-        std::string::size_type stringSize;
 
         /**
          * Palavras acentuadas e ç. Serão usadas para comparação e depois
@@ -113,6 +168,12 @@ namespace forcaStrings {
          */
         static const int _REMOVE_ACENTOS_MAP_SIZE_ =
             sizeof(_REMOVE_ACENTOS_ACENTUADAS_) / sizeof(_REMOVE_ACENTOS_ACENTUADAS_[0]);
+
+        std::string text = forcaStrings::normalize(string, "NFC");
+
+        int i;
+        std::string::size_type pos;
+        std::string::size_type stringSize;        
 
         for(i = 0; i < _REMOVE_ACENTOS_MAP_SIZE_; i++) {
 

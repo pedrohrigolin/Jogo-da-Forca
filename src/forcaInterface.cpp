@@ -445,6 +445,73 @@ NativeFunctionHandler::NativeFunctionHandler() {
 
     );    
 
+    router_->RegisterFunction("normalize",
+        [](const CefV8ValueList& args, CefRefPtr<CefV8Value>& retval, CefString& exception) -> bool {
+            
+            try {
+
+                std::size_t argsSize = args.size();
+
+                if(argsSize < 1){
+                    exception = "Quantidade insuficiente de parâmetros fornecidos para a função.";
+                    return true;
+                }      
+                
+                std::string string = args[0]->GetStringValue();
+
+                if(string.empty()){
+                    retval = CefV8Value::CreateString("");
+                    return true;
+                }
+                
+                std::string form = "NFC";
+
+                if(argsSize > 1){
+
+                    if( ! args[1]->IsString() && ! args[1]->IsUndefined() ){
+                        exception = "O primeiro parâmetro form deve ser do tipo string!";
+                        return true;
+                    }
+
+                    if(args[1]->IsString()){
+
+                        std::string temp = forcaStrings::to_uppercase(args[1]->GetStringValue());
+
+                        if( temp != "NFC" && temp != "NFD" && temp != "NFKC" && temp != "NFKD" ){
+                            exception = "Uncaught RangeError: The normalization form should be one of NFC, NFD, NFKC, NFKD.";
+                            return true;
+                        }
+
+                        form = temp;
+
+                    }
+
+                }
+
+                std::string normalize = forcaStrings::normalize(string, form);
+
+                retval = CefV8Value::CreateString(normalize);
+
+                return true;
+
+            } catch (const std::exception& e) {
+
+                exception = ForcaInterface::exceptionText(e);
+
+                return true;
+
+            } catch (...) {
+
+                exception = "Erro ao executar função no backend! \n\nTipo de exceção: Desconhecido \n\nMensagem: Exceção desconhecida!\n";
+
+                return true;
+
+            }        
+
+        }
+
+    );
+
     router_->RegisterFunction("removeAcentos",
         [](const CefV8ValueList& args, CefRefPtr<CefV8Value>& retval, CefString& exception) -> bool {
             
@@ -2493,6 +2560,8 @@ void ForcaCefApp::OnContextCreated(CefRefPtr<CefBrowser> browser, CefRefPtr<CefF
 
     ForcaAppObj->SetValue("removeSpaces", CefV8Value::CreateFunction("removeSpaces", nativeSyncHandler), V8_PROPERTY_ATTRIBUTE_NONE);
 
+    ForcaAppObj->SetValue("normalize", CefV8Value::CreateFunction("normalize", nativeSyncHandler), V8_PROPERTY_ATTRIBUTE_NONE);
+    
     ForcaAppObj->SetValue("removeAcentos", CefV8Value::CreateFunction("removeAcentos", nativeSyncHandler), V8_PROPERTY_ATTRIBUTE_NONE);
 
     ForcaAppObj->SetValue("trim", CefV8Value::CreateFunction("trim", nativeSyncHandler), V8_PROPERTY_ATTRIBUTE_NONE);
