@@ -57,6 +57,10 @@ namespace forcaStrings {
 
     std::string implode( const char* array[], int size, const std::string& delimiter = "" );
 
+    std::string::size_type search( const std::string& string, const std::string& search );
+
+    std::vector<std::string::size_type> search_all( const std::string& string, const std::string& search, std::size_t limit = std::numeric_limits<size_t>::max() );
+
 }
 
 #endif

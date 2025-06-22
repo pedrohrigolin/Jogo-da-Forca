@@ -906,4 +906,55 @@ namespace forcaStrings {
         
     }
 
+    std::string::size_type search( const std::string& string, const std::string& search ) {
+
+        if(string.empty()) return std::string::npos;
+
+        forcaRegex::RegexResult result = forcaRegex::preg_match(search, string);
+
+        if(!result.match) return std::string::npos;
+
+        std::vector<forcaRegex::RegexStructData>* match_data = result.get(0);
+
+        if(match_data == nullptr) return std::string::npos;
+
+        forcaRegex::RegexStructData first_match = match_data->at(0);
+
+        std::string::size_type realLength = forcaStrings::Length(string);
+
+        std::string::size_type realDifference = string.length() - realLength;
+
+        std::string::size_type index = first_match.start - realDifference;
+
+        return index;
+
+    }
+
+    
+    std::vector<std::string::size_type> search_all( const std::string& string, const std::string& search, std::size_t limit ) {
+
+        if(string.empty() || limit == 0) return {};
+
+        forcaRegex::RegexResult result = forcaRegex::preg_match(search, string, limit);
+
+        if(!result.match) return {};
+
+        std::vector<forcaRegex::RegexStructData>* match_data = result.get(0);
+
+        if(match_data == nullptr) return {};
+
+        std::vector<std::string::size_type> all_index;
+
+        std::size_t i, matchSize = match_data->size();
+
+        for(i=0; i<matchSize; i++){
+
+            if(i == limit) break;
+
+            all_index.push_back( match_data->at(i).start );
+
+        }
+
+    }
+
 }

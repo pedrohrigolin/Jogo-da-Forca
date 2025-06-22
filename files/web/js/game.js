@@ -1,5 +1,3 @@
-const languagesObject = {};
-
 const initializeObject = Object.freeze({
 
     elements: {
