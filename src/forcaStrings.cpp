@@ -10,6 +10,7 @@
 #include <unicode/uchar.h>
 #include <unicode/locid.h>
 #include <unicode/normalizer2.h>
+#include <unicode/utf8.h>
 #include "forcaStrings.h"
 #include "forcaRegex.h"
 #include "forcaUtils.h"
@@ -455,6 +456,8 @@ namespace forcaStrings {
      */
     std::vector<std::string> explodeGraphemes( const std::string& string ) {
 
+        if(string.empty()) return {};
+
         std::string input = string;
 
         icu::UnicodeString inputUnicode(input.c_str(), "UTF-8");
@@ -512,7 +515,7 @@ namespace forcaStrings {
      * @return std::string::size_type Quantidade de caracteres visíveis (graphemes) na string.
      * @throws std::runtime_error Em caso de erro na biblioteca ICU.
      */
-    std::string::size_type Length( const std::string& string ) {
+    std::string::size_type VisibleLength( const std::string& string ) {
 
         std::string input = string;
 
@@ -554,6 +557,28 @@ namespace forcaStrings {
     }
 
     /**
+     * Retorna o tamanho da string com base em unidades UTF-16.
+     *
+     * Esta função utiliza ICU para calcular o comprimento da string em termos de unidades de código UTF-16,
+     * que pode ser diferente do número de caracteres visíveis (graphemes) ou do número de bytes.
+     * Útil para operações que dependem da codificação interna UTF-16, como APIs que trabalham diretamente com UnicodeString.
+     *
+     * @param string String de entrada a ser analisada.
+     * @return std::string::size_type Quantidade de unidades UTF-16 na string.
+     */
+    std::string::size_type Length( const std::string& string ) {
+
+        std::string input = string;
+
+        icu::UnicodeString inputUnicode(input.c_str(), "UTF-8");
+
+        std::string::size_type length = inputUnicode.length();
+
+        return length;
+
+    }    
+
+    /**
      * Retorna o caractere visível (grapheme/code point Unicode) na posição informada da string.
      *
      * Esta função retorna o caractere visual (grapheme) na posição especificada, levando em consideração
@@ -571,7 +596,7 @@ namespace forcaStrings {
 
         if(string.empty()) return "";
 
-        std::string::size_type length = forcaStrings::Length(string);
+        std::string::size_type length = forcaStrings::VisibleLength(string);
 
         if(index >= length) throw std::out_of_range("forcaStrings::charAt: index (which is " + std::to_string(index) + ") >= this->length() (which is " + std::to_string(length) + ")");
 
@@ -628,7 +653,7 @@ namespace forcaStrings {
 
         std::string copy = string;
 
-        std::string::size_type length = forcaStrings::Length(copy);
+        std::string::size_type length = forcaStrings::VisibleLength(copy);
 
         if(pos > length) throw std::out_of_range("forcaStrings::substring: pos (which is " + std::to_string(pos) + ") > this->size() (which is " + std::to_string(length) + ")");
 
@@ -906,6 +931,132 @@ namespace forcaStrings {
         
     }
 
+    /**
+     * Converte um índice baseado em unidades de código UTF-16 (padrão JS)
+     * para um índice baseado em bytes (padrão C++ std::string/UTF-8).
+     *
+     * @param utf8_string A string de contexto completa, em formato UTF-8.
+     * @param utf16_index_alvo O índice no formato JavaScript a ser convertido.
+     * @return O offset correspondente em bytes.
+     * @throws std::out_of_range se o utf16_index_alvo for inválido.
+     */
+    std::string::size_type IndexUTF16_toUTF8( const std::string& utf8_string, std::string::size_type utf16_index_alvo ) {
+
+        icu::UnicodeString u_str = icu::UnicodeString::fromUTF8(utf8_string);
+
+        if (utf16_index_alvo > u_str.length()) {
+            throw std::out_of_range("Índice UTF-16 alvo está fora dos limites da string.");
+        }
+        if (utf16_index_alvo == 0) {
+            return 0;
+        }
+
+        icu::UnicodeString prefixo_u16;
+
+        u_str.extract(0, utf16_index_alvo, prefixo_u16);
+
+        std::string prefixo_utf8;
+
+        prefixo_u16.toUTF8String(prefixo_utf8);
+
+        return prefixo_utf8.length();
+
+    }    
+
+    /**
+     * Converte um único índice baseado em bytes (UTF-8) para um índice
+     * baseado em unidades de código UTF-16 (compatível com JavaScript) de forma otimizada.
+     * A função itera pela string apenas o necessário para fazer a conversão.
+     *
+     * @param utf8_string A string original no formato UTF-8.
+     * @param byte_index_alvo O índice baseado em bytes a ser convertido.
+     * @return O índice correspondente em unidades de código UTF-16.
+     * @throws std::out_of_range se o byte_index_alvo for maior que o tamanho da string.
+     */
+    std::string::size_type IndexUTF8_toUTF16( const std::string& utf8_string, std::string::size_type byte_index_alvo ) {
+
+        if (byte_index_alvo > utf8_string.length()) {
+            throw std::out_of_range("Índice de byte alvo está fora dos limites da string.");
+        }
+
+        if (byte_index_alvo == 0) {
+            return 0;
+        }
+
+        std::string::size_type utf8_pos = 0;
+        std::string::size_type utf16_pos = 0;
+
+        const char* s = utf8_string.c_str();
+        std::string::size_type len_bytes = utf8_string.length();
+
+        while (utf8_pos < byte_index_alvo) {
+
+            UChar32 c;
+
+            U8_NEXT(s, utf8_pos, len_bytes, c);
+
+            utf16_pos += U16_LENGTH(c);
+
+        }
+
+        return utf16_pos;
+
+    }
+
+    /**
+     * Cria um mapa de conversão de índices de byte (UTF-8) para índices de 
+     * unidades de código (UTF-16).
+     * 
+     * Itera sobre a string uma única vez para máxima eficiência.
+     *
+     * @param utf8_string A string de entrada.
+     * @return Um vetor onde `mapa[byte_index]` retorna o `utf16_index` correspondente.
+     */
+    std::vector<std::string::size_type> MapIndexUTF8_toUTF16( const std::string& utf8_string ) {
+
+        std::string::size_type len_bytes = utf8_string.length();
+        
+        std::vector<std::string::size_type> mapa(len_bytes + 1);
+
+        std::string::size_type utf8_pos = 0;
+        std::string::size_type utf16_pos = 0;
+
+        while (utf8_pos < len_bytes) {
+           
+            std::string::size_type inicio_char_utf8 = utf8_pos;
+
+            UChar32 c;
+
+            U8_NEXT(utf8_string.c_str(), utf8_pos, len_bytes, c);
+
+            std::string::size_type bytes_neste_char = utf8_pos - inicio_char_utf8;
+          
+            std::string::size_type u16_neste_char = U16_LENGTH(c);
+
+            for (int i = 0; i < bytes_neste_char; ++i) {
+                mapa[inicio_char_utf8 + i] = utf16_pos;
+            }
+
+            utf16_pos += u16_neste_char;
+        }
+
+        mapa[len_bytes] = utf16_pos;
+
+        return mapa;
+
+    }
+
+    /**
+     * Retorna o índice da primeira ocorrência do padrão informado na string.
+     *
+     * Esta função busca a primeira ocorrência do padrão (string ou expressão regular) na string de entrada,
+     * retornando o índice correspondente em unidades UTF-16 (compatível com JavaScript).
+     * Inspirada na função search do JavaScript.
+     *
+     * @param string String onde será feita a busca.
+     * @param search Padrão a ser buscado (string ou expressão regular).
+     * @return std::string::size_type Índice da primeira ocorrência do padrão, ou std::string::npos se não encontrado.
+     */    
     std::string::size_type search( const std::string& string, const std::string& search ) {
 
         if(string.empty()) return std::string::npos;
@@ -920,22 +1071,30 @@ namespace forcaStrings {
 
         forcaRegex::RegexStructData first_match = match_data->at(0);
 
-        std::string::size_type realLength = forcaStrings::Length(string);
-
-        std::string::size_type realDifference = string.length() - realLength;
-
-        std::string::size_type index = first_match.start - realDifference;
+        std::string::size_type index = forcaStrings::IndexUTF8_toUTF16(string, first_match.start);
 
         return index;
 
     }
 
-    
+    /**
+     * Retorna os índices de todas as ocorrências do padrão informado na string.
+     *
+     * Esta função busca todas as ocorrências do padrão (string ou expressão regular) na string de entrada,
+     * retornando um vetor com os índices de cada ocorrência em unidades UTF-16 (compatível com JavaScript).
+     * 
+     * Inspirada na função search do JavaScript, porém searchAll é uma implementação pessoal e não existe nativamente no JS.
+     *
+     * @param string String onde será feita a busca.
+     * @param search Padrão a ser buscado (string ou expressão regular).
+     * @param limit  (Opcional) Limite máximo de índices a retornar.
+     * @return std::vector<std::string::size_type> Vetor com os índices de todas as ocorrências encontradas.
+     */    
     std::vector<std::string::size_type> search_all( const std::string& string, const std::string& search, std::size_t limit ) {
 
         if(string.empty() || limit == 0) return {};
 
-        forcaRegex::RegexResult result = forcaRegex::preg_match(search, string, limit);
+        forcaRegex::RegexResult result = forcaRegex::preg_match_all(search, string, 0, limit);
 
         if(!result.match) return {};
 
@@ -947,13 +1106,17 @@ namespace forcaStrings {
 
         std::size_t i, matchSize = match_data->size();
 
+        std::vector<std::string::size_type> utf16_index = forcaStrings::MapIndexUTF8_toUTF16(string);
+
         for(i=0; i<matchSize; i++){
 
             if(i == limit) break;
 
-            all_index.push_back( match_data->at(i).start );
+            all_index.push_back( utf16_index[ match_data->at(i).start ] );
 
         }
+
+        return all_index;
 
     }
 

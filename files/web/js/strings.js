@@ -177,5 +177,9 @@ String.prototype.search = function(search){
  * @return {array}                Array com os índices de todas as ocorrências encontradas.
  */
 String.prototype.searchAll = function(search, limit){
-    return callUserFunc.sync("searchAll", this.toString(), search);
+    return callUserFunc.sync("searchAll", this.toString(), search, limit);
+}
+
+String.prototype.visibleLength = function(){
+    return callUserFunc.sync("VisibleLength", this.toString());
 }

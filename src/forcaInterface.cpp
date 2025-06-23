@@ -1115,7 +1115,7 @@ NativeFunctionHandler::NativeFunctionHandler() {
                     return true;
                 }
 
-                std::size_t length = forcaStrings::Length(string);
+                std::size_t length = forcaStrings::VisibleLength(string);
 
                 std::string::size_type charAt;
 
@@ -1245,7 +1245,7 @@ NativeFunctionHandler::NativeFunctionHandler() {
 
                 std::string string = args[0]->GetStringValue();
 
-                std::string::size_type stringLength = forcaStrings::Length(string);
+                std::string::size_type stringLength = forcaStrings::VisibleLength(string);
 
                 double startValue = args[1]->GetDoubleValue();
 
@@ -1338,7 +1338,7 @@ NativeFunctionHandler::NativeFunctionHandler() {
 
                 std::string string = args[0]->GetStringValue();
 
-                std::string::size_type stringLength = forcaStrings::Length(string);
+                std::string::size_type stringLength = forcaStrings::VisibleLength(string);
 
                 double startValue = args[1]->GetDoubleValue();
 
@@ -1654,6 +1654,8 @@ NativeFunctionHandler::NativeFunctionHandler() {
 
                 std::string string = args[0]->GetStringValue();
 
+                std::string::size_type stringLength = forcaStrings::Length(string);
+
                 CefRefPtr<CefV8Value> search = args[1];
 
                 std::string searchValue;
@@ -1753,7 +1755,7 @@ NativeFunctionHandler::NativeFunctionHandler() {
                             return true;
                         }
 
-                        if(value >= string.length()){
+                        if(value >= stringLength){
 
                             retval = CefV8Value::CreateString(string);
 
@@ -1761,7 +1763,7 @@ NativeFunctionHandler::NativeFunctionHandler() {
 
                         }
                         else{
-                            offset = value;
+                            offset = forcaStrings::IndexUTF16_toUTF8( string, value );
                         }
 
                     }
@@ -1829,6 +1831,8 @@ NativeFunctionHandler::NativeFunctionHandler() {
 
                 std::string string = args[0]->GetStringValue();
 
+                std::string::size_type stringLength = forcaStrings::Length(string);
+
                 CefRefPtr<CefV8Value> search = args[1];
 
                 std::string searchValue;
@@ -1928,7 +1932,7 @@ NativeFunctionHandler::NativeFunctionHandler() {
                             return true;
                         }
 
-                        if(value >= string.length()){
+                        if(value >= stringLength){
 
                             retval = CefV8Value::CreateString(string);
 
@@ -1936,7 +1940,7 @@ NativeFunctionHandler::NativeFunctionHandler() {
 
                         }
                         else{
-                            offset = value;
+                            offset = forcaStrings::IndexUTF16_toUTF8( string, value );
                         }
 
                     }
@@ -2049,6 +2053,8 @@ NativeFunctionHandler::NativeFunctionHandler() {
 
                 std::string string = args[0]->GetStringValue();
 
+                std::string::size_type stringLength = forcaStrings::Length(string);
+
                 CefRefPtr<CefV8Value> search = args[1];
 
                 std::string searchValue;
@@ -2133,7 +2139,7 @@ NativeFunctionHandler::NativeFunctionHandler() {
                             return true;
                         }
 
-                        if(value >= string.length()){
+                        if(value >= stringLength){
 
                             retval = CefV8Value::CreateString(string);
 
@@ -2141,7 +2147,7 @@ NativeFunctionHandler::NativeFunctionHandler() {
 
                         }
                         else{
-                            offset = value;
+                            offset = forcaStrings::IndexUTF16_toUTF8( string, value );
                         }
 
                     }
@@ -2605,6 +2611,34 @@ NativeFunctionHandler::NativeFunctionHandler() {
         }
     );    
 
+    router_->RegisterFunction("VisibleLength",
+        [=](const CefV8ValueList& args, CefRefPtr<CefV8Value>& retval, CefString& exception) -> bool {
+
+            try {
+
+                std::string string = args[0]->GetStringValue();
+
+                retval = CefV8Value::CreateDouble( forcaStrings::VisibleLength(string) );
+
+                return true;
+
+            } catch (const std::exception& e) {
+
+                exception = ForcaInterface::exceptionText(e);
+
+                return true;
+
+            } catch (...) {
+
+                exception = "Erro ao executar função no backend! \n\nTipo de exceção: Desconhecido \n\nMensagem: Exceção desconhecida!\n";
+
+                return true;
+
+            }                 
+
+        }
+    );
+
 }
 
 bool NativeFunctionHandler::Execute(const CefString& name, CefRefPtr<CefV8Value> object, const CefV8ValueList& arguments, CefRefPtr<CefV8Value>& retval, CefString& exception) {
@@ -2840,6 +2874,8 @@ void ForcaCefApp::OnContextCreated(CefRefPtr<CefBrowser> browser, CefRefPtr<CefF
     ForcaAppObj->SetValue("search", CefV8Value::CreateFunction("search", nativeSyncHandler), V8_PROPERTY_ATTRIBUTE_NONE);
 
     ForcaAppObj->SetValue("searchAll", CefV8Value::CreateFunction("searchAll", nativeSyncHandler), V8_PROPERTY_ATTRIBUTE_NONE);
+
+    ForcaAppObj->SetValue("VisibleLength", CefV8Value::CreateFunction("VisibleLength", nativeSyncHandler), V8_PROPERTY_ATTRIBUTE_NONE);
 
 }
 

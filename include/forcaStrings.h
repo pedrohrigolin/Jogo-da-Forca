@@ -33,6 +33,8 @@ namespace forcaStrings {
 
     std::vector<std::string> explodeGraphemes( const std::string& string );
 
+    std::string::size_type VisibleLength( const std::string& string );
+
     std::string::size_type Length( const std::string& string );
 
     std::string charAt( const std::string& string, std::string::size_type index = 0 );
@@ -56,6 +58,12 @@ namespace forcaStrings {
     std::string implode( char* array[], int size, const std::string& delimiter = "" );
 
     std::string implode( const char* array[], int size, const std::string& delimiter = "" );
+
+    std::string::size_type IndexUTF16_toUTF8( const std::string& utf8_string, std::string::size_type utf16_index_alvo );
+
+    std::string::size_type IndexUTF8_toUTF16( const std::string& utf8_string, std::string::size_type byte_index_alvo );
+
+    std::vector<std::string::size_type> MapIndexUTF8_toUTF16( const std::string& utf8_string );
 
     std::string::size_type search( const std::string& string, const std::string& search );
 
