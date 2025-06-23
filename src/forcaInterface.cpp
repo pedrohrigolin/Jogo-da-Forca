@@ -2639,6 +2639,277 @@ NativeFunctionHandler::NativeFunctionHandler() {
         }
     );
 
+    router_->RegisterFunction("filterValidateBoolean",
+        [=](const CefV8ValueList& args, CefRefPtr<CefV8Value>& retval, CefString& exception) -> bool {
+
+            try {
+
+                std::size_t argsSize = args.size();
+
+                if(argsSize == 0){
+                    exception = "Quantidade insuficiente de parâmetros fornecidos para a função.";
+                    return true;                    
+                }
+
+                if( ! args[0]->IsString() && ! args[0]->IsDouble() && ! args[0]->IsInt() && ! args[0]->IsUInt() && ! args[0]->IsBool() ){
+                    exception = "O primeiro parâmetro deve ser do tipo string, boolean ou inteiro!";
+                    return true;
+                }
+
+                bool strict = true;
+
+                if( argsSize > 1 ){
+
+                    if( ! args[1]->IsBool() ){
+                        exception = "O segundo parâmetro deve ser do tipo boolean!";
+                        return true;                    
+                    }
+
+                    strict = args[1]->GetBoolValue();
+
+                }
+
+                if( args[0]->IsString() ){
+                    retval = CefV8Value::CreateBool( forcaUtils::filter_validate_bool( args[0]->GetStringValue(), strict ) );
+                }
+                else if( args[0]->IsBool() ){
+                    retval = CefV8Value::CreateBool( args[0]->GetBoolValue() );
+                }
+                else{
+                    retval = CefV8Value::CreateBool( forcaUtils::filter_validate_bool( args[0]->GetIntValue(), strict ) );
+                }
+
+                return true;
+
+            } catch (const std::exception& e) {
+
+                exception = ForcaInterface::exceptionText(e);
+
+                return true;
+
+            } catch (...) {
+
+                exception = "Erro ao executar função no backend! \n\nTipo de exceção: Desconhecido \n\nMensagem: Exceção desconhecida!\n";
+
+                return true;
+
+            }                 
+
+        }
+    );
+
+    router_->RegisterFunction("getStringContent",
+        [=](const CefV8ValueList& args, CefRefPtr<CefV8Value>& retval, CefString& exception) -> bool {
+
+            try {
+
+                std::size_t argsSize = args.size();
+
+                if(argsSize == 0){
+                    exception = "Quantidade insuficiente de parâmetros fornecidos para a função.";
+                    return true;                    
+                }
+
+                if( ! args[0]->IsString() ){
+                    exception = "O primeiro parâmetro deve ser do tipo string!";
+                    return true;
+                }
+
+                bool escape = true;
+
+                if( argsSize > 1 ){
+
+                    if( ! args[1]->IsBool() ){
+                        exception = "O segundo parâmetro deve ser do tipo boolean!";
+                        return true;                    
+                    }
+
+                    escape = args[1]->GetBoolValue();
+
+                }
+
+                std::string filepath = forcaStrings::trim( args[0]->GetStringValue() );
+
+                if(escape){
+
+                    nlohmann::json content = forcaFiles::read::getContent(filepath);
+
+                    retval = CefV8Value::CreateString( content.dump() );
+
+                }
+                else{
+                    retval = CefV8Value::CreateString( forcaFiles::read::getContent(filepath) );
+                }
+
+                return true;
+
+            } catch (const std::exception& e) {
+
+                exception = ForcaInterface::exceptionText(e);
+
+                return true;
+
+            } catch (...) {
+
+                exception = "Erro ao executar função no backend! \n\nTipo de exceção: Desconhecido \n\nMensagem: Exceção desconhecida!\n";
+
+                return true;
+
+            }                 
+
+        }
+    );
+
+    router_->RegisterFunction("getJSONContent",
+        [=](const CefV8ValueList& args, CefRefPtr<CefV8Value>& retval, CefString& exception) -> bool {
+
+            try {
+
+                std::size_t argsSize = args.size();
+
+                if(argsSize == 0){
+                    exception = "Quantidade insuficiente de parâmetros fornecidos para a função.";
+                    return true;                    
+                }
+
+                if( ! args[0]->IsString() ){
+                    exception = "O primeiro parâmetro deve ser do tipo string!";
+                    return true;
+                }
+
+                std::string filepath = forcaStrings::trim( args[0]->GetStringValue() );
+                
+                std::string content = forcaFiles::read::getContent(filepath);
+                
+                nlohmann::json jscontent;
+
+                try {
+                    
+                    jscontent = nlohmann::json::parse(content);
+
+                } 
+                catch (const nlohmann::json::parse_error& e) {
+
+                    std::string what = e.what();
+
+                    exception = "Error ao fazer o parse do JSON: " + what;
+
+                    return true;
+
+                }
+
+                retval = CefV8Value::CreateString( jscontent.dump() );
+
+                return true;
+
+            } catch (const std::exception& e) {
+
+                exception = ForcaInterface::exceptionText(e);
+
+                return true;
+
+            } catch (...) {
+
+                exception = "Erro ao executar função no backend! \n\nTipo de exceção: Desconhecido \n\nMensagem: Exceção desconhecida!\n";
+
+                return true;
+
+            }                 
+
+        }
+    );
+
+    router_->RegisterFunction("getBase64Content",
+        [=](const CefV8ValueList& args, CefRefPtr<CefV8Value>& retval, CefString& exception) -> bool {
+
+            try {
+
+                std::size_t argsSize = args.size();
+
+                if(argsSize == 0){
+                    exception = "Quantidade insuficiente de parâmetros fornecidos para a função.";
+                    return true;                    
+                }
+
+                if( ! args[0]->IsString() ){
+                    exception = "O primeiro parâmetro deve ser do tipo string!";
+                    return true;
+                }
+
+                std::string filepath = forcaStrings::trim( args[0]->GetStringValue() );
+                
+                std::string content = forcaFiles::read::getContent(filepath);
+
+                std::string base64 = forcaEncrypt::base64_encode(content);
+
+                retval = CefV8Value::CreateString(base64);
+
+                return true;
+
+            } catch (const std::exception& e) {
+
+                exception = ForcaInterface::exceptionText(e);
+
+                return true;
+
+            } catch (...) {
+
+                exception = "Erro ao executar função no backend! \n\nTipo de exceção: Desconhecido \n\nMensagem: Exceção desconhecida!\n";
+
+                return true;
+
+            }                 
+
+        }
+    );    
+
+    router_->RegisterFunction("getBinaryContent",
+        [=](const CefV8ValueList& args, CefRefPtr<CefV8Value>& retval, CefString& exception) -> bool {
+
+            try {
+
+                std::size_t argsSize = args.size();
+
+                if(argsSize == 0){
+                    exception = "Quantidade insuficiente de parâmetros fornecidos para a função.";
+                    return true;                    
+                }
+
+                if( ! args[0]->IsString() ){
+                    exception = "O primeiro parâmetro deve ser do tipo string!";
+                    return true;
+                }
+
+                std::string filepath = forcaStrings::trim( args[0]->GetStringValue() );
+                
+                std::string content = forcaFiles::read::getContent(filepath);
+
+                CefRefPtr<CefV8Value> arrayBuffer = CefV8Value::CreateArrayBufferWithCopy(
+                    const_cast<void*>( static_cast<const void*>( content.data() ) ),
+                    content.size()
+                );
+
+                retval = arrayBuffer;
+
+                return true;
+
+            } catch (const std::exception& e) {
+
+                exception = ForcaInterface::exceptionText(e);
+
+                return true;
+
+            } catch (...) {
+
+                exception = "Erro ao executar função no backend! \n\nTipo de exceção: Desconhecido \n\nMensagem: Exceção desconhecida!\n";
+
+                return true;
+
+            }  
+
+        }
+    );
+
 }
 
 bool NativeFunctionHandler::Execute(const CefString& name, CefRefPtr<CefV8Value> object, const CefV8ValueList& arguments, CefRefPtr<CefV8Value>& retval, CefString& exception) {
@@ -2774,7 +3045,7 @@ void ForcaCefApp::OnContextInitialized() {
     CEF_REQUIRE_UI_THREAD();
 
     // Carrega o HTML
-    std::string url = "file:///" + forcaFiles::utils::root_realpath("files/web/html/game.html");
+    std::string url = "file:///" + forcaFiles::utils::root_realpath("../files/web/html/game.html");
 
     // Cria os handlers e a view do navegador
     CefRefPtr<ForcaCefClient> handler = new ForcaCefClient();
@@ -2876,6 +3147,16 @@ void ForcaCefApp::OnContextCreated(CefRefPtr<CefBrowser> browser, CefRefPtr<CefF
     ForcaAppObj->SetValue("searchAll", CefV8Value::CreateFunction("searchAll", nativeSyncHandler), V8_PROPERTY_ATTRIBUTE_NONE);
 
     ForcaAppObj->SetValue("VisibleLength", CefV8Value::CreateFunction("VisibleLength", nativeSyncHandler), V8_PROPERTY_ATTRIBUTE_NONE);
+
+    ForcaAppObj->SetValue("filterValidateBoolean", CefV8Value::CreateFunction("filterValidateBoolean", nativeSyncHandler), V8_PROPERTY_ATTRIBUTE_NONE);
+
+    ForcaAppObj->SetValue("getStringContent", CefV8Value::CreateFunction("getStringContent", nativeSyncHandler), V8_PROPERTY_ATTRIBUTE_NONE);
+    
+    ForcaAppObj->SetValue("getJSONContent", CefV8Value::CreateFunction("getJSONContent", nativeSyncHandler), V8_PROPERTY_ATTRIBUTE_NONE);
+
+    ForcaAppObj->SetValue("getBase64Content", CefV8Value::CreateFunction("getBase64Content", nativeSyncHandler), V8_PROPERTY_ATTRIBUTE_NONE);
+
+    ForcaAppObj->SetValue("getBinaryContent", CefV8Value::CreateFunction("getBinaryContent", nativeSyncHandler), V8_PROPERTY_ATTRIBUTE_NONE);
 
 }
 
