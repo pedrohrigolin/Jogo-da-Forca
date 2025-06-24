@@ -6,18 +6,20 @@ body {
     background-size: cover; /* Cobre toda a tela */
     background-position: center; /* Centraliza a imagem */
     background-attachment: fixed; /* A imagem não rola com o conteúdo */
-    margin: 0;
     min-height: 100vh;
     font-family: 'Cinzel', serif; /* Aplica a fonte importada */
-    display: flex;
+    display: block;
     justify-content: center;
     align-items: center;
     background-color: rgba(0, 0, 0, 0.5);
     background-blend-mode: multiply;
+    margin-top: 100px;
+    margin-left: 350px;
 }
 
 .menu-container {
     width: 350px;
+    margin-left: 120px;
     background-color: rgba(39, 28, 20, 0.85); 
     backdrop-filter: blur(5px); 
     padding: 30px 40px;
@@ -94,17 +96,52 @@ body {
     box-shadow: 0 4px 0 #3e2723, 0 5px 10px rgba(0, 0, 0, 0.6);
     position: relative;
     top: 0;
-    transition: all 0.1s ease-in-out;
+    transition: all 0.3s ease-in-out;
+    overflow: hidden; 
 }
 
 .menu-modo:hover {
+    height: 100px;
     background-color: #6d4c41; 
     color: #fff;
 }
 
-.menu-modo:active {
-    top: 4px; 
-    box-shadow: 0 0 0 #3e2723, 0 1px 5px rgba(0, 0, 0, 0.6);
+.menu-modo::after {
+  content: "";
+  position: absolute;
+  top: 75px;
+  left: 41%;
+  transform: translate(-50%, -50%);
+  color: white;
+  opacity: 0;
+  text-align: left;
+  white-space: pre-wrap; 
+}
+
+#solo:hover {
+  background-image: url('../web/components/solo.svg');
+  background-repeat: no-repeat;
+  background-position: right calc(100% - 10px);
+  background-size: 120px 120px; 
+}
+
+#solo:hover::after {
+  font-size: 10px;
+  content: "Enfrente o desafio e mostre que é capaz de vencer a forca! Escolha um nível de dificuldade, adivinhe as palavras e teste seus conhecimentos sem depender de ninguém.";
+  opacity: 1;
+}
+
+#duo:hover {
+  background-image: url('../web/components/duo.svg');
+  background-repeat: no-repeat;
+  background-position: right calc(100% - 5px);
+  background-size: 120px 120px; 
+}
+
+#duo:hover::after {
+  font-size: 10px;
+  content: "Um jogador escolhe a palavra en- quanto o outro tenta adivinhar. Vocês podem se revezar ou criar seus próprios desafios. Vejam quem consegue escapar da forca!";
+  opacity: 1;
 }
 
 .menu-nivel {
@@ -145,7 +182,6 @@ body {
   font-family: 'Cinzel', serif;
   border-radius: 10px;
   cursor: pointer;
-  transition: all 0.3s ease;
   font-size: 20px;
   border: 1px solid #4e342e; 
   box-shadow: 0 4px 0 #3e2723, 0 5px 10px rgba(0, 0, 0, 0.6);
@@ -156,6 +192,13 @@ body {
   padding-top: 12px;
   position: relative;
   overflow: hidden; 
+  transition: transform 0.3s ease, background-color 0.3s ease;
+  transform-origin: top; /* Fixa o topo durante a expansão */
+  min-width: 150px; /* ou um valor maior */
+  min-height: 50px;
+  padding: 10px 20px;
+  white-space: normal; /* Permite quebrar a linha se o texto for muito longo */
+  text-align: center;
 }
 
 .botao-transformavel:hover {
@@ -163,24 +206,23 @@ body {
   height: 200px;
   background-color: #6d4c41; 
   color: white;
+  padding-bottom: 30px;
 }
 
 .botao-transformavel::after {
   content: "";
   position: absolute;
-  top: 50%;
-  left: 50%;
+  top: 80px;
+  left: 85px;
   transform: translate(-50%, -50%);
   color: white;
   opacity: 0;
   transition: opacity 0.3s ease;
-  text-align: center;
-  white-space: pre-wrap; 
-}
-
-.botao-transformavel:hover::after {
-  content: "Fácil";
-  opacity: 1;
+  text-align: left;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  text-align: left;
+  display: block;
 }
 
 .texto-fixo {
@@ -192,20 +234,70 @@ body {
 #easy:hover {
   background-image: url('../web/components/facil.svg');
   background-repeat: no-repeat;
-  background-position: bottom;
+  background-position: center calc(100% - 10px);
   background-size: 60px 60px; 
+}
+
+#easy:hover::after {
+  font-size: 10px;
+  content: "Aqui as palavras são curtas e simples, per- feitas para quem es- tá começando ou quer uma partida mais tranquila.";
+  opacity: 1;
 }
 
 #norm:hover {
   background-image: url('../web/components/medio.svg');
   background-repeat: no-repeat;
-  background-position: bottom;
+  background-position: center calc(100% - 10px);
   background-size: 60px 60px; 
+}
+
+#norm:hover::after {
+  font-size: 10px;
+  content: "Um desafio na medi- da certa! As palavras são um pouco mais longas e exigem mais atenção e raciocínio.";
+  opacity: 1;
 }
 
 #hard:hover {
   background-image: url('../web/components/dificil.svg');
   background-repeat: no-repeat;
-  background-position: bottom;
+  background-position: center calc(100% - 10px);
   background-size: 60px 60px; 
+}
+
+#hard:hover::after {
+  font-size: 10px;
+  content: "Este é o verdadeiro teste para os mestres da forca! Palavras longas, pouco usadas no dia a dia e com combinações de letras que vão exigir muita atenção e vocabulário avançado.";
+  opacity: 1;
+}
+
+.titulo-duo {
+    color: #e0cda8;
+    text-align: center;
+    font-weight: 700;
+    font-size: 15px;
+    margin-bottom: 30px;
+    text-shadow: 3px 3px 5px rgba(0, 0, 0, 0.8);
+}
+
+input[type="password"] {
+      width: 97%;
+      padding: 10px;
+      font-size: 16px;
+      border-radius: 5px;
+      border: 1px solid #e0cda8;
+      text-align: center;
+      margin-bottom: 20px;
+      font-family: 'Cinzel', serif;
+      background-color: #8d6e63;
+      color: #e0cda8;
+      right: 10px;
+    }
+
+input::placeholder {
+  color: #e0cda8;
+}
+
+#game{
+  left: 15px;
+  font-size: 15px;
 }

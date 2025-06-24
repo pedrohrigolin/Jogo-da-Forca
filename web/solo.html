@@ -18,13 +18,19 @@
         <h3 class="titulo-nivel">Escolha um Nível</h3>
         <nav class="menu-navegacao">
             <div class="container-botoes">
-                <button id="easy" class="botao-transformavel"><span class="texto-fixo">Fácil</span></button>
-                <button id="norm" class="botao-transformavel"><span class="texto-fixo">Médio</span></button>
-                <button id="hard" class="botao-transformavel"><span class="texto-fixo">Difícil</span></button>
+                <button id="easy" onclick="nivel" class="botao-transformavel"><span class="texto-fixo">Fácil</span></button>
+                <button id="norm" onclick="nivel" class="botao-transformavel"><span class="texto-fixo">Médio</span></button>
+                <button id="hard" onclick="nivel" class="botao-transformavel"><span class="texto-fixo">Difícil</span></button>
             </div>
             <a href="home.html" class="menu-botao">Voltar</a>
         </nav>
     </main>
+
+<script>
+    function nivel() {
+      window.location.href = 'game.html';
+    }
+</script>
 
 </body>
 </html>
