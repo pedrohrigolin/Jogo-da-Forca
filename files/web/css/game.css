@@ -71,3 +71,311 @@ table {
 *:focus, *:focus-visible{
     outline: none;
 }
+
+/* FIM DO CSS RESET */
+
+body {
+    background-image: url('../assets/images/background.jpg'); /* Imagem de fundo */
+    background-size: cover; /* Cobre toda a tela */
+    background-position: center; /* Centraliza a imagem */
+    background-attachment: fixed; /* A imagem não rola com o conteúdo */
+    margin: 0;
+    min-height: 100vh;
+    width: 100vw;
+    max-width: 100vw;
+    overflow-x: hidden; /* Impede rolagem */
+    padding: 60px;
+    font-family: 'Cinzel', serif; /* Aplica a fonte importada */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: rgba(0, 0, 0, 0.5);
+    background-blend-mode: multiply;
+}
+
+.menu-container {
+    width: 450px;
+    background-color: rgba(39, 28, 20, 0.85); 
+    backdrop-filter: blur(5px); 
+    padding: 30px 40px;
+    border-radius: 10px;
+    border: 3px solid #6d4c41;
+    border-top-color: #8d6e63;
+    border-left-color: #8d6e63;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7), inset 0 0 15px rgba(0, 0, 0, 0.5);
+}
+
+.titulo-container{
+    text-align: center;
+    margin-top: 10px;
+    margin-bottom: 30px;
+    min-height: 80px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+}
+
+.titulo-jogo {
+    color: #e0cda8; 
+    text-align: center;
+    font-weight: 700; 
+    font-size: 2.8em;
+    text-shadow: 3px 3px 5px rgba(0, 0, 0, 0.8);
+}
+
+.menu-navegacao {
+    display: block;
+    width: 100%;
+    margin: auto;
+    padding: 0;
+    text-align: center;
+    align-content: center;
+}
+
+.menu-botao {
+    display: block; 
+    width: 100%;
+    max-height: 50px;
+    padding: 10px;
+    margin-bottom: 18px; 
+    cursor: pointer;
+    background-color: #5d4037; 
+    color: #d7ccc8; 
+    font-family: 'Cinzel', serif;
+    font-size: 1.2em;
+    font-weight: 400;
+    text-align: center;
+    text-decoration: none;
+    overflow: hidden;
+    border-radius: 5px;
+    border: 1px solid #4e342e;
+    box-shadow: 0 4px 0 #3e2723, 0 5px 10px rgba(0, 0, 0, 0.6);
+    position: relative;
+    top: 0;
+    transition: all 0.2s ease-in-out;
+}
+
+.menu-botao .menu-botao-titulo {
+    color: #FFFFFF;
+}
+
+.menu-botao svg{
+    width: 120px;
+    height: 120px;
+    position: absolute;
+    z-index: -1;
+    visibility: hidden;
+    top: calc(50% - 60px);
+    right: calc(100% - 120px);
+    transition: all 0.2s ease-in-out;
+}
+
+.menu-botao .menu-botao-after{
+    max-width: calc(100% - 150px);
+    text-align: left;
+    white-space: pre-wrap;
+    font-size: 12px;
+    color: #FFFFFF;
+    position: relative;
+    margin: 5px;
+    margin-left: 25px;
+    z-index: -1;
+    visibility: hidden;
+    opacity: 0;
+    transition: all 0.2s ease-in-out;
+}
+
+.menu-botao:hover {
+    max-height: 100%;
+    background-color: #6d4c41; 
+    color: #fff;
+    transition: all 0.2s ease-in-out;
+}
+
+.menu-botao:hover svg {
+    z-index: 1;
+    visibility: visible;
+    right: 10px;
+    transition: all 0.2s ease-in-out;
+}
+
+.menu-botao:hover .menu-botao-after {
+    z-index: 1;
+    visibility: visible;
+    opacity: 1;
+    transition: all 0.2s ease-in-out;
+}
+
+.menu-botao:active {
+    top: 4px; 
+    box-shadow: 0 0 0 #3e2723, 0 1px 5px rgba(0, 0, 0, 0.6); 
+    transition: all 0.1s ease-in-out;
+}
+
+.menu-navegacao .menu-botao:last-child {
+    margin-bottom: 0;
+}
+
+.menu-modo {
+    display: block; 
+    width: 95%;
+    padding: 10px;
+    margin-bottom: 18px;
+    background-color: #5d4037; 
+    color: #d7ccc8; 
+    font-family: 'Cinzel', serif;
+    font-size: 1.2em;
+    font-weight: 400;
+    text-align: center;
+    text-decoration: none;
+    border-radius: 5px;
+    border: 1px solid #4e342e;
+    box-shadow: 0 4px 0 #3e2723, 0 5px 10px rgba(0, 0, 0, 0.6);
+    position: relative;
+    top: 0;
+    transition: all 0.2s ease-in-out;
+    overflow: hidden; 
+}
+
+.menu-modo:hover {
+    height: 100px;
+    background-color: #6d4c41; 
+    color: #fff;
+}
+
+.menu-nivel {
+    width: 600px;
+    background-color: rgba(39, 28, 20, 0.85); 
+    backdrop-filter: blur(5px); 
+    padding: 30px 40px;
+    border-radius: 10px;
+    border: 3px solid #6d4c41;
+    border-top-color: #8d6e63;
+    border-left-color: #8d6e63;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7), inset 0 0 15px rgba(0, 0, 0, 0.5);
+}
+
+.titulo-nivel {
+    color: #e0cda8;
+    text-align: center;
+    font-weight: 700;
+    font-size: 30px;
+    margin-top: 0;
+    margin-bottom: 30px;
+    text-shadow: 3px 3px 5px rgba(0, 0, 0, 0.8);
+}
+
+.container-botoes {
+  display: flex;
+  gap: 5px; 
+  margin-bottom: 20px;
+  justify-content: center;
+  margin-top: 10px;
+}
+
+.menu-botao-nivel {
+  width: 200px;
+  height: 50px;
+  background-color: #5d4037; 
+  color: #d7ccc8;
+  font-family: 'Cinzel', serif;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 20px;
+  border: 1px solid #4e342e; 
+  box-shadow: 0 4px 0 #3e2723, 0 5px 10px rgba(0, 0, 0, 0.6);
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 12px;
+  position: relative;
+  overflow: hidden; 
+  transition: all 0.2s ease-in-out;
+  transform-origin: top; /* Fixa o topo durante a expansão */
+  min-width: 150px; /* ou um valor maior */
+  min-height: 50px;
+  padding: 10px 20px;
+  white-space: normal; /* Permite quebrar a linha se o texto for muito longo */
+  text-align: center;
+}
+
+.menu-botao-nivel svg{
+    width: 60px;
+    height: 60px;
+    overflow: visible;
+    z-index: -1;
+    visibility: hidden;
+    transition: all 0.2s ease-in-out;
+}
+
+.texto-fixo {
+  z-index: 1;
+  position: relative;
+  pointer-events: none;
+  color: #d7ccc8;
+}
+
+.texto-dificuldade {
+  font-size: 12px;
+  color: #FFFFFF;
+  z-index: -1;
+  visibility: hidden;
+  opacity: 0;
+  transition: all 0.2s ease-in-out;
+}
+
+.menu-botao-nivel:hover {
+  width: 200px;
+  height: 200px;
+  background-color: #6d4c41; 
+  color: #FFFFFF;
+  transition: all 0.2s ease-in-out;
+}
+
+.menu-botao-nivel:hover .texto-fixo {
+  color: #FFFFFF;
+  transition: all 0.2s ease-in-out;
+}
+
+.menu-botao-nivel:hover svg {
+    z-index: 1;
+    visibility: visible;
+    transition: all 0.2s ease-in-out;
+}
+
+.menu-botao-nivel:hover .texto-dificuldade {
+    z-index: 1;
+    visibility: visible;
+    opacity: 1;
+    transition: all 0.2s ease-in-out;
+}
+
+.titulo-duo {
+    color: #e0cda8;
+    text-align: center;
+    font-weight: 700;
+    font-size: 15px;
+    margin-bottom: 30px;
+    text-shadow: 3px 3px 5px rgba(0, 0, 0, 0.8);
+}
+
+.input-palavra-secreta {
+    width: 100%;
+    padding: 10px;
+    font-size: 16px;
+    border-radius: 5px;
+    border: 1px solid #e0cda8;
+    text-align: center;
+    margin-bottom: 20px;
+    font-family: 'Cinzel', serif;
+    background-color: #8d6e63;
+    color: #e0cda8;
+    right: 10px;
+}
+
+.input-palavra-secreta::placeholder {
+  color: #e0cda8;
+}
