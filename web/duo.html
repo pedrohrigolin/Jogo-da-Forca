@@ -1,28 +1,38 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jogo da Forca</title>
-    
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&display=swap" rel="stylesheet">
-
-    <link rel="stylesheet" href="home.css">
+  <meta charset="UTF-8">
+  <title>Jogo da Forca</title>
+  <link rel="stylesheet" href="home.css">
 </head>
 <body>
 
-    <main class="menu-container">
-        <h1 class="titulo-jogo">Jogo da Forca</h1>
-        <h3 class="titulo-jogo">Escolha um Nível</h3>
-        <nav class="menu-navegacao">
-            <a href="#" class="menu-botao">Fácil</a>
-            <a href="#" class="menu-botao">Médio</a>
-            <a href="#" class="menu-botao">Difícil</a>
-            <a href="home.html" class="menu-botao">Voltar</a>
-        </nav>
-    </main>
+  <main class="menu-nivel">
+    <h1 class="titulo-jogo">Jogo da Forca</h1>
+    <h3 class="titulo-duo">Jogador 1: Escolha cuidadosamente a palavra que o Jogador 2 terá que adivinhar.  
+        Digite a palavra abaixo. Ela ficará oculta para manter o mistério!</h3>
+      <input type="password" id="palavra-secreta" placeholder="Digite a palavra secreta">
+      <button id="game" onclick="confirmarPalavra()" class="menu-botao">Confirmar</button>
+      <button id="game" onclick="retorno()" class="menu-botao">Voltar</button>
+    </div>
+  </main>
+
+  <script>
+    function confirmarPalavra() {
+      const palavra = document.getElementById('palavra-secreta').value;
+      if (palavra.trim() === '') {
+        alert('Por favor, digite uma palavra!');
+        return;
+      }
+      localStorage.setItem('palavraDuo', palavra);
+
+      window.location.href = 'game.html';
+    }
+
+    function retorno() {
+      window.location.href = 'home.html';
+    }
+  </script>
 
 </body>
 </html>
