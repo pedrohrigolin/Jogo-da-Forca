@@ -15,6 +15,301 @@ const interfaceObject = {
 
 };
 
+const gameObject = {
+
+    word: "",
+
+    letrasCorretas: [],
+    
+    letrasErradas: [],
+
+    erros: 0,
+
+    initialized: false,
+
+    mostrasTracos: function() {
+
+        if( ! gameObject.initialized ) return;
+
+        const wordLength = gameObject.word.length;
+
+        const textContent = "_".repeat(wordLength);
+
+        interfaceObject.menu.forca.tracosContainer.textContent = textContent;
+
+    },
+
+    mostrarErro: function() {
+
+        if( ! gameObject.initialized ) return;
+
+        const partesLength = interfaceObject.menu.forca.partes.length;
+
+        if( gameObject.erros <= partesLength ){
+
+            const parte = interfaceObject.menu.forca.partes[gameObject.erros - 1];
+
+            if( parte ) parte.style.display = "block";
+
+        }
+
+    },
+
+    verificarFimDeJogo: function() {
+
+        if( ! gameObject.initialized ) return;
+
+        if( ! interfaceObject.menu.forca.tracosContainer.textContent.includes("_") ){
+
+            interfaceObject.menu.forca.mensagemFinal.textContent = "Parabéns! Você venceu! A palavra era: " + gameObject.word;
+
+            interfaceObject.menu.forca.input.value = "";
+
+            interfaceObject.menu.forca.input.blur();
+
+            interfaceObject.menu.forca.input.disabled = true;
+
+            const partesLength = interfaceObject.menu.forca.partes.length;
+
+            for(let i = 0; i < partesLength; i++){
+
+                const parte = interfaceObject.menu.forca.partes[i];
+
+                if( parte ) parte.style.display = "none";
+
+            }
+
+            gameObject.word = "";
+
+            gameObject.letrasCorretas = [];
+
+            gameObject.letrasErradas = [];
+
+            gameObject.erros = 0;
+
+            gameObject.initialized = false;
+
+            interfaceObject.menu.forca.letrasErradas.textContent = "";
+
+            interfaceObject.menu.forca.tracosContainer.textContent = "";
+
+        }
+        else if( gameObject.erros >= 6 ){
+
+            interfaceObject.menu.forca.mensagemFinal.textContent = "Game over! A palavra era: " + gameObject.word;
+
+            interfaceObject.menu.forca.input.value = "";
+
+            interfaceObject.menu.forca.input.blur();
+
+            interfaceObject.menu.forca.input.disabled = true;
+
+            const partesLength = interfaceObject.menu.forca.partes.length;
+
+            for(let i = 0; i < partesLength; i++){
+
+                const parte = interfaceObject.menu.forca.partes[i];
+
+                if( parte ) parte.style.display = "none";
+
+            }
+
+            gameObject.word = "";
+
+            gameObject.letrasCorretas = [];
+
+            gameObject.letrasErradas = [];
+
+            gameObject.erros = 0;
+
+            gameObject.initialized = false;
+
+            interfaceObject.menu.forca.letrasErradas.textContent = "";
+
+            interfaceObject.menu.forca.tracosContainer.textContent = "";
+
+        }
+
+    },
+
+    verificarLetras: function(letter) {
+
+        if( ! gameObject.initialized ) return;
+
+        console.log(`Verificando letra: ${letter}`); // Debugging line
+
+        if( typeof letter !== "string" || letter.length !== 1 ){
+
+            alert("Digite uma letra válida!");
+
+            interfaceObject.menu.forca.input.value = "";
+
+            interfaceObject.menu.forca.input.focus();
+
+            return;
+
+        }
+
+        letter = letter.normalizeWord();
+
+        console.log(`Letra normalizada: ${letter}`); // Debugging line
+
+        if( ! letter.isAlpha() ){
+
+            alert("Digite uma letra válida!");
+
+            interfaceObject.menu.forca.input.value = "";
+
+            interfaceObject.menu.forca.input.focus();
+
+            return;
+
+        }
+
+        if( gameObject.letrasCorretas.includes(letter) || gameObject.letrasErradas.includes(letter) ){
+
+            alert("Você já tentou essa letra!");
+
+            interfaceObject.menu.forca.input.value = "";
+
+            interfaceObject.menu.forca.input.focus();
+
+            return;
+
+        }
+
+        if( gameObject.word.includes(letter) ){
+
+            gameObject.letrasCorretas.push(letter);
+
+            const index = gameObject.word.searchAll(letter);
+
+            const indexLength = index.length;
+
+            let textContent = interfaceObject.menu.forca.tracosContainer.textContent;
+
+            for(let i = 0; i < indexLength; i++){
+
+                const letterIndex = index[i];
+
+                let firstSubstring;
+
+                if( letterIndex === 0 ){
+
+                    firstSubstring = "";
+
+                }
+                else {
+
+                    firstSubstring = textContent.substr(0, letterIndex);
+
+                }
+
+                textContent = firstSubstring + letter + textContent.substr(letterIndex + 1, textContent.length);
+
+            }
+
+            interfaceObject.menu.forca.tracosContainer.textContent = textContent;
+
+            interfaceObject.menu.forca.input.value = "";
+
+            interfaceObject.menu.forca.input.focus();
+
+            gameObject.verificarFimDeJogo();
+
+        }
+        else {
+
+            gameObject.letrasErradas.push(letter);
+
+            gameObject.erros++;
+
+            interfaceObject.menu.forca.letrasErradas.textContent = gameObject.letrasErradas.implode(", ");
+
+            gameObject.mostrarErro();
+
+            interfaceObject.menu.forca.input.value = "";
+
+            interfaceObject.menu.forca.input.focus();
+
+            gameObject.verificarFimDeJogo();
+
+        }
+
+    },
+
+    resetDisable: function() {
+
+        gameObject.letrasCorretas = [];
+
+        gameObject.letrasErradas = [];
+
+        gameObject.erros = 0;
+
+        interfaceObject.menu.forca.input.disabled = true;
+
+        gameObject.initialized = false;
+
+        interfaceObject.menu.forca.input.value = "";
+
+        interfaceObject.menu.forca.input.blur();
+
+        interfaceObject.menu.forca.letrasErradas.textContent = "";
+
+        interfaceObject.menu.forca.mensagemFinal.textContent = "";
+
+        interfaceObject.menu.forca.tracosContainer.textContent = "";
+
+        const partesLength = interfaceObject.menu.forca.partes.length;
+
+        for(let i = 0; i < partesLength; i++){
+
+            const parte = interfaceObject.menu.forca.partes[i];
+
+            if( parte ) parte.style.display = "none";
+
+        }
+
+    },
+
+    init: function() {
+
+        gameObject.letrasCorretas = [];
+
+        gameObject.letrasErradas = [];
+
+        gameObject.erros = 0;
+
+        interfaceObject.menu.forca.input.disabled = false;
+
+        gameObject.initialized = true;
+
+        interfaceObject.menu.forca.input.value = "";
+
+        interfaceObject.menu.forca.input.focus();
+
+        interfaceObject.menu.forca.letrasErradas.textContent = "";
+
+        interfaceObject.menu.forca.mensagemFinal.textContent = "";
+
+        interfaceObject.menu.forca.tracosContainer.textContent = "";
+
+        const partesLength = interfaceObject.menu.forca.partes.length;
+
+        for(let i = 0; i < partesLength; i++){
+
+            const parte = interfaceObject.menu.forca.partes[i];
+
+            if( parte ) parte.style.display = "none";
+
+        }
+
+        gameObject.mostrasTracos();
+
+    },
+
+};
+
 const utilsObject = Object.freeze({
 
     filterWordsArray: function(array){
@@ -1214,6 +1509,8 @@ const initializeObject = Object.freeze({
 
         interfaceObject.menu.solo.buttons.all = interfaceObject.menu.solo.main.getElementsByClassName("menu-botao-nivel");
 
+        initializeObject.changeSubStatus("Criando o menu de jogo dupla...");
+
         // Criando o menu de jogo duo
 
         interfaceObject.menu.duo = {};
@@ -1341,6 +1638,218 @@ const initializeObject = Object.freeze({
         // Adicionando as nodes list vivas dos botões, para consulta rápida e cache inteligente
 
         interfaceObject.menu.duo.buttons.all = interfaceObject.menu.duo.main.getElementsByClassName("menu-botao");
+
+        initializeObject.changeSubStatus("Criando a interface do jogo da forca...");
+
+        // Criando a interface do jogo da forca
+
+        interfaceObject.menu.forca = {};
+
+        interfaceObject.menu.forca.main = document.createElement("main");
+
+        interfaceObject.menu.forca.main.classList.add("menu-forca");
+
+        interfaceObject.menu.forca.main.classList.add("forcaMenu");
+
+        // Criando o container do título do jogo
+
+        interfaceObject.menu.forca.tituloContainer = document.createElement("div")
+
+        interfaceObject.menu.forca.tituloContainer.classList.add("titulo-container");
+
+        interfaceObject.menu.forca.svgCaveira = interfaceObject.svg.caveira.cloneNode(true);
+
+        interfaceObject.menu.forca.svgCaveira.classList.add("caveira-svg");
+
+        interfaceObject.menu.forca.svgCaveira.style.width = "47px";
+
+        interfaceObject.menu.forca.svgCaveira.style.height = "70px";
+
+        interfaceObject.menu.forca.tituloContainer.append(interfaceObject.menu.forca.svgCaveira);
+
+        interfaceObject.menu.forca.titulo = document.createElement("h1");
+
+        interfaceObject.menu.forca.titulo.classList.add("titulo-jogo");
+
+        interfaceObject.menu.forca.titulo.textContent = "Jogo da Forca";
+
+        interfaceObject.menu.forca.tituloContainer.append(interfaceObject.menu.forca.titulo);
+
+        interfaceObject.menu.forca.svgForca = interfaceObject.svg.forca.cloneNode(true);
+
+        interfaceObject.menu.forca.svgForca.classList.add("forca-svg");
+
+        interfaceObject.menu.forca.svgForca.style.width = "29px";
+
+        interfaceObject.menu.forca.svgForca.style.height = "70px";
+
+        interfaceObject.menu.forca.tituloContainer.append(interfaceObject.menu.forca.svgForca);
+
+        interfaceObject.menu.forca.main.append(interfaceObject.menu.forca.tituloContainer); 
+        
+        // Criando o desenho da forca
+
+        interfaceObject.menu.forca.desenhoForca = document.createElement("div");
+
+        interfaceObject.menu.forca.desenhoForca.classList.add("forca");
+
+        interfaceObject.menu.forca.main.append(interfaceObject.menu.forca.desenhoForca);
+
+        // Adicionando as imagens svg
+
+        interfaceObject.menu.forca.cabeca = document.createElement("img");
+
+        interfaceObject.menu.forca.cabeca.classList.add("parte");
+
+        interfaceObject.menu.forca.cabeca.setAttribute("id", "cabeca");
+
+        interfaceObject.menu.forca.cabeca.setAttribute("alt", "Cabeça do boneco da forca");
+
+        interfaceObject.menu.forca.cabeca.setAttribute("src", "../assets/svg/forca/cabeca.svg");
+
+        interfaceObject.menu.forca.desenhoForca.append(interfaceObject.menu.forca.cabeca);
+
+        interfaceObject.menu.forca.corpo = document.createElement("img");
+
+        interfaceObject.menu.forca.corpo.classList.add("parte");
+
+        interfaceObject.menu.forca.corpo.setAttribute("id", "corpo");
+
+        interfaceObject.menu.forca.corpo.setAttribute("alt", "Corpo do boneco da forca");
+
+        interfaceObject.menu.forca.corpo.setAttribute("src", "../assets/svg/forca/corpo.svg");
+
+        interfaceObject.menu.forca.desenhoForca.append(interfaceObject.menu.forca.corpo);
+
+        interfaceObject.menu.forca.bracoEsquerdo = document.createElement("img");
+
+        interfaceObject.menu.forca.bracoEsquerdo.classList.add("parte");
+
+        interfaceObject.menu.forca.bracoEsquerdo.setAttribute("id", "braco-esquerdo");
+
+        interfaceObject.menu.forca.bracoEsquerdo.setAttribute("alt", "Braço esquerdo do boneco da forca");
+
+        interfaceObject.menu.forca.bracoEsquerdo.setAttribute("src", "../assets/svg/forca/braco-esquerdo.svg");
+
+        interfaceObject.menu.forca.desenhoForca.append(interfaceObject.menu.forca.bracoEsquerdo);
+
+        interfaceObject.menu.forca.bracoDireito = document.createElement("img");
+
+        interfaceObject.menu.forca.bracoDireito.classList.add("parte");
+
+        interfaceObject.menu.forca.bracoDireito.setAttribute("id", "braco-direito");
+
+        interfaceObject.menu.forca.bracoDireito.setAttribute("alt", "Braço direito do boneco da forca");
+
+        interfaceObject.menu.forca.bracoDireito.setAttribute("src", "../assets/svg/forca/braco-direito.svg");
+
+        interfaceObject.menu.forca.desenhoForca.append(interfaceObject.menu.forca.bracoDireito);
+
+        interfaceObject.menu.forca.pernaEsquerda = document.createElement("img");
+
+        interfaceObject.menu.forca.pernaEsquerda.classList.add("parte");
+
+        interfaceObject.menu.forca.pernaEsquerda.setAttribute("id", "perna-esquerda");
+
+        interfaceObject.menu.forca.pernaEsquerda.setAttribute("alt", "Perna esquerda do boneco da forca");
+
+        interfaceObject.menu.forca.pernaEsquerda.setAttribute("src", "../assets/svg/forca/perna-esquerda.svg");
+
+        interfaceObject.menu.forca.desenhoForca.append(interfaceObject.menu.forca.pernaEsquerda);
+
+        interfaceObject.menu.forca.pernaDireita = document.createElement("img");
+
+        interfaceObject.menu.forca.pernaDireita.classList.add("parte");
+
+        interfaceObject.menu.forca.pernaDireita.setAttribute("id", "perna-direita");
+
+        interfaceObject.menu.forca.pernaDireita.setAttribute("alt", "Perna direita do boneco da forca");
+
+        interfaceObject.menu.forca.pernaDireita.setAttribute("src", "../assets/svg/forca/perna-direita.svg");
+
+        interfaceObject.menu.forca.desenhoForca.append(interfaceObject.menu.forca.pernaDireita);
+
+        // Criando o container das letras
+
+        interfaceObject.menu.forca.letrasContainer = document.createElement("div");
+
+        interfaceObject.menu.forca.letrasContainer.classList.add("letras-tentadas");
+
+        interfaceObject.menu.forca.letrasContainer.textContent = "Letras tentadas: ";
+
+        interfaceObject.menu.forca.main.append(interfaceObject.menu.forca.letrasContainer);
+
+        // Criando o span das letras erradas
+
+        interfaceObject.menu.forca.letrasErradas = document.createElement("span");
+
+        interfaceObject.menu.forca.letrasErradas.setAttribute("id", "letras-erradas");
+
+        interfaceObject.menu.forca.letrasContainer.append(interfaceObject.menu.forca.letrasErradas);
+
+        // Criando o input de letra
+
+        interfaceObject.menu.forca.input = document.createElement("input");
+
+        interfaceObject.menu.forca.input.setAttribute("type", "text");
+
+        interfaceObject.menu.forca.input.setAttribute("placeholder", "LETRA");
+
+        interfaceObject.menu.forca.input.classList.add("input-letra");
+
+        interfaceObject.menu.forca.input.setAttribute("maxlength", "1");
+
+        interfaceObject.menu.forca.input.setAttribute("autocomplete", "off");
+
+        interfaceObject.menu.forca.input.setAttribute("id", "entrada-letra");
+
+        interfaceObject.menu.forca.main.append(interfaceObject.menu.forca.input);
+
+        // Criando a div tracos
+
+        interfaceObject.menu.forca.tracosContainer = document.createElement("div");
+
+        interfaceObject.menu.forca.tracosContainer.classList.add("tracos");
+
+        interfaceObject.menu.forca.tracosContainer.setAttribute("id", "tracos");
+
+        interfaceObject.menu.forca.main.append(interfaceObject.menu.forca.tracosContainer);
+
+        // Criando o botão de voltar
+
+        interfaceObject.menu.forca.buttons = {};
+
+        interfaceObject.menu.forca.buttons.back = {};
+
+        interfaceObject.menu.forca.buttons.back.button = document.createElement("button");
+
+        interfaceObject.menu.forca.buttons.back.button.classList.add("menu-botao");
+
+        interfaceObject.menu.forca.buttons.back.button.setAttribute("id", "back");
+
+        interfaceObject.menu.forca.buttons.back.title = document.createElement("p");
+
+        interfaceObject.menu.forca.buttons.back.title.classList.add("texto-fixo");
+
+        interfaceObject.menu.forca.buttons.back.title.textContent = "VOLTAR";
+
+        interfaceObject.menu.forca.buttons.back.button.append(interfaceObject.menu.forca.buttons.back.title);
+
+        interfaceObject.menu.forca.main.append(interfaceObject.menu.forca.buttons.back.button);
+
+        // Criando a div de mensagem final
+
+        interfaceObject.menu.forca.mensagemFinal = document.createElement("div");
+
+        interfaceObject.menu.forca.mensagemFinal.classList.add("mensagem-final");
+
+        interfaceObject.menu.forca.mensagemFinal.setAttribute("id", "mensagem-final");
+
+        interfaceObject.menu.forca.main.append(interfaceObject.menu.forca.mensagemFinal);
+
+        // Cache inteligente das partes do corpo do boneco da forca
+
+        interfaceObject.menu.forca.partes = document.getElementsByClassName("parte");
 
         // Criando os handlers do menu principal
 
@@ -1490,7 +1999,13 @@ const initializeObject = Object.freeze({
 
             const word = resourcesObject.words.default.easy[randomIndex].normalizeWord();
 
-            console.log(word);
+            gameObject.resetDisable();
+
+            gameObject.word = word;
+
+            gameObject.init();
+
+            interfaceObject.menu.solo.main.replaceWith(interfaceObject.menu.forca.main);
 
         }
 
@@ -1504,7 +2019,13 @@ const initializeObject = Object.freeze({
 
             const word = resourcesObject.words.default.normal[randomIndex].normalizeWord();
 
-            console.log(word);
+            gameObject.resetDisable();
+
+            gameObject.word = word;
+
+            gameObject.init();
+
+            interfaceObject.menu.solo.main.replaceWith(interfaceObject.menu.forca.main);
 
         }
 
@@ -1518,7 +2039,13 @@ const initializeObject = Object.freeze({
 
             const word = resourcesObject.words.default.hard[randomIndex].normalizeWord();
 
-            console.log(word);
+            gameObject.resetDisable();
+
+            gameObject.word = word;
+
+            gameObject.init();
+
+            interfaceObject.menu.solo.main.replaceWith(interfaceObject.menu.forca.main);
 
         }
 
@@ -1602,8 +2129,15 @@ const initializeObject = Object.freeze({
 
             }
 
-            console.log(word);
-            console.log("Dificuldade da palavra: " + difficulty);
+            gameObject.resetDisable();
+
+            gameObject.word = word;
+
+            gameObject.init();
+
+            interfaceObject.menu.duo.main.replaceWith(interfaceObject.menu.forca.main);
+
+            interfaceObject.menu.duo.input.value = '';
 
         }
 
@@ -1683,7 +2217,107 @@ const initializeObject = Object.freeze({
 
             }
 
-        }        
+        }    
+        
+        // Criando os handlers do menu de jogo da forca
+
+        interfaceObject.handlers.menu.forca = {};
+
+        interfaceObject.handlers.menu.forca.buttons = {};
+
+        interfaceObject.handlers.menu.forca.buttons.click = {};
+
+        interfaceObject.handlers.menu.forca.buttons.click.back = function(event) {
+
+            gameObject.resetDisable();
+
+            interfaceObject.menu.forca.main.replaceWith(interfaceObject.menu.start.main);
+
+        }
+
+        interfaceObject.handlers.menu.forca.input = {};
+
+        interfaceObject.handlers.menu.forca.input.input = function(event) {
+
+            // Verifica se o input está vazio ou contém apenas espaços em branco
+
+            if( interfaceObject.menu.forca.input.value.trim().empty() ) {
+
+                interfaceObject.menu.forca.input.value = '';
+
+                return;
+
+            }
+
+            // Verifica se o input contém apenas caracteres alpha
+
+            if( ! interfaceObject.menu.forca.input.value.isAlpha() ) {
+            
+                alert("São permitidos apenas letras de A a Z, sem acentos, números, cedilhas ou caracteres especiais. Por favor, digite uma letra válida.");
+            
+                interfaceObject.menu.forca.input.value = interfaceObject.menu.forca.input.value.preg_replace(/[^a-zA-Z]/g, '');
+
+                return;
+
+            }
+
+            // Verifica se o input contém mais de 1 caractere
+
+            if( interfaceObject.menu.forca.input.value.visibleLength() > 1 ) {
+
+                alert("A letra deve ser apenas um caractere. Por favor, digite uma letra válida.");
+
+                interfaceObject.menu.forca.input.value = interfaceObject.menu.forca.input.value.slice(0, 1);
+
+                return;
+
+            }
+
+        }
+
+        interfaceObject.handlers.menu.forca.input.change = function(event) {
+
+            // Verifica se o input está vazio ou contém apenas espaços em branco
+
+            if( interfaceObject.menu.forca.input.value.trim().empty() ) {
+
+                interfaceObject.menu.forca.input.value = '';
+
+                return;
+
+            }
+
+            // Verifica se o input contém apenas caracteres alpha
+
+            if( ! interfaceObject.menu.forca.input.value.isAlpha() ) {
+            
+                alert("São permitidos apenas letras de A a Z, sem acentos, números, cedilhas ou caracteres especiais. Por favor, digite uma letra válida.");
+            
+                interfaceObject.menu.forca.input.value = interfaceObject.menu.forca.input.value.preg_replace(/[^a-zA-Z]/g, '');
+
+                return;
+
+            }
+
+            // Verifica se o input contém mais de 1 caractere
+
+            if( interfaceObject.menu.forca.input.value.visibleLength() > 1 ) {
+
+                alert("A letra deve ser apenas um caractere. Por favor, digite uma letra válida.");
+
+                interfaceObject.menu.forca.input.value = interfaceObject.menu.forca.input.value.slice(0, 1);
+
+                return;
+
+            }
+
+        }
+
+        interfaceObject.handlers.menu.forca.input.keydown = function(event) {
+
+            if(event.key === "Enter") gameObject.verificarLetras(interfaceObject.menu.forca.input.value);
+
+        }
 
 
         // Criando os listeners do menu principal
@@ -1722,10 +2356,26 @@ const initializeObject = Object.freeze({
 
         interfaceObject.menu.duo.buttons.confirm.button.addEventListener("click", interfaceObject.handlers.menu.duo.buttons.confirm.click);
 
+        // Criando os listeners do menu de jogo da forca
+
+        interfaceObject.menu.forca.buttons.back.button.addEventListener("click", interfaceObject.handlers.menu.forca.buttons.click.back);
+
+        interfaceObject.menu.forca.input.addEventListener("input", interfaceObject.handlers.menu.forca.input.input);
+
+        interfaceObject.menu.forca.input.addEventListener("change", interfaceObject.handlers.menu.forca.input.change);
+
+        interfaceObject.menu.forca.input.addEventListener("keydown", interfaceObject.handlers.menu.forca.input.keydown);
+
         interfaceObject.body.append(interfaceObject.menu.start.main);
 
         document.documentElement.replaceWith(interfaceObject.body);
 
     }
+
+});
+
+document.addEventListener("DOMContentLoaded", function() {
+
+    initializeObject.init();
 
 });
