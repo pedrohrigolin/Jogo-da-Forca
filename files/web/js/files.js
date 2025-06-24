@@ -121,6 +121,22 @@ const ForcaFiles = Object.freeze({
 
         return content;
 
+    },
+
+    createFile: function(filepath, content = "") {
+
+        if( typeof filepath !== "string" ) throw new TypeError("O parâmetro filepath deve ser do tipo string!");
+
+        if( typeof content !== "string" && ! (content instanceof ArrayBuffer) ){
+            throw new TypeError("O parâmetro content deve ser do tipo string, ArrayBuffer!");
+        }
+
+        // Tem que colocar a resposta nessa const pq se retornar a chamda da função, o array buffer é apagado no meio 
+        // do processo, corrompendo os dados.
+        const response = callUserFunc.sync("createFile", filepath, content);
+
+        return response;
+
     }
 
 })

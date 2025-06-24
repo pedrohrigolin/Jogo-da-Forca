@@ -2,16 +2,32 @@
 const ForcaApp = window.ForcaApp;
 
 /**
- * Objecto para fazer as chamadas de funções para o C++, tanto de forma 
- * síncrona quanto assíncrona.
+ * @namespace callUserFunc
+ * @description
+ * Objeto utilitário responsável por realizar chamadas de funções do backend C++ a partir do JavaScript,
+ * tanto de forma síncrona quanto assíncrona, utilizando a ponte CEF (Chromium Embedded Framework).
  * 
- * O nome do objeto vem da função call_user_func() do PHP, porém, a implementação é
- * completamente diferente.
+ * O nome do objeto faz referência à função call_user_func() do PHP, mas sua implementação é específica para integração JS/C++.
  * 
- * @author Pedro Rigolin
-*/
+ * Fornece métodos para chamadas síncronas (sync), assíncronas (async), chamadas sem retorno (sendToCpp) e gerenciamento de Promises (cefResolve).
+ * Utiliza o objeto global ForcaApp, exposto pelo CEF, para executar funções nativas do backend.
+ * 
+ */
 const callUserFunc = {
 
+    /**
+     * @function sendToCpp
+     * @memberof callUserFunc
+     * @description
+     * Chama uma função do backend C++ de forma síncrona, sem esperar retorno de valor.
+     * Utiliza o objeto global ForcaApp, que é exposto pelo CEF, para executar funções nativas do C++.
+     * Lança erro se a função não existir ou se ForcaApp não estiver disponível.
+     *
+     * @param {string} functionName - Nome da função C++ a ser chamada.
+     * @param {...any} args - Argumentos a serem passados para a função C++.
+     * @returns {boolean} true se a chamada foi realizada com sucesso.
+     * @throws {Error} Se functionName não for string ou se a função não existir no backend.
+     */
     sendToCpp: function( functionName, ...args ){
 
         if( typeof functionName !== "string" ){
@@ -37,6 +53,19 @@ const callUserFunc = {
 
     },
 
+    /**
+     * @function async
+     * @memberof callUserFunc
+     * @description
+     * Chama uma função do backend C++ de forma assíncrona, retornando uma Promise.
+     * Utiliza o objeto global ForcaApp para executar funções nativas do C++ e gerencia a resolução/rejeição da Promise.
+     * Lança erro se a função não existir ou se ForcaApp não estiver disponível.
+     *
+     * @param {string} functionName - Nome da função C++ a ser chamada.
+     * @param {...any} args - Argumentos a serem passados para a função C++.
+     * @returns {Promise<any>} Promise resolvida com o resultado da função ou rejeitada em caso de erro.
+     * @throws {Error} Se functionName não for string.
+     */
     async: function( functionName, ...args ){
 
         if( typeof functionName !== "string" ){
@@ -71,6 +100,19 @@ const callUserFunc = {
 
     },
 
+    /**
+     * @function sync
+     * @memberof callUserFunc
+     * @description
+     * Chama uma função do backend C++ de forma síncrona e retorna o valor retornado pela função C++.
+     * Utiliza o objeto global ForcaApp para executar funções nativas do C++.
+     * Lança erro se a função não existir ou se ForcaApp não estiver disponível.
+     *
+     * @param {string} functionName - Nome da função C++ a ser chamada.
+     * @param {...any} args - Argumentos a serem passados para a função C++.
+     * @returns {any} Valor retornado pela função C++.
+     * @throws {Error} Se functionName não for string ou se a função não existir no backend.
+     */
     sync: function (functionName, ...args) {
         
         if( typeof functionName !== "string" ){
@@ -91,6 +133,19 @@ const callUserFunc = {
 
     pendingPromises: {},
 
+    /**
+     * @function cefResolve
+     * @memberof callUserFunc
+     * @description
+     * Resolve ou rejeita uma Promise pendente criada por uma chamada assíncrona ao backend C++.
+     * Utilizada internamente para comunicação entre o backend C++ e o JavaScript, garantindo que o resultado
+     * da operação assíncrona seja entregue corretamente à Promise correspondente.
+     *
+     * @param {string} promiseId - Identificador único da Promise.
+     * @param {boolean} success - true para resolver a Promise, false para rejeitar.
+     * @param {any} resultOrError - Valor de resolução ou mensagem de erro.
+     * @throws {Error} Se a Promise com o ID informado não for encontrada.
+     */
     cefResolve: function( promiseId, success, resultOrError ){
 
         if ( ! callUserFunc.pendingPromises[promiseId] ) {

@@ -335,7 +335,7 @@ namespace forcaFiles {
          * @param   std::string content    Conteúdo a ser gravado no arquivo (opcional, padrão é string vazia).
          * @return  bool                   true se o arquivo foi criado e escrito com sucesso, false caso contrário.
          */
-        bool createFile( std::string filepath, std::string content = "" ) {
+        bool createFile( std::string filepath, std::string content ) {
 
             bool exist = forcaFiles::utils::fileExist(filepath);
 
@@ -359,7 +359,7 @@ namespace forcaFiles {
 
             std::ofstream newFile;
             
-            newFile.open(filepath);
+            newFile.open(filepath, std::ios::binary);
 
             if( ! newFile.is_open() ) {
 

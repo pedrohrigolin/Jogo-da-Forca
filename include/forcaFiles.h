@@ -86,7 +86,7 @@ namespace forcaFiles {
 
     namespace create {
 
-        bool createFile( std::string filepath, std::string content );
+        bool createFile( std::string filepath, std::string content = "" );
 
     }
 

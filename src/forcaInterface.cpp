@@ -2910,6 +2910,73 @@ NativeFunctionHandler::NativeFunctionHandler() {
         }
     );
 
+    router_->RegisterFunction("createFile",
+        [=](const CefV8ValueList& args, CefRefPtr<CefV8Value>& retval, CefString& exception) -> bool {
+
+            try {
+                
+                std::size_t argsSize = args.size();
+
+                if(argsSize == 0){
+                    exception = "Quantidade insuficiente de parâmetros fornecidos para a função.";
+                    return true;                    
+                }
+
+                if( ! args[0]->IsString() ){
+                    exception = "O primeiro parâmetro deve ser do tipo string!";
+                    return true;
+                }
+
+                std::string filepath = forcaStrings::trim( args[0]->GetStringValue() );
+
+                std::string content = "";
+
+                if( argsSize > 1 ){
+
+                    if( ! args[1]->IsString() && ! args[1]->IsArrayBuffer() && ! args[1]->IsUndefined() ){
+                        exception = "O segundo parâmetro deve ser do tipo string ou ArrayBuffer!";
+                        return true;
+                    }
+
+                    if( args[1]->IsString() ){
+
+                        content = args[1]->GetStringValue();
+
+                    }
+                    else if( args[1]->IsArrayBuffer() ){
+
+                        void* data = args[1]->GetArrayBufferData();
+                        size_t length = args[1]->GetArrayBufferByteLength();
+
+                        content = static_cast<char*>(data);
+
+                    }
+
+                }
+                
+                bool response = forcaFiles::create::createFile(filepath, content);
+
+                retval = CefV8Value::CreateBool(response);
+
+                return true;
+
+            } catch (const std::exception& e) {
+
+                exception = ForcaInterface::exceptionText(e);
+
+                return true;
+
+            } catch (...) {
+
+                exception = "Erro ao executar função no backend! \n\nTipo de exceção: Desconhecido \n\nMensagem: Exceção desconhecida!\n";
+
+                return true;
+
+            }  
+
+        }
+    );
+
 }
 
 bool NativeFunctionHandler::Execute(const CefString& name, CefRefPtr<CefV8Value> object, const CefV8ValueList& arguments, CefRefPtr<CefV8Value>& retval, CefString& exception) {
@@ -3157,6 +3224,8 @@ void ForcaCefApp::OnContextCreated(CefRefPtr<CefBrowser> browser, CefRefPtr<CefF
     ForcaAppObj->SetValue("getBase64Content", CefV8Value::CreateFunction("getBase64Content", nativeSyncHandler), V8_PROPERTY_ATTRIBUTE_NONE);
 
     ForcaAppObj->SetValue("getBinaryContent", CefV8Value::CreateFunction("getBinaryContent", nativeSyncHandler), V8_PROPERTY_ATTRIBUTE_NONE);
+
+    ForcaAppObj->SetValue("createFile", CefV8Value::CreateFunction("createFile", nativeSyncHandler), V8_PROPERTY_ATTRIBUTE_NONE);
 
 }
 

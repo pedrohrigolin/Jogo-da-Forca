@@ -1,0 +1,21 @@
+{
+  "compilerOptions": {
+    "checkJs": false,
+    "target": "ES2020",          // Ou outra versão do JS que você usa
+    "module": "commonjs",          // Pode usar "commonjs" se quiser
+    "allowSyntheticDefaultImports": true,
+    "baseUrl": ".",              // Considera o diretório atual como base
+    "paths": {
+      "*": ["types/*"]
+    }
+  },
+  "include": [
+    "src/**/*",                  // Ou ajuste para a pasta onde estão os arquivos JS
+    "scripts/**/*",
+    "*.js",
+    "types/**/*"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
+}

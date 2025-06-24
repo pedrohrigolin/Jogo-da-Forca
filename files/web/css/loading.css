@@ -28,13 +28,14 @@ body {
 
 .static-text {
     font-size: 24px;
-    margin-bottom: 10px;
+    margin-bottom: 15px;
     color: #ffffff; /* Branco puro para destaque */
     text-shadow: 0 0 8px rgba(77, 142, 230, 0.5); /* Sutil glow azul */
 }
 
 .dynamic-text {
     font-size: 18px;
+    margin-bottom: 15px;
     color: #a0a0a0; /* Cinza claro */
     min-height: 24px;
 }

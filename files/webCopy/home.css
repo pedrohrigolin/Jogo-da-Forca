@@ -1,0 +1,290 @@
+/* Importa a fonte do Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&display=swap');
+
+/* CSS RESET */
+
+*{
+    margin: 0;
+    padding: 0;
+}
+  
+html, body, div, span, applet, object, iframe,
+h1, h2, h3, h4, h5, h6, p, blockquote, pre,
+a, abbr, acronym, address, big, cite, code,
+del, dfn, em, img, ins, kbd, q, s, samp,
+small, strike, strong, sub, sup, tt, var,
+b, u, i, center,
+dl, dt, dd, ol, ul, li,
+fieldset, form, label, legend,
+table, caption, tbody, tfoot, thead, tr, th, td,
+article, aside, canvas, details, embed, 
+figure, figcaption, footer, header, hgroup, 
+menu, nav, output, ruby, section, summary,
+time, mark, audio, video {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    font-size: 100%;
+    font: inherit;
+    vertical-align: baseline;
+}
+/* HTML5 display-role reset for older browsers */
+article, aside, details, figcaption, figure, 
+footer, header, hgroup, menu, nav, section {
+    display: block;
+}
+ol, ul {
+    list-style: none;
+}
+blockquote, q {
+    quotes: none;
+}
+blockquote:before, blockquote:after,
+q:before, q:after {
+    content: '';
+    content: none;
+}
+table {
+    border-collapse: collapse;
+    border-spacing: 0;
+}
+
+*, 
+*:after,
+*:before,
+*::before, 
+*::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    text-decoration: none;
+    padding-block: 0;
+    padding-inline: 0;
+    margin-block-start: 0;
+    margin-block-end: 0;
+    margin-inline-start: 0;
+    margin-inline-end: 0;
+    padding-inline-start: 0;
+    box-shadow: none;
+    text-shadow: none;
+    background: transparent;
+    -webkit-tap-highlight-color: transparent;
+}
+
+*:focus, *:focus-visible{
+    outline: none;
+}
+
+/* FIM DO CSS RESET */
+
+body {
+    background-image: url('components/img1.jpg');
+    background-size: cover; /* Cobre toda a tela */
+    background-position: center; /* Centraliza a imagem */
+    background-attachment: fixed; /* A imagem não rola com o conteúdo */
+    margin: 0;
+    min-height: 100vh;
+    font-family: 'Cinzel', serif; /* Aplica a fonte importada */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: rgba(0, 0, 0, 0.5);
+    background-blend-mode: multiply;
+}
+
+.menu-container {
+    width: 450px;
+    background-color: rgba(39, 28, 20, 0.85); 
+    backdrop-filter: blur(5px); 
+    padding: 30px 40px;
+    border-radius: 10px;
+    border: 3px solid #6d4c41;
+    border-top-color: #8d6e63;
+    border-left-color: #8d6e63;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7), inset 0 0 15px rgba(0, 0, 0, 0.5);
+}
+
+.titulo-container{
+    text-align: center;
+    margin-top: 10px;
+    margin-bottom: 30px;
+    min-height: 80px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.titulo-jogo {
+    color: #e0cda8; 
+    text-align: center;
+    font-weight: 700; 
+    font-size: 2.8em;
+    text-shadow: 3px 3px 5px rgba(0, 0, 0, 0.8);
+}
+
+.menu-botao {
+    display: block; 
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 18px; 
+    background-color: #5d4037; 
+    color: #d7ccc8; 
+    font-family: 'Cinzel', serif;
+    font-size: 1.2em;
+    font-weight: 400;
+    text-align: center;
+    text-decoration: none;
+    border-radius: 5px;
+    border: 1px solid #4e342e;
+    box-shadow: 0 4px 0 #3e2723, 0 5px 10px rgba(0, 0, 0, 0.6);
+    position: relative;
+    top: 0;
+    transition: all 0.1s ease-in-out;
+}
+
+.menu-botao:hover {
+    background-color: #6d4c41; 
+    color: #fff;
+}
+
+.menu-botao:active {
+    top: 4px; 
+    box-shadow: 0 0 0 #3e2723, 0 1px 5px rgba(0, 0, 0, 0.6); 
+}
+
+.menu-navegacao .menu-botao:last-child {
+    margin-bottom: 0;
+}
+
+.menu-modo {
+    display: block; 
+    width: 95%;
+    padding: 10px;
+    margin-bottom: 18px;
+    background-color: #5d4037; 
+    color: #d7ccc8; 
+    font-family: 'Cinzel', serif;
+    font-size: 1.2em;
+    font-weight: 400;
+    text-align: center;
+    text-decoration: none;
+    border-radius: 5px;
+    border: 1px solid #4e342e;
+    box-shadow: 0 4px 0 #3e2723, 0 5px 10px rgba(0, 0, 0, 0.6);
+    position: relative;
+    top: 0;
+    transition: all 0.1s ease-in-out;
+}
+
+.menu-modo:hover {
+    background-color: #6d4c41; 
+    color: #fff;
+}
+
+.menu-modo:active {
+    top: 4px; 
+    box-shadow: 0 0 0 #3e2723, 0 1px 5px rgba(0, 0, 0, 0.6);
+}
+
+.menu-nivel {
+    width: 600px;
+    background-color: rgba(39, 28, 20, 0.85); 
+    backdrop-filter: blur(5px); 
+    padding: 30px 40px;
+    border-radius: 10px;
+    border: 3px solid #6d4c41;
+    border-top-color: #8d6e63;
+    border-left-color: #8d6e63;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7), inset 0 0 15px rgba(0, 0, 0, 0.5);
+}
+
+.titulo-nivel {
+    color: #e0cda8;
+    text-align: center;
+    font-weight: 700;
+    font-size: 30px;
+    margin-top: 0;
+    margin-bottom: 30px;
+    text-shadow: 3px 3px 5px rgba(0, 0, 0, 0.8);
+}
+
+.container-botoes {
+  display: flex;
+  gap: 5px; 
+  margin-bottom: 20px;
+  justify-content: center;
+  margin-top: 10px;
+}
+
+.botao-transformavel {
+  width: 200px;
+  height: 50px;
+  background-color: #5d4037; 
+  color: #d7ccc8;
+  font-family: 'Cinzel', serif;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 20px;
+  border: 1px solid #4e342e; 
+  box-shadow: 0 4px 0 #3e2723, 0 5px 10px rgba(0, 0, 0, 0.6);
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  padding-top: 12px;
+  position: relative;
+  overflow: hidden; 
+}
+
+.botao-transformavel:hover {
+  width: 200px;
+  height: 200px;
+  background-color: #6d4c41; 
+  color: white;
+}
+
+.botao-transformavel::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: white;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  text-align: center;
+  white-space: pre-wrap; 
+}
+
+.botao-transformavel:hover::after {
+  content: "Fácil";
+  opacity: 1;
+}
+
+.texto-fixo {
+  z-index: 2;
+  position: relative;
+  pointer-events: none;
+}
+
+#easy:hover {
+  background-image: url('../web/components/facil.svg');
+  background-repeat: no-repeat;
+  background-position: bottom;
+  background-size: 60px 60px; 
+}
+
+#norm:hover {
+  background-image: url('../web/components/medio.svg');
+  background-repeat: no-repeat;
+  background-position: bottom;
+  background-size: 60px 60px; 
+}
+
+#hard:hover {
+  background-image: url('../web/components/dificil.svg');
+  background-repeat: no-repeat;
+  background-position: bottom;
+  background-size: 60px 60px; 
+}
