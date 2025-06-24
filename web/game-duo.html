@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Jogo da Forca</title>
+  <link rel="stylesheet" href="./css/game.css">
+</head>
+<body>
+
+<main class="menu-forca">
+  <h1 class="titulo-jogo">Jogo da Forca</h1>
+
+  <div class="forca">
+    <img id="cabeca" class="parte" src="./components/forca/cabeça.svg" alt="Cabeça">
+    <img id="corpo" class="parte" src="./components/forca/corpo.svg" alt="Corpo">
+    <img id="braco-esquerdo" class="parte" src="./components/forca/b-esquerdo.svg" alt="Braço Esquerdo">
+    <img id="braco-direito" class="parte" src="./components/forca/b-direito.svg" alt="Braço Direito">
+    <img id="perna-esquerda" class="parte" src="./components/forca/p-esquerdo.svg" alt="Perna Esquerda">
+    <img id="perna-direita" class="parte" src="./components/forca/p-direito.svg" alt="Perna Direita">
+  </div>
+
+  <div class="letras-tentadas">Letras tentadas: <span id="letras-erradas"></span></div>
+
+  <input type="text" id="entrada-letra" maxlength="1" placeholder="Letra">
+
+  <div id="traços" class="traços"></div>
+
+  <button onclick="retorno()" class="menu-botao">Voltar</button>
+
+  <div id="mensagem-final"></div>
+</main>
+
+<script>
+  const palavraSecreta = localStorage.getItem('palavraDuo')?.toLowerCase() || 'teste';
+  const traçosContainer = document.getElementById('traços');
+  const letrasErradasContainer = document.getElementById('letras-erradas');
+  const mensagemFinal = document.getElementById('mensagem-final');
+  const inputLetra = document.getElementById('entrada-letra');
+
+  let letrasCorretas = [];
+  let letrasErradas = [];
+  let erros = 0;
+
+  const partes = [
+    document.getElementById('cabeca'),
+    document.getElementById('corpo'),
+    document.getElementById('braco-esquerdo'),
+    document.getElementById('braco-direito'),
+    document.getElementById('perna-esquerda'),
+    document.getElementById('perna-direita')
+  ];
+
+  window.onload = () => {
+    inputLetra.focus();
+    mostrarTracos();
+  };
+
+  inputLetra.addEventListener('keydown', function(event) {
+    if (event.key === 'Enter') {
+      verificarLetra();
+    }
+  });
+
+  function mostrarTracos() {
+    let tracosHTML = '';
+    for (let letra of palavraSecreta) {
+      if (letrasCorretas.includes(letra)) {
+        tracosHTML += letra.toUpperCase() + ' ';
+      } else {
+        tracosHTML += '_ ';
+      }
+    }
+    traçosContainer.innerHTML = tracosHTML;
+  }
+
+  function verificarLetra() {
+    const letra = inputLetra.value.toLowerCase();
+
+    if (!letra.match(/[a-zá-úà-ùãõç]/i) || letra.length !== 1) {
+      alert('Digite uma letra válida.');
+      inputLetra.value = '';
+      inputLetra.focus();
+      return;
+    }
+
+    if (letrasCorretas.includes(letra) || letrasErradas.includes(letra)) {
+      alert('Você já tentou essa letra.');
+      inputLetra.value = '';
+      inputLetra.focus();
+      return;
+    }
+
+    if (palavraSecreta.includes(letra)) {
+      letrasCorretas.push(letra);
+    } else {
+      letrasErradas.push(letra);
+      erros++;
+      mostrarErro();
+    }
+
+    mostrarTracos();
+    letrasErradasContainer.innerText = letrasErradas.join(', ').toUpperCase();
+    verificarFimDeJogo();
+    inputLetra.value = '';
+    inputLetra.focus();
+  }
+
+  function mostrarErro() {
+    if (erros <= partes.length) {
+      partes[erros - 1].style.display = 'block';
+    }
+  }
+
+  function verificarFimDeJogo() {
+    if (!traçosContainer.innerText.includes('_')) {
+      mensagemFinal.innerText = 'Parabéns! Você venceu!';
+      desativarInput();
+    } else if (erros >= 6) {
+      mensagemFinal.innerText = `Game Over! A palavra era: ${palavraSecreta.toUpperCase()}`;
+      desativarInput();
+    }
+  }
+
+  function desativarInput() {
+    inputLetra.disabled = true;
+  }
+
+  function retorno() {
+    window.location.href = 'home.html';
+  }
+</script>
+
+</body>
+</html>

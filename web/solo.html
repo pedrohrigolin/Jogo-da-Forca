@@ -9,7 +9,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&display=swap" rel="stylesheet">
 
-    <link rel="stylesheet" href="home.css">
+    <link rel="stylesheet" href="./css/solo.css">
 </head>
 <body>
 
@@ -18,9 +18,9 @@
         <h3 class="titulo-nivel">Escolha um Nível</h3>
         <nav class="menu-navegacao">
             <div class="container-botoes">
-                <button id="easy" onclick="nivel" class="botao-transformavel"><span class="texto-fixo">Fácil</span></button>
-                <button id="norm" onclick="nivel" class="botao-transformavel"><span class="texto-fixo">Médio</span></button>
-                <button id="hard" onclick="nivel" class="botao-transformavel"><span class="texto-fixo">Difícil</span></button>
+                <button id="easy" onclick="nivel()" class="botao-transformavel"><span class="texto-fixo">Fácil</span></button>
+                <button id="norm" onclick="nivel()" class="botao-transformavel"><span class="texto-fixo">Médio</span></button>
+                <button id="hard" onclick="nivel()" class="botao-transformavel"><span class="texto-fixo">Difícil</span></button>
             </div>
             <a href="home.html" class="menu-botao">Voltar</a>
         </nav>
@@ -28,7 +28,7 @@
 
 <script>
     function nivel() {
-      window.location.href = 'game.html';
+      window.location.href = './game-solo.html';
     }
 </script>
 
