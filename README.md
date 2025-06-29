@@ -1,6 +1,6 @@
 # 🎮 Jogo da Forca em C++
 
-Um projeto acadêmico completo de Jogo da Forca desenvolvido em C++ com foco em boas práticas de programação, modularidade e robustez. O jogo é projetado para rodar no terminal e utiliza bibliotecas modernas como ncurses/pdcurses e pcre2.
+Um projeto acadêmico completo de Jogo da Forca desenvolvido em C++ com foco em boas práticas de programação, modularidade e robustez.
 
 ---
 
