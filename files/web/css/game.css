@@ -167,7 +167,8 @@ body {
     z-index: -1;
     visibility: hidden;
     top: calc(50% - 60px);
-    right: calc(100% - 120px);
+    /* right: calc(100% - 120px); */
+    right: 10px;
     transition: all 0.2s ease-in-out;
 }
 
@@ -264,6 +265,10 @@ body {
     margin-top: 0;
     margin-bottom: 30px;
     text-shadow: 3px 3px 5px rgba(0, 0, 0, 0.8);
+}
+
+.duoMenu .titulo-nivel{
+  font-size: 14px;
 }
 
 .container-botoes {
@@ -394,7 +399,7 @@ body {
 
 .forca {
   margin: 20px auto;
-  width: 105px;
+  width: 110px;
   height: 250px;
   position: relative;
   border-left: 5px solid #8d6e63;
@@ -492,9 +497,12 @@ body {
 
 .tracos{
     color: #FFFFFF;
-    font-size: 16px;
+    font-size: 30px;
     font-weight: 400;
     font-family: 'Cinzel';
+    letter-spacing: 15px;
+    margin-left: 60px;
+    margin-bottom: 10px;
 }
 
 #mensagem-final {
@@ -503,4 +511,9 @@ body {
   font-weight: bold;
   text-align: center;
   color: #e0cda8;
+}
+
+.menu-nivel, .menu-container, .menu-forca{
+  position: fixed;
+  top: 80px;
 }

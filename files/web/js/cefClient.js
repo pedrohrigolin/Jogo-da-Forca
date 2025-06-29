@@ -36,8 +36,6 @@ const callUserFunc = {
 
         }
 
-        // TODO: ISSO AQUI PODE SER MELHORADO, TALVEZ JÁ RETORNAR ERRO DA APLICAÇÃO LOGO QUANDO FOR DETECTADO 
-        // TODO: QUE O FORCAAPP NÃO FOI INICIADO NO WINDOWS.
         if (ForcaApp && ForcaApp.salvarUsuario) {
 
             ForcaApp[functionName](...args);

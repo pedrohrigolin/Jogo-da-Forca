@@ -232,90 +232,6 @@ namespace forcaFiles {
 
         }
 
-        /**
-         * Retorna o caminho de um arquivo a partir de uma chave e do tipo (DEFAULT, CUSTOM ou ANY).
-         *
-         * A função busca a chave primeiramente em forcaFileKeys, que representa arquivos presentes em ambas as pastas.
-         * Se não encontrar, busca em forcaDefaultFiles (para DEFAULT) ou forcaCustomFiles (para CUSTOM).
-         * Para o tipo ANY, busca em forcaAnyFiles, que pode conter qualquer arquivo do sistema.
-         * 
-         * Prioridade de busca:
-         *   1. forcaFileKeys: prioridade máxima, pois representa arquivos compartilhados entre default e custom.
-         *   2. forcaDefaultFiles ou forcaCustomFiles: caso não encontre na anterior, busca nos arquivos exclusivos de cada pasta.
-         *   3. forcaAnyFiles: apenas se o tipo for ANY, busca em todos os arquivos conhecidos do sistema.
-         *
-         * @param key  Chave do arquivo a ser buscado.
-         * @param type Tipo do caminho desejado: "DEFAULT", "CUSTOM" ou "ANY".
-         * @return std::string Caminho do arquivo, já normalizado.
-         * @throws std::invalid_argument Se o tipo for inválido ou a chave não existir no(s) mapa(s) correspondente(s).
-         */
-        std::string getPath( std::string key, std::string type ) {
-
-            type = forcaStrings::normalizeWord(type);
-
-            if( type != "DEFAULT" && type != "CUSTOM" && type != "ANY"){
-                std::invalid_argument("O parametro type passado na funcao esta incorrete! Os valores esperados sao DEFAULT, CUSTOM OU ANY");
-            }
-
-            key = forcaStrings::removeSpaces(key);
-
-            if(type != "ANY"){
-
-                std::map<std::string, std::string>::const_iterator path = forcaFiles::forcaFileKeys.find(key);
-
-                if(path == forcaFiles::forcaFileKeys.end()){
-                    
-                    if(type == "DEFAULT"){
-
-                        path = forcaFiles::forcaDefaultFiles.find(key);
-
-                        if(path == forcaFiles::forcaDefaultFiles.end()){
-                            std::invalid_argument("O primeiro parametro (key) passado na funcao nao existe!");
-                        }
-
-                    }
-                    else{
-
-                        path = forcaFiles::forcaCustomFiles.find(key);
-
-                        if(path == forcaFiles::forcaDefaultFiles.end()){
-                            std::invalid_argument("O primeiro parametro (key) passado na funcao nao existe!");
-                        }
-
-                    }
-
-                }
-
-                std::string response;
-
-                if(type == "DEFAULT"){
-                    response = forcaFiles::utils::normalizePath(forcaFiles::forcaDefaultPath + path->second);
-                }
-                else{
-                    response = forcaFiles::utils::normalizePath(forcaFiles::forcaCustomPath + path->second);
-                }
-
-                return response;
-
-            }
-            else{
-             
-                std::map<std::string, std::string>::const_iterator path = forcaFiles::forcaAnyFiles.find(key);
-
-                if(path == forcaFiles::forcaAnyFiles.end()){
-                    std::invalid_argument("O primeiro parametro (key) passado na funcao nao existe!");
-                }
-
-                std::string response = forcaFiles::utils::normalizePath(path->second);
-
-                return response;
-
-            }
-
-        }
-
-    }
-
     namespace create {
 
         /*
@@ -341,16 +257,12 @@ namespace forcaFiles {
 
             if( exist && ! forcaFiles::utils::canRead(filepath) ){
 
-                forcaUtils::clear_screen();
-                
                 throw std::runtime_error("O arquivo " + filepath + " nao tem permissao de leitura, ou ocorreu um erro ao tentar abrir o arquivo, verifique e tente novamente!");
                 
             }
 
             if( ! forcaFiles::utils::canWrite(filepath) ){
 
-                forcaUtils::clear_screen();
-                
                 throw std::runtime_error("O arquivo " + filepath + " nao tem permissao de escrita!");
 
             }
@@ -371,8 +283,6 @@ namespace forcaFiles {
 
             if( newFile.fail() ){
 
-                forcaUtils::clear_screen();
-                
                 newFile.close();
                 
                 throw std::runtime_error("Erro ao gravar o conteudo no arquivo " + filepath);
@@ -411,16 +321,12 @@ namespace forcaFiles {
 
             if( ! exist ){
 
-                forcaUtils::clear_screen();
-                
                 throw std::runtime_error("O arquivo " + filepath + " nao existe!");
 
             }
 
             if( ! forcaFiles::utils::canRead(filepath) ){
 
-                forcaUtils::clear_screen();
-                
                 throw std::runtime_error("O arquivo " + filepath + " nao tem permissao de leitura!");
 
             }
@@ -440,8 +346,6 @@ namespace forcaFiles {
 
             if (size == -1) {
 
-                forcaUtils::clear_screen();
-
                 file.close();
 
                 throw std::runtime_error("Erro ao obter tamanho do arquivo " + filepath);
@@ -454,8 +358,6 @@ namespace forcaFiles {
             file.read(&content[0], size);
 
             if( file.fail() ){
-
-                forcaUtils::clear_screen();
 
                 file.close();
                 
@@ -512,117 +414,6 @@ namespace forcaFiles {
             if(content.empty()) return true;
 
             return false;
-
-        }
-
-    }
-
-    namespace validate {
-
-        /*
-        |===========================
-        |   FUNÇÕES DE VALIDAÇÃO
-        |===========================
-        */
-
-        /**
-         * Valida a existência e integridade de todos os arquivos essenciais do sistema.
-         * 
-         * Verifica cada arquivo listado em forcaPaths, garantindo que:
-         * - Existe uma versão padrão (default) do arquivo
-         * - A versão padrão pode ser lida e não está vazia
-         * - Existe uma versão customizável do arquivo (ou cria uma cópia da versão padrão)
-         * - A versão customizável pode ser lida e escrita
-         * - A versão customizável não está vazia (se estiver, restaura conteúdo da versão padrão)
-         * 
-         * @return  bool                   true se todos os arquivos são válidos
-         * @throws  std::runtime_error     Se algum arquivo padrão não existe, não pode ser lido ou está vazio
-         *                                 Se algum arquivo customizável não pode ser escrito
-         */
-        bool validateEssentialFiles() {
-           
-            for( const auto& name : forcaFiles::forcaFileKeys ) {
-
-                std::string filename = forcaFiles::utils::normalizePath( forcaFiles::forcaDefaultPath + name.second );
-
-                if( ! forcaFiles::utils::fileExist(filename) ){
-                    throw std::runtime_error("O arquivo " + filename + " nao existe!");
-                }
-
-                if( ! forcaFiles::utils::canRead(filename) ){
-                    throw std::runtime_error("O arquivo " + filename + " nao permite leitura!");
-                }
-
-                if( forcaFiles::utils::isEmpty(filename) ){
-                    throw std::runtime_error("O arquivo " + filename + " nao pode estar vazio!");
-                }
-
-                filename = forcaFiles::utils::normalizePath( forcaFiles::forcaCustomPath + name.second );
-
-                std::string content = "";
-
-                if( ! forcaFiles::utils::fileExist(filename) ){
-
-                    // TODO: EVOLUIR ISSO PARA UM BLOCO TRY CATCH FUTURAMENTE
-
-                    content = forcaFiles::read::getContent( forcaFiles::utils::normalizePath( forcaFiles::forcaDefaultPath + name.second ) );
-
-                    forcaFiles::create::createFile(filename, content);
-
-                }
-
-                if( ! forcaFiles::utils::canWrite(filename) ){
-
-                    throw std::runtime_error("O arquivo " + filename + " nao pode ser escrito!");
-
-                }
-
-                // Se o arquivo não permite leitura, sobreescreve ele para permitir
-                if( ! forcaFiles::utils::canRead(filename) ){
-
-                    // TODO: EVOLUIR ISSO PARA UM BLOCO TRY CATCH FUTURAMENTE
-
-                    if(content == ""){
-                        content = forcaFiles::read::getContent( forcaFiles::utils::normalizePath( forcaFiles::forcaDefaultPath + name.second ) );
-                    }
-
-                    forcaFiles::create::createFile(filename, content);
-
-                }
-
-                if( forcaFiles::utils::isEmpty(filename) ){
-
-                    // TODO: EVOLUIR ISSO PARA UM BLOCO TRY CATCH FUTURAMENTE
-
-                    if(content == ""){
-                        content = forcaFiles::read::getContent( forcaFiles::utils::normalizePath( forcaFiles::forcaDefaultPath + name.second ) );
-                    }
-
-                    forcaFiles::create::createFile(filename, content);
-
-                }
-
-            }
-
-            for( const auto& name : forcaFiles::forcaDefaultFiles ) {
-
-                std::string filename = forcaFiles::utils::normalizePath( forcaFiles::forcaDefaultPath + name.second );
-
-                if( ! forcaFiles::utils::fileExist(filename) ){
-                    throw std::runtime_error("O arquivo " + filename + " nao existe!");
-                }
-
-                if( ! forcaFiles::utils::canRead(filename) ){
-                    throw std::runtime_error("O arquivo " + filename + " nao permite leitura!");
-                }
-
-                if( forcaFiles::utils::isEmpty(filename) ){
-                    throw std::runtime_error("O arquivo " + filename + " nao pode estar vazio!");
-                }
-
-            }
-
-            return true;
 
         }
 

@@ -104,16 +104,6 @@ const gameObject = {
 
             interfaceObject.menu.forca.input.disabled = true;
 
-            const partesLength = interfaceObject.menu.forca.partes.length;
-
-            for(let i = 0; i < partesLength; i++){
-
-                const parte = interfaceObject.menu.forca.partes[i];
-
-                if( parte ) parte.style.display = "none";
-
-            }
-
             gameObject.word = "";
 
             gameObject.letrasCorretas = [];
@@ -136,8 +126,6 @@ const gameObject = {
 
         if( ! gameObject.initialized ) return;
 
-        console.log(`Verificando letra: ${letter}`); // Debugging line
-
         if( typeof letter !== "string" || letter.length !== 1 ){
 
             alert("Digite uma letra válida!");
@@ -151,8 +139,6 @@ const gameObject = {
         }
 
         letter = letter.normalizeWord();
-
-        console.log(`Letra normalizada: ${letter}`); // Debugging line
 
         if( ! letter.isAlpha() ){
 

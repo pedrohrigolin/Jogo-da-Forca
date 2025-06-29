@@ -123,12 +123,26 @@ const ForcaFiles = Object.freeze({
 
     },
 
+    /**
+     * @function createFile
+     * @memberof ForcaFiles
+     * @description
+     * Cria um novo arquivo no caminho especificado, com o conteúdo informado.
+     * O conteúdo pode ser uma string ou um ArrayBuffer (binário).
+     * Utiliza o backend C++ para garantir escrita segura e compatibilidade com diferentes formatos.
+     *
+     * @param {string} filepath - Caminho do arquivo a ser criado.
+     * @param {string|ArrayBuffer} [content=""] - Conteúdo a ser gravado no arquivo.
+     * @returns {boolean} true se o arquivo foi criado com sucesso.
+     * @throws {TypeError} Se filepath não for string ou content não for string nem ArrayBuffer.
+     * @throws {Error} Se ocorrer erro ao criar o arquivo.
+     */
     createFile: function(filepath, content = "") {
 
         if( typeof filepath !== "string" ) throw new TypeError("O parâmetro filepath deve ser do tipo string!");
 
         if( typeof content !== "string" && ! (content instanceof ArrayBuffer) ){
-            throw new TypeError("O parâmetro content deve ser do tipo string, ArrayBuffer!");
+            throw new TypeError("O parâmetro content deve ser do tipo String, ArrayBuffer!");
         }
 
         // Tem que colocar a resposta nessa const pq se retornar a chamda da função, o array buffer é apagado no meio 

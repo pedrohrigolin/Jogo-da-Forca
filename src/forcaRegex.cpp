@@ -9,10 +9,6 @@
 #include <memory> // Para gerenciamento de memória com unique_ptr
 #include "forcaRegex.h"
 
-#include <iostream> // !! TIRAR DEPOIS DE CONCLUIR TODOS OS TESTES
-
-// TODO: SE DER TEMPO ADICIONAR UM CACHE DE REGEX COMPILADOS, IGUAL É FEITO NO PHP
-
 /**
  * Namespace que implementa funcionalidades de expressões regulares inspiradas no PHP.
  * Oferece uma interface familiar para usar regex no C++, seguindo o padrão do PHP.

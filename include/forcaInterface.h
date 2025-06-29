@@ -35,22 +35,44 @@
 #include "include/views/cef_window.h"
 #include "include/wrapper/cef_helpers.h"
 
-// =================================================================================================
-// --- SEÇÃO 1: FUNÇÕES AUXILIARES GLOBAIS ---
-// =================================================================================================
-
+/**
+ * @class ForcaInterfaceGPU
+ * @brief Gerencia o estado da GPU e flags de inicialização para fallback seguro em caso de falha gráfica.
+ *
+ * Responsável por criar, remover e verificar flags de desabilitação de GPU, além de exibir mensagens de erro
+ * específicas para cada plataforma (Windows/Linux) quando ocorre falha no subsistema gráfico.
+ */
 class ForcaInterfaceGPU {
 
 private:
 
     ForcaInterfaceGPU() {}
 
+    /**
+     * @struct ForcaInterfaceGPU::gGPUHandler
+     * @brief Estrutura responsável por gerenciar o estado da GPU e flags de fallback gráfico.
+     *
+     * Esta struct encapsula toda a lógica de controle de fallback gráfico, incluindo:
+     * - Controle do status de desabilitação da GPU durante a execução do programa.
+     * - Criação e remoção de flags temporárias e permanentes para desabilitar a GPU.
+     * - Detecção automática de flags via argumentos de linha de comando ou arquivos de flag.
+     * - Exibição de mensagens de erro específicas para o usuário em caso de falha gráfica, com suporte a Windows e Linux.
+     * - Verificação de códigos de erro relacionados à GPU para acionar o modo seguro.
+     *
+     * O objetivo é garantir que, caso ocorra uma falha no subsistema gráfico, a aplicação possa reiniciar em modo seguro,
+     * evitando redefinições acidentais do status da GPU e fornecendo feedback claro ao usuário.
+     */    
     struct gGPUHandler {
 
         private:
 
+            // Propriedade que identifica se a GPU foi desabilitada ou não
             bool gpu_disabled = false;
+
+            // Nome da flag de desabilitar a GPU temporariamente
             std::string temp_flag = "temp_disabled_gpu.flag";
+
+            // Nome da flag de desabilitar a GPU permanentemente
             std::string always_flag = "always_disabled_gpu.flag";
 
         public:
@@ -68,10 +90,24 @@ private:
 
             }
 
+            /**
+             * @brief Retorna o status atual da GPU.
+             *
+             * Indica se a GPU foi desabilitada durante a execução do programa, seja por flag temporária, permanente
+             * ou argumento de linha de comando. Retorna true se a GPU está desabilitada, false caso contrário.
+             *
+             * @return true se a GPU está desabilitada, false caso contrário.
+             */
             bool getStatus() {
                 return gGPUHandler::gpu_disabled;
             }
 
+            /**
+             * @brief Cria uma flag temporária para desabilitar a GPU.
+             *
+             * Gera um arquivo temporário no sistema de arquivos indicando que a GPU deve ser desabilitada
+             * na próxima inicialização do programa. Utilizado como mecanismo de fallback gráfico em caso de falha.
+             */            
             void createTempFlag() {
 
                 std::ofstream flag_file(gGPUHandler::temp_flag);
@@ -85,12 +121,24 @@ private:
 
             }
 
+            /**
+             * @brief Remove a flag temporária que desabilita a GPU.
+             *
+             * Exclui o arquivo temporário do sistema de arquivos, permitindo que a GPU seja reabilitada
+             * na próxima inicialização do programa, caso não haja outras flags ativas.
+             */            
             void deleteTempFlag() {
 
                 (void)std::filesystem::remove(gGPUHandler::temp_flag);
 
             }
 
+            /**
+             * @brief Cria uma flag permanente para desabilitar a GPU.
+             *
+             * Gera um arquivo permanente no sistema de arquivos indicando que a GPU deve ser desabilitada
+             * em todas as inicializações futuras do programa, até que a flag seja removida manualmente.
+             */            
             void createAlwaysFlag() {
 
                 std::ofstream flag_file(gGPUHandler::always_flag);
@@ -104,12 +152,27 @@ private:
 
             }
 
+            /**
+             * @brief Remove a flag permanente que desabilita a GPU.
+             *
+             * Exclui o arquivo permanente do sistema de arquivos, permitindo que a GPU seja reabilitada
+             * em futuras inicializações do programa.
+             */            
             void deleteAlwaysFlag() {
 
                 (void)std::filesystem::remove(gGPUHandler::always_flag);
 
             }
 
+            /**
+             * @brief Verifica a existência de flags ou argumentos para desabilitar a GPU.
+             *
+             * Analisa os argumentos de linha de comando e a existência dos arquivos de flag temporária e permanente.
+             * Se encontrar qualquer indicação para desabilitar a GPU, atualiza o status interno para refletir isso.
+             *
+             * @param argc Quantidade de argumentos da linha de comando.
+             * @param argv Vetor de argumentos da linha de comando.
+             */            
             void checkFlag( int argc, char* argv[] ){
                 
                 if( gGPUHandler::gpu_disabled ) return;
@@ -148,11 +211,16 @@ private:
 
             }
 
+            /**
+             * @brief Exibe uma mensagem de erro ao usuário em caso de falha gráfica.
+             *
+             * Mostra uma mensagem apropriada para a plataforma (Windows ou Linux) informando que ocorreu um erro
+             * no subsistema gráfico e que o programa será reiniciado em modo seguro.
+             */            
             void showGPUError(){
 
                 #if defined(OS_WIN)
 
-                    // CORREÇÃO 3: Usar MessageBoxW para strings Unicode (com o L"...")
                     MessageBoxW(NULL,
                             L"Ocorreu um erro no subsistema grafico.\nAgora o programa sera fechado e voce precisara abrir de novo.\nNa proxima vez, a aplicacao iniciara em um modo de renderizacao mais seguro.",
                             L"Erro de GPU",
@@ -176,6 +244,15 @@ private:
 
             }
 
+            /**
+             * @brief Verifica se o código de erro está relacionado a falha de GPU.
+             *
+             * Analisa o código de erro retornado pelo CEF para identificar se corresponde a falhas conhecidas de GPU,
+             * como CEF_RESULT_CODE_GPU_DEAD_ON_ARRIVAL ou CEF_RESULT_CODE_GPU_EXIT_ON_CONTEXT_LOST.
+             *
+             * @param code Código de erro retornado pelo CEF.
+             * @return true se o erro está relacionado à GPU, false caso contrário.
+             */            
             bool isGPUError(int code){
 
                 if( code == CEF_RESULT_CODE_GPU_DEAD_ON_ARRIVAL || code == CEF_RESULT_CODE_GPU_EXIT_ON_CONTEXT_LOST ){
@@ -190,18 +267,20 @@ private:
 
 public:
 
+    /**
+     * @var ForcaInterfaceGPU::GPUHandler
+     * @brief Instância global para gerenciamento do estado da GPU e flags de fallback.
+     */
     static ForcaInterfaceGPU::gGPUHandler GPUHandler;
 
 };
 
-
-// =================================================================================================
-// --- SEÇÃO 2: ARQUITETURA DA PONTE JS <-> C++ ---
-// =================================================================================================
-
 /**
- * Roteia chamadas de API do JavaScript para as funções C++ correspondentes.
- * Este é o coração da nossa arquitetura "bonita", substituindo o bloco if/else.
+ * @class ApiRouter
+ * @brief Roteador de chamadas de API do JavaScript para funções C++.
+ *
+ * Permite registrar funções C++ (lambdas ou funções livres) associadas a nomes, e despacha chamadas vindas do JS
+ * para a função correta, substituindo grandes blocos if/else por um mapa de funções.
  */
 class ApiRouter {
 
@@ -210,10 +289,19 @@ public:
     // Define um tipo "FuncType" para nossas funções: recebe os argumentos do CEF e não retorna nada.
     using FuncType = std::function<void(CefRefPtr<CefListValue>)>;
 
-    // Registra uma função no mapa, associando um nome (string) a uma função C++.
+    /**
+     * @brief Registra uma função C++ para ser chamada via JS.
+     * @param name Nome da função (string) que será chamada do JS.
+     * @param func Função C++ (lambda ou std::function) a ser executada.
+     */
     void RegisterFunction(const std::string& name, FuncType func);
 
-    // Procura uma função pelo nome no mapa e a executa com os argumentos fornecidos.
+    /**
+     * @brief Executa a função registrada correspondente ao nome informado.
+     * @param name Nome da função a ser chamada.
+     * @param args Argumentos recebidos do JS via CEF.
+     * @return true se a função foi encontrada e executada, false caso contrário.
+     */    
     bool HandleCall(const std::string& name, CefRefPtr<CefListValue> args);
 
 private:
@@ -223,6 +311,9 @@ private:
 };
 
 /**
+ * @class ApiBridgeHandler
+ * @brief Handler genérico para despachar chamadas JS para o processo do navegador via IPC.
+ * 
  * Atua no Processo de Renderização. É um despachante genérico que pega qualquer
  * chamada de uma função exposta, empacota o nome e os argumentos, e envia para o
  * Processo do Navegador via IPC. Ele não precisa de nenhuma lógica específica.
@@ -233,6 +324,15 @@ public:
 
     ApiBridgeHandler();
 
+    /**
+     * @brief Executa a chamada JS, empacota argumentos e envia para o processo do navegador.
+     * @param name Nome da função JS chamada.
+     * @param object Objeto JS.
+     * @param arguments Lista de argumentos JS.
+     * @param retval Valor de retorno para o JS.
+     * @param exception Exceção, se houver.
+     * @return true se a mensagem foi enviada com sucesso.
+     */    
     virtual bool Execute(const CefString& name, CefRefPtr<CefV8Value> object, const CefV8ValueList& arguments, CefRefPtr<CefV8Value>& retval, CefString& exception) override;
 
 private:
@@ -244,12 +344,21 @@ private:
     // Pega o objeto global String
     CefRefPtr<CefV8Value> jsStringObj = jsGlobal->GetValue("String");
 
+    // Pega o objeto global Blob
+    CefRefPtr<CefV8Value> jsBlobObj = jsGlobal->GetValue("Blob");
+
+    // Pega o objeto global FileReader
+    CefRefPtr<CefV8Value> jsFileReaderObj = jsGlobal->GetValue("FileReader");
+
     IMPLEMENT_REFCOUNTING(ApiBridgeHandler);
 
 };
 
 /**
- * Roteador para as funções V8 nativas e síncronas.
+ * @class NativeApiRouter
+ * @brief Roteador para funções síncronas nativas expostas ao JS.
+ *
+ * Permite registrar funções C++ que podem ser chamadas diretamente do JS, retornando valores e exceções.
  */
 class NativeApiRouter {
 
@@ -257,8 +366,21 @@ public:
 
     using FuncType = std::function< bool(const CefV8ValueList& args, CefRefPtr<CefV8Value>& retval, CefString& exception) >;
 
+    /**
+     * @brief Registra uma função nativa síncrona.
+     * @param name Nome da função.
+     * @param func Função C++ a ser executada.
+     */    
     void RegisterFunction(const std::string& name, FuncType func);
 
+    /**
+     * @brief Executa a função registrada correspondente ao nome informado.
+     * @param name Nome da função.
+     * @param args Argumentos JS.
+     * @param retval Valor de retorno.
+     * @param exception Exceção, se houver.
+     * @return true se a função foi encontrada e executada.
+     */    
     bool HandleCall(const CefString& name, const CefV8ValueList& args, CefRefPtr<CefV8Value>& retval, CefString& exception);
 
 private:
@@ -268,7 +390,10 @@ private:
 };
 
 /**
- * Handler para executar funções nativas no Renderer Process.
+ * @class NativeFunctionHandler
+ * @brief Handler para executar funções nativas síncronas no Renderer Process.
+ *
+ * Recebe chamadas JS, roteia para a função C++ correta e retorna o valor ou exceção para o JS.
  */
 class NativeFunctionHandler : public CefV8Handler {
 
@@ -276,6 +401,15 @@ public:
 
     NativeFunctionHandler();
 
+    /**
+     * @brief Executa a função nativa correspondente ao nome informado.
+     * @param name Nome da função.
+     * @param object Objeto JS.
+     * @param arguments Argumentos JS.
+     * @param retval Valor de retorno.
+     * @param exception Exceção, se houver.
+     * @return true se a função foi executada.
+     */    
     virtual bool Execute(const CefString& name, CefRefPtr<CefV8Value> object, const CefV8ValueList& arguments, CefRefPtr<CefV8Value>& retval, CefString& exception) override;
 
 private:
@@ -288,17 +422,22 @@ private:
 
     // Pega o objeto global String
     CefRefPtr<CefV8Value> jsStringObj = jsGlobal->GetValue("String");
+
+    // Pega o objeto global Blob
+    CefRefPtr<CefV8Value> jsBlobObj = jsGlobal->GetValue("Blob");
+
+    // Pega o objeto global FileReader
+    CefRefPtr<CefV8Value> jsFileReaderObj = jsGlobal->GetValue("FileReader");
     
     IMPLEMENT_REFCOUNTING(NativeFunctionHandler);
 
 };
 
-// =================================================================================================
-// --- SEÇÃO 3: LÓGICA DA APLICAÇÃO (BROWSER PROCESS) ---
-// =================================================================================================
-
 /**
- * Gerencia eventos do navegador e da janela. Contém nosso ApiRouter.
+ * @class ForcaCefClient
+ * @brief Gerencia eventos do navegador, janela e centraliza o roteamento de funções JS <-> C++.
+ *
+ * Responsável por registrar funções da API, tratar eventos do navegador, manipular promessas JS e gerenciar a ponte entre JS e C++.
  */
 class ForcaCefClient : 
     public CefClient, 
@@ -318,16 +457,24 @@ public:
     virtual CefRefPtr<CefRequestHandler> GetRequestHandler() override { return this; }
     virtual CefRefPtr<CefLoadHandler> GetLoadHandler() override { return this; }
 
-    // Desabilita o menu de contexto
+    /**
+     * @brief Desabilita o menu de contexto do navegador.
+     */
     void OnBeforeContextMenu(CefRefPtr<CefBrowser> b, CefRefPtr<CefFrame> f, CefRefPtr<CefContextMenuParams> p, CefRefPtr<CefMenuModel> m) override;
 
-    // Captura a referência do browser quando ele é criado para usá-la nas lambdas.
+    /**
+     * @brief Captura referência do browser ao ser criado.
+     */    
     void OnAfterCreated(CefRefPtr<CefBrowser> browser) override;
 
+    /**
+     * @brief Evento chamado antes do navegador ser fechado.
+     */
     void OnBeforeClose(CefRefPtr<CefBrowser> browser) override;
 
-    // --- MÉTODO DE DETECÇÃO DE CRASH GPU ---
-    // Método de detecção de crash
+    /**
+     * @brief Detecta crash da GPU e executa fallback seguro.
+     */
     void OnRenderProcessTerminated(
         CefRefPtr<CefBrowser> browser,
         TerminationStatus status,
@@ -335,17 +482,40 @@ public:
         const CefString& error_string
     ) override;
 
-    // Recebe a mensagem do Renderer Process e a despacha para o nosso ApiRouter.
-    // Este método agora é extremamente simples e não precisa mais mudar.
+    /**
+     * @brief Recebe mensagens do Renderer Process e despacha para o ApiRouter.
+     */
     virtual bool OnProcessMessageReceived(CefRefPtr<CefBrowser> b, CefRefPtr<CefFrame> f, CefProcessId pid, CefRefPtr<CefProcessMessage> msg) override;
 
 private:
 
+    /**
+     * @brief Resolve uma Promise JS com sucesso, enviando o resultado.
+     * @param frame Frame JS.
+     * @param promise_id ID da Promise.
+     * @param data Dados de retorno.
+     */
     void ResolvePromise(CefRefPtr<CefFrame> frame, const CefString& promise_id, const CefString& data);
 
+    /**
+     * @brief Rejeita uma Promise JS, enviando mensagem de erro.
+     * @param frame Frame JS.
+     * @param promise_id ID da Promise.
+     * @param error_message Mensagem de erro.
+     */    
     void RejectPromise(CefRefPtr<CefFrame> frame, const CefString& promise_id, const CefString& error_message);
 
-    // Centraliza o registro de todas as funções da nossa API C++.
+    /**
+     * @brief Centraliza o registro de todas as funções da API C++ expostas ao JS.
+     *
+     * Cada chamada de RegisterFunction associa um nome JS a uma função C++ (lambda).
+     * Exemplo de lambda registrada:
+     * @code
+     * router_->RegisterFunction("abrirDevTools", [this](CefRefPtr<CefListValue> args) {
+     *     if (browser_) browser_->GetHost()->ShowDevTools(...);
+     * });
+     * @endcode
+     */
     void RegisterApiFunctions();
 
     std::unique_ptr<ApiRouter> router_;
@@ -357,7 +527,10 @@ private:
 };
 
 /**
- * Delegate da janela para o framework CEF Views.
+ * @class ForcaWindowDelegate
+ * @brief Delegate da janela para o framework CEF Views.
+ *
+ * Gerencia criação, destruição e propriedades da janela principal do app.
  */
 class ForcaWindowDelegate : public CefWindowDelegate {
 
@@ -382,11 +555,12 @@ private:
 
 };
 
-
-// =================================================================================================
-// --- SEÇÃO 5: CLASSE PRINCIPAL DA APLICAÇÃO E PONTO DE ENTRADA ---
-// =================================================================================================
-
+/**
+ * @class ForcaCefApp
+ * @brief Classe principal da aplicação CEF, ponto de entrada e gerenciamento de contexto.
+ *
+ * Gerencia inicialização, configuração de switches, criação da UI e exposição das funções C++ para o JS.
+ */
 class ForcaCefApp : public CefApp, public CefBrowserProcessHandler, public CefRenderProcessHandler {
 
 public:
@@ -396,17 +570,27 @@ public:
     virtual CefRefPtr<CefBrowserProcessHandler> GetBrowserProcessHandler() override { return this; }
     virtual CefRefPtr<CefRenderProcessHandler> GetRenderProcessHandler() override { return this; }
 
+    /**
+     * @brief Monitora processos filhos, especialmente GPU, para fallback seguro.
+     */    
     void OnBeforeChildProcessLaunch(
         CefRefPtr<CefCommandLine> command_line) override;
 
+    /**
+     * @brief Configura switches de linha de comando antes da inicialização.
+     */        
     void OnBeforeCommandLineProcessing (
         const CefString& process_type,
         CefRefPtr<CefCommandLine> command_line) override;
 
-    // Cria a UI principal quando o CEF está pronto.
+    /**
+     * @brief Cria a UI principal quando o CEF está pronto.
+     */
     void OnContextInitialized() override;
 
-    // Anuncia as funções para o JavaScript no Processo de Renderização.
+    /**
+     * @brief Expõe funções C++ para o JS no Renderer Process.
+     */
     void OnContextCreated(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame, CefRefPtr<CefV8Context> context) override;
 
 private:
@@ -415,14 +599,34 @@ private:
 
 };
 
+/**
+ * @class ForcaInterface
+ * @brief Funções auxiliares globais para manipulação de exceções e inicialização da aplicação.
+ */
 class ForcaInterface {
 
 public: 
 
+    /**
+     * @brief Torna o nome de exceção mais legível (demangle).
+     * @param name Nome do tipo.
+     * @return Nome legível.
+     */
     static std::string demangle( const char* name );
 
+    /**
+     * @brief Retorna texto detalhado da exceção para o JS.
+     * @param e Exceção capturada.
+     * @return Texto detalhado.
+     */    
     static std::string exceptionText( const std::exception& e );
 
+    /**
+     * @brief Inicializa a aplicação CEF.
+     * @param argc Argumentos.
+     * @param argv Argumentos.
+     * @return Código de saída.
+     */    
     static bool init( int argc, char* argv[] );
 
 };

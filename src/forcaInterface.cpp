@@ -1,3 +1,16 @@
+/**
+ * @file forcaInterface.cpp
+ * @brief Implementação da ponte entre JavaScript e C++ usando CEF, incluindo roteamento de funções, gerenciamento de GPU e integração com o frontend.
+ *
+ * Este arquivo implementa toda a lógica de integração entre o frontend JavaScript e o backend C++,
+ * utilizando o Chromium Embedded Framework (CEF). Fornece mecanismos para:
+ * - Registrar e despachar funções C++ acessíveis via JS.
+ * - Gerenciar fallback gráfico em caso de falha de GPU.
+ * - Expor funções síncronas e assíncronas para o JS.
+ * - Manipular promessas, exceções e comunicação IPC.
+ * - Gerenciar ciclo de vida da janela e do navegador.
+ */
+
 #include "forcaInterface.h"
 
 #include <iostream>
@@ -26,26 +39,26 @@
 #include "forcaStrings.h"
 #include "forcaUtils.h"
 
-
-// =================================================================================================
-// --- DEFINIÇÃO DE MEMBROS ESTÁTICOS ---
-// =================================================================================================
-
+// Instância global do handler de GPU
 ForcaInterfaceGPU::gGPUHandler ForcaInterfaceGPU::GPUHandler;
 
-
-// =================================================================================================
-// --- IMPLEMENTAÇÃO DAS CLASSES ---
-// =================================================================================================
-
-// Registra uma função no mapa, associando um nome (string) a uma função C++.
+/**
+ * @brief Registra uma função C++ para ser chamada via JS.
+ * @param name Nome da função (string) que será chamada do JS.
+ * @param func Função C++ (lambda ou std::function) a ser executada.
+ */
 void ApiRouter::RegisterFunction(const std::string& name, FuncType func) {
 
     function_map_[name] = func;
 
 }
 
-// Procura uma função pelo nome no mapa e a executa com os argumentos fornecidos.
+/**
+ * @brief Executa a função registrada correspondente ao nome informado.
+ * @param name Nome da função a ser chamada.
+ * @param args Argumentos recebidos do JS via CEF.
+ * @return true se a função foi encontrada e executada, false caso contrário.
+ */
 bool ApiRouter::HandleCall(const std::string& name, CefRefPtr<CefListValue> args) {
 
     auto it = function_map_.find(name);
@@ -65,8 +78,20 @@ bool ApiRouter::HandleCall(const std::string& name, CefRefPtr<CefListValue> args
 
 }
 
+/**
+ * @brief Construtor padrão do handler de ponte assíncrona.
+ */
 ApiBridgeHandler::ApiBridgeHandler() {}
 
+/**
+ * @brief Executa a chamada JS, empacota argumentos e envia para o processo do navegador.
+ * @param name Nome da função JS chamada.
+ * @param object Objeto JS.
+ * @param arguments Lista de argumentos JS.
+ * @param retval Valor de retorno para o JS.
+ * @param exception Exceção, se houver.
+ * @return true se a mensagem foi enviada com sucesso.
+ */
 bool ApiBridgeHandler::Execute(const CefString& name, CefRefPtr<CefV8Value> object, const CefV8ValueList& arguments, CefRefPtr<CefV8Value>& retval, CefString& exception) {
     
     CefRefPtr<CefProcessMessage> msg = CefProcessMessage::Create("ApiBridgeMsg");
@@ -88,30 +113,49 @@ bool ApiBridgeHandler::Execute(const CefString& name, CefRefPtr<CefV8Value> obje
 
 }
 
-// Implementação do Roteador Nativo
+/**
+ * @brief Registra uma função nativa síncrona.
+ * @param name Nome da função.
+ * @param func Função C++ a ser executada.
+ */
 void NativeApiRouter::RegisterFunction(const std::string& name, FuncType func) {
     function_map_[name] = func;
 }
 
+/**
+ * @brief Executa a função registrada correspondente ao nome informado.
+ * @param name Nome da função.
+ * @param args Argumentos JS.
+ * @param retval Valor de retorno.
+ * @param exception Exceção, se houver.
+ * @return true se a função foi encontrada e executada.
+ */
 bool NativeApiRouter::HandleCall(const CefString& name, const CefV8ValueList& args, CefRefPtr<CefV8Value>& retval, CefString& exception) {
     auto it = function_map_.find(name);
     if (it == function_map_.end()) return false;
     return it->second(args, retval, exception);
 }
 
+/**
+ * @brief Construtor do cliente principal do CEF. Inicializa o roteador de funções e registra as funções da API.
+ */
 ForcaCefClient::ForcaCefClient() {
 
     router_ = std::make_unique<ApiRouter>();
 
-    // O registro de funções agora é feito de forma limpa no construtor.
     RegisterApiFunctions();
 
 }
 
-// Desabilita o menu de contexto
+/**
+ * @brief Desabilita o menu de contexto do navegador.
+ */
 void ForcaCefClient::OnBeforeContextMenu(CefRefPtr<CefBrowser> b, CefRefPtr<CefFrame> f, CefRefPtr<CefContextMenuParams> p, CefRefPtr<CefMenuModel> m) { m->Clear(); }
 
-// Captura a referência do browser quando ele é criado para usá-la nas lambdas.
+/**
+ * @brief Captura a referência do browser ao ser criado para usá-la nas lambdas e define o ícone da janela.
+ * Remove a flag de GPU temporária caso o processo principal tenha iniciado corretamente.
+ */
 void ForcaCefClient::OnAfterCreated(CefRefPtr<CefBrowser> browser) {
 
     CEF_REQUIRE_UI_THREAD();
@@ -125,13 +169,10 @@ void ForcaCefClient::OnAfterCreated(CefRefPtr<CefBrowser> browser) {
     // --- LÓGICA PARA DEFINIR O ÍCONE ---
     #if defined(OS_WIN)
 
-        // No Windows, pegamos o HWND (handle da janela)
         HWND hwnd = browser->GetHost()->GetWindowHandle();
 
         if (hwnd) {
 
-            // IMPORTANTE: Mude "caminho\\para\\seu\\icone.ico" para o caminho real do seu ícone!
-            // Use barras invertidas duplas (\\) ou barras normais (/)
             HICON hIcon = (HICON)LoadImage(NULL, L"forca_icon.ico", IMAGE_ICON, 0, 0, LR_LOADFROMFILE | LR_DEFAULTSIZE | LR_SHARED);
             
             if (hIcon) {
@@ -148,30 +189,24 @@ void ForcaCefClient::OnAfterCreated(CefRefPtr<CefBrowser> browser) {
 
     #elif defined(OS_LINUX)
 
-        // No Linux, pegamos a janela GTK de nível superior
         CefRefPtr<CefWindow> window = CefWindow::GetForBrowser(browser->GetIdentifier());
 
         if (window) {
 
-            // GtkWidget* é o "handle" da janela no GTK
             GtkWindow* gtk_window = GTK_WINDOW( window->GetWindowHandle() );
 
             if (gtk_window) {
 
                 GError* err = nullptr;
-                // IMPORTANTE: Mude "caminho/para/seu/icone.png" para o caminho real!
 
-                // TODO: ALTERAR O ICONE NO LINUX
                 GdkPixbuf* pixbuf = gdk_pixbuf_new_from_file("forca_icon.ico", &err);
 
                 if (pixbuf) {
 
-                    // O GTK usa uma lista de ícones (mesmo que seja só um)
                     GList* icon_list = NULL;
                     icon_list = g_list_append(icon_list, pixbuf);
                     gtk_window_set_icon_list(gtk_window, icon_list);
                     
-                    // Limpa a memória
                     g_list_free(icon_list);
                     g_object_unref(pixbuf);
 
@@ -183,15 +218,18 @@ void ForcaCefClient::OnAfterCreated(CefRefPtr<CefBrowser> browser) {
 
     #endif
 
-    // Quando o processo principal é finalmente iniciado, já pode remover a flag de falha de gpu, se ela existir
     if( ForcaInterfaceGPU::GPUHandler.getStatus() ) ForcaInterfaceGPU::GPUHandler.deleteTempFlag();
 
 }
 
+/**
+ * @brief Evento chamado antes do navegador ser fechado.
+ */
 void ForcaCefClient::OnBeforeClose(CefRefPtr<CefBrowser> browser) {}
 
-// --- MÉTODO DE DETECÇÃO DE CRASH GPU ---
-// Método de detecção de crash
+/**
+ * @brief Detecta crash da GPU e executa fallback seguro, criando flag e exibindo mensagem ao usuário.
+ */
 void ForcaCefClient::OnRenderProcessTerminated(
     CefRefPtr<CefBrowser> browser,
     TerminationStatus status,
@@ -212,8 +250,10 @@ void ForcaCefClient::OnRenderProcessTerminated(
 
 }
 
-// Recebe a mensagem do Renderer Process e a despacha para o nosso ApiRouter.
-// Este método agora é extremamente simples e não precisa mais mudar.
+/**
+ * @brief Recebe mensagens do Renderer Process e as despacha para o ApiRouter.
+ * @return true se a mensagem foi tratada.
+ */
 bool ForcaCefClient::OnProcessMessageReceived(CefRefPtr<CefBrowser> b, CefRefPtr<CefFrame> f, CefProcessId pid, CefRefPtr<CefProcessMessage> msg) {
     
     CEF_REQUIRE_UI_THREAD();
@@ -230,6 +270,12 @@ bool ForcaCefClient::OnProcessMessageReceived(CefRefPtr<CefBrowser> b, CefRefPtr
 
 }
 
+/**
+ * @brief Resolve uma Promise JS com sucesso, enviando o resultado para o frontend.
+ * @param frame Frame JS.
+ * @param promise_id ID da Promise.
+ * @param data Dados de retorno.
+ */
 void ForcaCefClient::ResolvePromise(CefRefPtr<CefFrame> frame, const CefString& promise_id, const CefString& data) {
 
     if (frame && frame->IsValid()) {
@@ -242,6 +288,12 @@ void ForcaCefClient::ResolvePromise(CefRefPtr<CefFrame> frame, const CefString& 
 
 }
 
+/**
+ * @brief Rejeita uma Promise JS, enviando mensagem de erro para o frontend.
+ * @param frame Frame JS.
+ * @param promise_id ID da Promise.
+ * @param error_message Mensagem de erro.
+ */
 void ForcaCefClient::RejectPromise(CefRefPtr<CefFrame> frame, const CefString& promise_id, const CefString& error_message) {
 
     if (frame && frame->IsValid()) {
@@ -254,10 +306,23 @@ void ForcaCefClient::RejectPromise(CefRefPtr<CefFrame> frame, const CefString& p
 
 }
 
-// Centraliza o registro de todas as funções da nossa API C++.
+/**
+ * @brief Centraliza o registro de todas as funções da API C++ expostas ao JS.
+ *
+ * Cada chamada de RegisterFunction associa um nome JS a uma função C++ (lambda).
+ * Exemplos de funções registradas:
+ * - abrirDevTools: Abre as DevTools do Chromium.
+ * - salvarUsuario: Salva dados do usuário recebidos do JS.
+ * - getAppVersion: Retorna a versão do app para o JS.
+ * - getUserData: Busca dados do usuário por ID e resolve/rejeita Promise JS.
+ * - Funções de manipulação de strings, arquivos, regex, etc.
+ */
 void ForcaCefClient::RegisterApiFunctions() {
 
-    // Para adicionar uma nova função, basta adicionar uma nova chamada de RegisterFunction aqui.
+    /**
+     * @brief Função exposta ao JS: abrirDevTools
+     * Abre as DevTools do Chromium para depuração.
+     */
     router_->RegisterFunction("abrirDevTools", 
         [this](CefRefPtr<CefListValue> args) {
             if (browser_) {
@@ -266,48 +331,46 @@ void ForcaCefClient::RegisterApiFunctions() {
         }
     );
 
+    /**
+     * @brief Função exposta ao JS: salvarUsuario
+     * Salva dados do usuário (nome, idade) recebidos do JS.
+     */    
     router_->RegisterFunction("salvarUsuario", 
         [this](CefRefPtr<CefListValue> args) {
             std::string nome = args->GetString(1);
             int idade = args->GetInt(2);
-            std::cout << "[C++] Rota via Mapa: 'salvarUsuario' com Nome: " << nome << ", Idade: " << idade << std::endl;
         }
     );
 
+    /**
+     * @brief Função exposta ao JS: getAppVersion
+     * Retorna a versão do aplicativo para o JS.
+     */    
     router_->RegisterFunction("getAppVersion", 
         [this](CefRefPtr<CefListValue> args) {
             if (!browser_) {
                 return;
             }
 
-            // 1. Sua lógica C++ para obter o valor.
-            std::string versaoDoApp = "1.0.0-beta"; // Poderia vir de um arquivo, etc.
-            std::cout << "[C++] Função 'getAppVersion' chamada. Retornando a versão: " << versaoDoApp << std::endl;
+            std::string versaoDoApp = "1.0.0-beta"; 
 
-            // 2. Prepara o código JavaScript para chamar a função de callback no lado do JS.
-            // É crucial escapar quaisquer caracteres especiais na string de retorno.
-            // Para este exemplo simples, aspas são suficientes.
             std::string js_code = "receberVersaoDoApp('" + versaoDoApp + "'); promise.then('ola');";
 
-            // 3. Envia o comando de volta para o frame principal do navegador.
             CefRefPtr<CefFrame> frame = browser_->GetMainFrame();
             frame->ExecuteJavaScript(js_code, frame->GetURL(), 0);
         }
     );
 
-    // --- NOSSA NOVA FUNÇÃO ASSÍNCRONA ---
+    /**
+     * @brief Função exposta ao JS: getUserData
+     * Busca dados do usuário por ID e resolve/rejeita Promise JS.
+     */
     router_->RegisterFunction("getUserData",
         [this](CefRefPtr<CefListValue> args) {
             if (!browser_) return;
 
-            // 1. O primeiro argumento (índice 1) será o ID do usuário que queremos buscar.
             if (args->GetSize() < 3 || args->GetType(2) != VTYPE_INT) {
 
-                // Se não recebemos um int como primeiro argumento, algo está errado.
-                // Precisamos do ID do usuário e do ID da promise.
-                std::cerr << "[C++] Erro: getUserData chamada com argumentos invalidos." << std::endl;
-
-                // Rejeita a promise se possível
                 CefString promiseId = args->GetString(1);
 
                 if(!promiseId.empty()) {
@@ -318,15 +381,10 @@ void ForcaCefClient::RegisterApiFunctions() {
 
             int userId = args->GetInt(2);
 
-            // 2. O ID da promise continua sendo o último argumento.
             CefString promiseId = args->GetString(1);
-
-            std::cout << "[C++] Funcao 'getUserData' chamada para o usuario ID: " << userId 
-                      << " (Promise ID: " << promiseId.ToString() << ")" << std::endl;
 
             CefRefPtr<CefFrame> frame = browser_->GetMainFrame();
 
-            // 3. Simula uma busca no banco de dados.
             if (userId == 123) {
 
                 nlohmann::json userDataJson;
@@ -341,7 +399,6 @@ void ForcaCefClient::RegisterApiFunctions() {
 
             } else {
 
-                // FALHA: Usuário não encontrado!
                 RejectPromise(frame, promiseId, "Usuario com ID " + std::to_string(userId) + " nao encontrado.");
 
             }
@@ -350,7 +407,10 @@ void ForcaCefClient::RegisterApiFunctions() {
 
 }
 
-// Implementação do Handler Nativo
+/**
+ * @brief Construtor do handler de funções nativas síncronas.
+ * Registra todas as funções síncronas expostas ao JS.
+ */
 NativeFunctionHandler::NativeFunctionHandler() {
 
     router_ = std::make_unique<NativeApiRouter>();
@@ -1637,7 +1697,6 @@ NativeFunctionHandler::NativeFunctionHandler() {
             }
 
         }
-
     );
 
     router_->RegisterFunction("str_replace",
@@ -2948,7 +3007,7 @@ NativeFunctionHandler::NativeFunctionHandler() {
                         void* data = args[1]->GetArrayBufferData();
                         size_t length = args[1]->GetArrayBufferByteLength();
 
-                        content = static_cast<char*>(data);
+                        content = std::string(static_cast<char*>(data), length);
 
                     }
 
@@ -2979,12 +3038,29 @@ NativeFunctionHandler::NativeFunctionHandler() {
 
 }
 
+/**
+ * @brief Executa a função nativa correspondente ao nome informado.
+ * @param name Nome da função.
+ * @param object Objeto JS.
+ * @param arguments Argumentos JS.
+ * @param retval Valor de retorno.
+ * @param exception Exceção, se houver.
+ * @return true se a função foi executada.
+ */
 bool NativeFunctionHandler::Execute(const CefString& name, CefRefPtr<CefV8Value> object, const CefV8ValueList& arguments, CefRefPtr<CefV8Value>& retval, CefString& exception) {
     return router_->HandleCall(name, arguments, retval, exception);
 }
 
+/**
+ * @brief Delegate da janela para o framework CEF Views.
+ * Gerencia criação, destruição e propriedades da janela principal do app.
+ */
 ForcaWindowDelegate::ForcaWindowDelegate(CefRefPtr<CefBrowserView> browser_view) : browser_view_(browser_view) {}
 
+/**
+ * @brief Evento chamado quando a janela é criada. Define título, adiciona a view do navegador e exibe a janela.
+ * Também define o ícone da janela conforme a plataforma.
+ */
 void ForcaWindowDelegate::OnWindowCreated(CefRefPtr<CefWindow> window) {
 
     window->SetTitle("Jogo da Forca");
@@ -2995,27 +3071,16 @@ void ForcaWindowDelegate::OnWindowCreated(CefRefPtr<CefWindow> window) {
     // O código é duplicado, pois já existe um desse tipo acima, mas esse aqui garante que o icone utilizado será o correto
     #if defined(OS_WIN)
 
-        // Pega o "handle" nativo da janela que acabou de ser criada
         HWND hwnd = window->GetWindowHandle();
 
         if (hwnd) {
 
-            // IMPORTANTE: Use o mesmo caminho do ícone que você usou no seu arquivo .rc
-            // ou carregue-o do recurso do executável.
-            
-            // Opção A: Carregar de um arquivo .ico
             HICON hIcon = (HICON)LoadImage(NULL, L"forca_icon.ico", IMAGE_ICON, 0, 0, LR_LOADFROMFILE | LR_DEFAULTSIZE | LR_SHARED);
-
-            // Opção B (Melhor): Carregar o ícone que já está embutido no .exe
-            // HICON hIcon = LoadIcon(GetModuleHandle(NULL), MAKEINTRESOURCE(MAINICON)); 
-            // (Assumindo que você nomeou seu ícone como "MAINICON" no arquivo .rc)
 
             if (hIcon) {
 
-                // Define o ícone grande (usado em ALT+TAB)
                 SendMessage(hwnd, WM_SETICON, ICON_BIG, (LPARAM)hIcon);
 
-                // Define o ícone pequeno (usado na barra de título e barra de tarefas)
                 SendMessage(hwnd, WM_SETICON, ICON_SMALL, (LPARAM)hIcon);
 
             }
@@ -3028,10 +3093,6 @@ void ForcaWindowDelegate::OnWindowCreated(CefRefPtr<CefWindow> window) {
 
         if (gtk_window) {
 
-            // No Linux, o ícone geralmente é definido pelo arquivo .desktop,
-            // mas podemos forçar aqui também se necessário.
-
-            // TODO: LEMBRAR DE ALTERAR O ICONE NO LINUX
             gtk_window_set_icon_from_file(gtk_window, "forca_icon.ico", NULL);
 
         }
@@ -3040,20 +3101,37 @@ void ForcaWindowDelegate::OnWindowCreated(CefRefPtr<CefWindow> window) {
 
 }
 
+/**
+ * @brief Evento chamado quando a janela é destruída. Finaliza o loop de mensagens do CEF.
+ */
 void ForcaWindowDelegate::OnWindowDestroyed(CefRefPtr<CefWindow> window) { browser_view_ = nullptr; CefQuitMessageLoop(); }
 
+/**
+ * @brief Indica se a janela pode ser fechada.
+ * @return true sempre (pode ser customizado).
+ */
 bool ForcaWindowDelegate::CanClose(CefRefPtr<CefWindow> window) { return true; }
 
-// Este método é chamado pelo framework para saber o tamanho mínimo da janela.
+/**
+ * @brief Retorna o tamanho mínimo da janela principal.
+ * @return CefSize com largura e altura mínimas.
+ */
 CefSize ForcaWindowDelegate::GetMinimumSize(CefRefPtr<CefView> view) {
 
-    // Defina aqui a largura e altura mínimas desejadas.
+    // Define a largura e altura mínimas desejadas.
     return CefSize(800, 600); 
 
 }
 
+/**
+ * @brief Construtor da aplicação principal CEF.
+ */
 ForcaCefApp::ForcaCefApp() {}
 
+/**
+ * @brief Monitora processos filhos, especialmente GPU, para fallback seguro.
+ * Cria flag e exibe mensagem de erro se detectar falha de GPU.
+ */
 void ForcaCefApp::OnBeforeChildProcessLaunch(
     CefRefPtr<CefCommandLine> command_line) {
     
@@ -3072,6 +3150,10 @@ void ForcaCefApp::OnBeforeChildProcessLaunch(
 
 }
 
+/**
+ * @brief Configura switches de linha de comando antes da inicialização.
+ * Ativa modo escuro, configura aceleração por GPU ou força fallback conforme status da GPU.
+ */
 void ForcaCefApp::OnBeforeCommandLineProcessing (
     const CefString& process_type,
     CefRefPtr<CefCommandLine> command_line) {
@@ -3106,7 +3188,10 @@ void ForcaCefApp::OnBeforeCommandLineProcessing (
 
 }
 
-// Cria a UI principal quando o CEF está pronto.
+/**
+ * @brief Cria a UI principal quando o CEF está pronto.
+ * Carrega o HTML, cria handlers, browser view e janela nativa.
+ */
 void ForcaCefApp::OnContextInitialized() {
 
     CEF_REQUIRE_UI_THREAD();
@@ -3126,7 +3211,10 @@ void ForcaCefApp::OnContextInitialized() {
 
 }
 
-// Anuncia as funções para o JavaScript no Processo de Renderização.
+/**
+ * @brief Expõe funções C++ para o JS no Renderer Process.
+ * Cria o objeto global ForcaApp e associa funções síncronas e assíncronas.
+ */
 void ForcaCefApp::OnContextCreated(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame, CefRefPtr<CefV8Context> context) {
 
     CefRefPtr<CefV8Value> global = context->GetGlobal();
@@ -3281,15 +3369,12 @@ std::string ForcaInterface::exceptionText( const std::exception& e ) {
 
 bool ForcaInterface::init( int argc, char* argv[] ){
 
-    // Cria os argumentos principais da aplicação de forma específica para cada plataforma
     #if defined(OS_WIN)
 
-        // No Windows, pegamos o HINSTANCE manualmente para o CefMainArgs
         CefMainArgs main_args(GetModuleHandle(NULL));
 
     #else
 
-        // No Linux, usamos os argumentos da linha de comando
         CefMainArgs main_args(argc, argv);
 
     #endif

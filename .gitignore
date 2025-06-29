@@ -53,6 +53,11 @@ cmake_install.cmake
 
 # arquivos de config e metadados de IDEs
 compile_commands.json
+custom-prototypes.d.ts
+custom-prototypes.d.ts.in
+custom-prototypes.d
+jsconfig.json
+tsconfig.json
 
 # arquivos binários gerados por bibliotecas (ex. ncurses)
 **/build/bin/
