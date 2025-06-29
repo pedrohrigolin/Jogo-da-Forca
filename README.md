@@ -6,21 +6,21 @@ Um projeto acadêmico completo de Jogo da Forca desenvolvido em C++ com foco em 
 
 ## Sumário
 
-1. [Visão Geral do Projeto](#1-visão-geral-do-projeto)
+1. [Visão Geral do Projeto](#1-visão-geral-do-projeto-)
 2. [Arquitetura e Estrutura de Pastas](#2-arquitetura-e-estrutura-de-pastas)
 3. [Design de Módulos e Responsabilidades](#3-design-de-módulos-e-responsabilidades)
-4. [Módulo forcaRegex (Expressões Regulares)](#4-módulo-forcaregex-expressões-regulares)
-5. [Módulo forcaStrings (Manipulação de Strings)](#5-módulo-forcastrings-manipulação-de-strings)
-6. [Módulo forcaFiles (Sistema de Arquivos)](#6-módulo-forcafiles-sistema-de-arquivos)
-7. [Módulo forcaUtils (Utilitários do Sistema)](#7-módulo-forcautils-utilitários-do-sistema)
-8. [Módulo forcaEncrypt (Criptografia e Codificação)](#8-módulo-forcaencrypt-criptografia-e-codificação)
-9. [Módulo forcaInterface (Interface e Ponte CEF)](#9-módulo-forcainterface-interface-e-ponte-cef)
-10. [Módulo JavaScript - Extensão do Motor V8](#10-módulo-javascript-extensão-do-motor-v8)
-11. [Frontend Web - Interface Gráfica do Usuário](#11-frontend-web-interface-gráfica-do-usuário)
-12. [Padrões de Projeto e Decisões de Design](#12-padrões-de-projeto-e-decisões-de-design)
-13. [Fluxograma de Execução](#13-fluxograma-de-execução)
-14. [Guia de Instalação e Compilação](#14-guia-de-instalação-e-compilação)
-15. [Referências e Links Úteis](#15-referências-e-links-úteis)
+4. [Módulo forcaRegex (Expressões Regulares)](#4-módulo-forcaregex-expressões-regulares-)
+5. [Módulo forcaStrings (Manipulação de Strings)](#5-módulo-forcastrings-manipulação-de-strings-)
+6. [Módulo forcaFiles (Sistema de Arquivos)](#6-módulo-forcafiles-sistema-de-arquivos-)
+7. [Módulo forcaUtils (Utilitários do Sistema)](#7-módulo-forcautils-utilitários-do-sistema-)
+8. [Módulo forcaEncrypt (Criptografia e Codificação)](#8-módulo-forcaencrypt-criptografia-e-codificação-)
+9. [Módulo forcaInterface (Interface e Ponte CEF)](#9-módulo-forcainterface-interface-e-ponte-cef-)
+10. [Módulo JavaScript - Extensão do Motor V8](#10-módulo-javascript---extensão-do-motor-v8-)
+11. [Frontend Web - Interface Gráfica do Usuário](#11-frontend-web---interface-gráfica-do-usuário-)
+12. [Padrões de Projeto e Decisões de Design](#12-padrões-de-projeto-e-decisões-de-design-)
+13. [Fluxograma de Execução](#13-fluxograma-de-execução-)
+14. [Guia de Instalação e Compilação](#14-guia-de-instalação-e-compilação-)
+15. [Referências e Links Úteis](#15-referências-e-links-úteis-)
 
 ---
 
